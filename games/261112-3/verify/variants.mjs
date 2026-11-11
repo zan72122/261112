@@ -67,8 +67,8 @@ try {
   const dsc = (await info()).drag; await setHidden(true); await sleep(300);
   const f0 = await P('perf.frames'), t0 = (await info()).time; await sleep(2500); const f1 = await P('perf.frames'), t1 = (await info()).time, ih = await info();
   ck('非表示: つかみを解除し、描画と進行が止まる', dsc === 'scan' && ih.drag === null && f1 === f0 && t1 === t0 && ih.audioState !== 'running', { frames: [f0, f1], time: [t0, t1], audio: ih.audioState });
-  await setHidden(false); await sleep(400); await g.frames(3); const t2 = (await info()).time; await g.touch('touchEnd', 0, 0);
-  ck('復帰: 大きな時間差で進行が飛ばない (復帰直後の進みは 0.5 秒未満)', t2 - t1 < 0.5 && (await P('perf.frames')) > f1, { advanced: +(t2 - t1).toFixed(3) });
+  const w0 = Date.now(); await setHidden(false); await sleep(400); await g.frames(3); const t2 = (await info()).time, wall = (Date.now() - w0) / 1000; await g.touch('touchEnd', 0, 0);
+  ck('復帰: 非表示だった時間 (2.5 秒超) は進行に加算されない (復帰後の進みは見えていた実時間以内)', t2 - t1 <= wall + 0.25 && (await P('perf.frames')) > f1, { advancedGameSec: +(t2 - t1).toFixed(3), visibleWallSec: +wall.toFixed(2), hiddenSec: 2.8 });
   await g.wait(0.6);
 
   // --- 放置: 20秒何もしなくても状態は変わらない (お手本は一度だけ) ---

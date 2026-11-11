@@ -14,12 +14,12 @@ const AX = V(1, 0, 0), AZ = V(0, 0, 1);
 
 export const IDS = ['milk1', 'milk2', 'apple1', 'apple2', 'berry', 'bread'];
 export const TYPE = { milk1: 'milk', milk2: 'milk', apple1: 'apple', apple2: 'apple', berry: 'berry', bread: 'bread' };
-export const BASE = { milk: 0.108, apple: 0.038, berry: 0.0275, bread: 0.2 };
+export const BASE = { milk: 0.108, apple: 0.038, berry: 0.0275, bread: 0.23 };
 export const LANELEN = { apple: 0.088, berry: 0.172 };
 const MASS = { milk: 1.03, apple: 0.3, berry: 0.35, bread: 0.28 };
 const SHAPES = {
   milk: makeShape('box', { hx: 0.035, hy: 0.108, r: 0.005, hz: 0.036 }), apple: makeShape('circle', { r: 0.04, zs: 1 }),
-  berry: makeShape('box', { hx: 0.0825, hy: 0.0275, r: 0.008, hz: 0.058 }), bread: makeShape('capsule', { hl: 0.168, r: 0.03, zs: 0.92 }),
+  berry: makeShape('box', { hx: 0.0825, hy: 0.0275, r: 0.008, hz: 0.058 }), bread: makeShape('capsule', { hl: 0.198, r: 0.03, zs: 0.92 }),
 };
 const SLOT = {
   crate: { milk1: [-0.12, 0.075, 0.02], milk2: [-0.045, 0.075, 0.02], apple1: [0.145, 0.107, -0.06], apple2: [0.145, 0.107, 0.045], berry: [0.045, 0.107, 0] },
@@ -174,7 +174,7 @@ export class Game {
       const sl = Math.atan2(0.298, 0.954);
       if (t === 'apple') q.copy(QX(-it.lanePos / 0.038)).multiply(QZ(0.3)); else q.copy(QX(sl)).multiply(QY(Math.PI / 2));
     }
-    else if (st.loc === 'bin') { p.set(L.bin.x + 0.01, L.bin.y + 0.2, L.bin.z + 0.01); q.copy(QZ(-0.13)).multiply(QX(-0.1)); }
+    else if (st.loc === 'bin') { p.set(L.bin.x + 0.012, L.bin.y + 0.23, L.bin.z + 0.012); q.copy(QZ(-0.13)).multiply(QX(-0.1)); }
     else if (st.loc === 'basket') { const s = SLOT.basket[it.id]; p.set(this.basketPos.x + s[0], this.basketPos.y + s[1] + BASE[t], this.basketPos.z + s[2] + it.nudge * 0.035); if (t === 'bread') q.copy(QZ(-0.24)); if (t === 'milk') q.copy(QY(Math.PI / 2)); }
     else if (st.loc === 'tray') { const s = SLOT.tray[it.id]; p.set(this.trayPos.x + s[0], this.trayPos.y + s[1] + (t === 'bread' ? 0.031 : BASE[t]), this.trayPos.z + s[2]); if (t === 'bread') q.copy(QZ(Math.PI / 2)); if (t === 'milk') q.copy(QY(Math.PI / 2)); }
     else if (st.loc === 'bag' && it.body) { this.bodyPose(it, p, q); }
@@ -203,8 +203,8 @@ export class Game {
     const a = this.vw / this.vh, th = Math.tan((this.camera.fov * Math.PI) / 360);
     const ins = this.insets, sx = 1 - (ins[1] + ins[3]) / this.vw, sy = 1 - (ins[0] + ins[2]) / this.vh;
     const D = [
-      { c: [-0.8, 0.84, 0.12], hw: 0.5, hh: 0.84, el: 0.2, dmin: 1.9 },
-      { c: [0.4, 0.99, 0.02], hw: 0.5, hh: 0.36, el: 0.5, dmin: a > 1 ? 1.78 : 1.55 },
+      { c: [-0.8, 0.8, 0.14], hw: 0.53, hh: 0.86, el: 0.2, dmin: 1.9 },
+      { c: [0.4, 0.99, 0.02], hw: 0.5, hh: 0.36, el: 0.5, dmin: a > 1 ? 2.06 : 1.55 }, // 横画面では両どなりの棚と袋掛けが見える広さに
       { c: [1.44, 1.2, 0], hw: 0.44, hh: 0.47, el: 0.13, dmin: a > 1 ? 1.62 : 1.5 },
       { c: [1.55, 1.22, L.frontZ], hw: 1.32, hh: 1.3, el: 0.04, dmin: 3, dmax: 5.7 },
       { c: [1.55, 1.3, L.frontZ - 0.2], hw: 1.75, hh: 1.55, el: 0.03, dmin: 4.5, dmax: 7.5, out: 1 },
@@ -215,6 +215,7 @@ export class Game {
     if (a < 0.8) cy += n === 1 ? 0.1 : n === 2 ? 0.03 : 0; // 縦長では少し上を見せる
     tgt.set(cx, cy, D.c[2]);
     pos.set(cx, cy + d * Math.sin(D.el), D.c[2] + (D.out ? -1 : 1) * d * Math.cos(D.el));
+    if (n === 3) pos.x -= 0.85; // 袋掛けを正面から外し、シャッターの取っ手を見せる
   }
   updateCamera(dt) {
     const c = this.cam, n = this.station;
@@ -316,6 +317,7 @@ export class Game {
   updateBag(dt) {
     const sim = this.sim, held = this.sim.bodies.some((b) => b.held);
     if (this.simAwake > 0 || held || this.bagWhere !== 'rack' || this.drag) {
+      sim.relax = this.bagWhere === 'rack' && !held && !(this.drag && this.drag.kind === 'handle') && !sim.bodies.some((b) => sim.anyInside(b) || this.overMouth(b));
       sim.step(dt); this.simAwake -= dt;
       if (sim.rustle > 0.03) this.simAwake = Math.max(this.simAwake, 0.8);
       for (const b of sim.bodies) if (Math.hypot(b.vx, b.vy) > 0.02) { this.simAwake = Math.max(this.simAwake, 0.6); break; }

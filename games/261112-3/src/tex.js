@@ -296,7 +296,7 @@ export function drawCard(c, t) {
   g.strokeStyle = 'rgba(200,190,170,0.5)'; g.lineWidth = 3; g.strokeRect(8, 8, W - 16, H - 16);
   if (t <= 0) return;
   const cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.24;
-  g.strokeStyle = '#e23a2e'; g.lineCap = 'round'; g.lineJoin = 'round'; g.lineWidth = R * 0.14; g.globalAlpha = 0.92;
+  g.strokeStyle = '#d3201c'; g.lineCap = 'round'; g.lineJoin = 'round'; g.lineWidth = R * 0.17; g.globalAlpha = 0.96;
   g.beginPath(); // うずまき
   const N = 120, tt = Math.min(1, t * 1.6);
   for (let i = 0; i <= N * tt; i++) { const a = (i / N) * Math.PI * 5.2, r = (i / N) * R; const x = cx + Math.cos(a - 1.2) * r, y = cy + Math.sin(a - 1.2) * r; i ? g.lineTo(x, y) : g.moveTo(x, y); }

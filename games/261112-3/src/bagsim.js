@@ -189,11 +189,18 @@ export class BagSim {
     else { lx = Math.max(-sh.hx * 0.6, Math.min(sh.hx * 0.6, lx)); ly = Math.max(-sh.hy * 0.85, Math.min(sh.hy * 0.85, ly)); }
     b.gx = lx; b.gy = ly; b.held = true; b.tx = x; b.ty = y; b.stuckT = 0; b.ghost = 0;
     // 手で持つ: 箱や球はつかんだ向きをゆるく保つ。長いパンだけはつかみ点から自由にぶら下がる
-    b.holdA = sh.type === 'capsule' ? null : (sh.type === 'box' ? Math.round(b.a / (Math.PI / 2)) * (Math.PI / 2) : b.a);
+    // 長いパンは、まんなか近くを持てば横向きを保ち、端を持てば先が下を向いてぶら下がる
+    if (sh.type === 'capsule') b.holdA = Math.abs(ly) < sh.hl * 0.3 ? Math.round((b.a - Math.PI / 2) / Math.PI) * Math.PI + Math.PI / 2 : null;
+    else b.holdA = sh.type === 'box' ? Math.round(b.a / (Math.PI / 2)) * (Math.PI / 2) : b.a;
   }
   release(b) { b.held = false; b.ghost = 0; }
 
   step(dt) {
+    // 空の袋は、折れやねじれが残らないよう、掛かった位置の素直な形へゆっくり戻る (速度は生まない)
+    if (this.relax) {
+      const k = 1 - Math.exp(-2.5 * Math.min(dt, 0.05)), ox = (this.pinL.x + this.pinR.x) / 2, oy = (this.pinL.y + this.pinR.y) / 2 - PEG_Y;
+      for (let i = 0; i < this.n; i++) { if (this.w[i] === 0) continue; const dx = (this.restX[i] + ox - this.px[i]) * k, dy = (this.restY[i] + oy - this.py[i]) * k; this.px[i] += dx; this.qx[i] += dx; this.py[i] += dy; this.qy[i] += dy; }
+    }
     this.acc += Math.min(dt, 0.05);
     let n = 0;
     this.thump = 0;
@@ -317,7 +324,7 @@ export class BagSim {
     if (lam > maxF) lam = maxF;
     const cx = nx * lam, cy = ny * lam;
     b.x += cx * b.invM; b.y += cy * b.invM; b.a += b.invI * (rx * cy - ry * cx);
-    if (b.holdA !== null && b.holdA !== undefined) b.a += (b.holdA - b.a) * (1 - Math.exp(-14 * h));
+    if (b.holdA !== null && b.holdA !== undefined) b.a += (b.holdA - b.a) * (1 - Math.exp(-(b.shape.type === 'box' ? 30 : 14) * h));
   }
   _disp(b, rx, ry, out) {
     const da = b.pa - b.a, c = Math.cos(da), s = Math.sin(da);
@@ -337,7 +344,7 @@ export class BagSim {
       const rax = cxp - a.x, ray = cyp - a.y, rbx = cxp - b.x, rby = cyp - b.y;
       const hm = a.held ? 0.35 : 1, hb = b.held ? 0.35 : 1; // 持った品は押し負けにくい
       const wa = (a.invM + a.invI * (rax * ny - ray * nx) ** 2) * hm, wb = (b.invM + b.invI * (rbx * ny - rby * nx) ** 2) * hb;
-      const lam = -d / (wa + wb);
+      const lam = Math.min(-d, 0.004) / (wa + wb); // 深いめり込みは少しずつ解く (弾け飛ばない)
       this._corr(a, rax, ray, nx * lam * hm, ny * lam * hm); this._corr(b, rbx, rby, -nx * lam * hb, -ny * lam * hb);
       a.contact = b.contact = 1;
       // 摩擦
@@ -439,7 +446,6 @@ export class BagSim {
         const gxw = b.x + c * b.gx - s * b.gy, gyw = b.y + s * b.gx + c * b.gy;
         const far = Math.hypot(b.tx - gxw, b.ty - gyw);
         if (far > 0.07) b.stuckT += dt; else b.stuckT = Math.max(0, b.stuckT - dt * 2);
-        if (b.stuckT > 0.45) b.ghost = 0.35;
       }
       if (b.ghost > 0) { b.ghost -= dt; if (b.ghost <= 0) b.stuckT = 0; }
       if (b.hit > this.thump) this.thump = b.hit;
@@ -450,20 +456,27 @@ export class BagSim {
   }
   // 手が届くか: 手は2つの持ち手のあいだから、ほぼ真上から入る。
   // 持ち手に寄せられた「肩」の下や、ほかの品の真下は届かない → 持ち手を横へ引いて口を広げた側だけ届くようになる。
+  // 手の入る幅: ふだんは2つの持ち手のあいだ。持ち手を外側の掛け金へ引いた側は、その側の壁ぎわまで開く
+  reachBand() {
+    return [this.pinL.x + 0.03 - Math.max(0, PEG_X[1] - this.pinL.x) * 1.6, this.pinR.x - 0.03 + Math.max(0, this.pinR.x - PEG_X[2]) * 1.6];
+  }
   reachable(b) {
     if (!this.allInside(b)) return true;
-    const lo = this.pinL.x + 0.03, hi = this.pinR.x - 0.03, ey = Math.min(this.py[this.cornerL], this.py[this.cornerR]) + 0.02;
+    const band = this.reachBand(), lo = band[0], hi = band[1];
     if (hi < lo) return false;
     const sh = b.shape, c = Math.cos(b.a), sn = Math.sin(b.a), pts = [[b.x, b.y]];
     const ext = sh.type === 'box' ? (sh.hx > sh.hy ? [sh.hx * 0.7, 0] : [0, sh.hy * 0.7]) : sh.type === 'capsule' ? [0, sh.hl * 0.8] : null;
     if (ext) for (const s of [1, -1]) pts.push([b.x + s * (c * ext[0] - sn * ext[1]), b.y + s * (sn * ext[0] + c * ext[1])]);
+    // 品の左右の肩にも手をかけられる (上に少しかぶさった品があっても、空いた側からつかめる)
+    const rx = sh.type === 'circle' ? sh.r : sh.type === 'capsule' ? Math.abs(sn) * sh.hl + sh.r : Math.abs(c) * sh.hx + Math.abs(sn) * sh.hy;
+    pts.push([b.x + rx * 0.6, b.y], [b.x - rx * 0.6, b.y]);
     for (const t of pts) {
-      if (t[0] < lo - 0.02 || t[0] > hi + 0.02) continue;
-      const ex = Math.max(lo, Math.min(hi, t[0])); let clear = true;
-      for (let s = 1; s <= 20 && clear; s++) {
-        const u = s / 21, x = ex + (t[0] - ex) * u, y = ey + (t[1] - ey) * u;
-        if (this.sdfWorld(b, x, y) < 0) break;
-        for (const o of this.bodies) if (o !== b && this.sdfWorld(o, x, y) < 0.012) { clear = false; break; }
+      if (t[0] < lo || t[0] > hi) continue; // 持ち手のあいだ (口の開いている幅) の真下だけ
+      let clear = true; // その点のすぐ上に別の品がかぶさっていないか
+      for (let h = 0.02; h <= 0.16 && clear; h += 0.02) {
+        const x = t[0], y = t[1] + h;
+        if (this.sdfWorld(b, x, y) < 0) continue;
+        for (const o of this.bodies) if (o !== b && this.sdfWorld(o, x, y) < 0) { clear = false; break; }
       }
       if (clear) return true;
     }

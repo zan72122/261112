@@ -163,7 +163,7 @@ export function makeBerryPack(seed) {
   return g;
 }
 export function makeBread(seed) {
-  const g = new THREE.Group(), Ln = 0.4, R = 0.031;
+  const g = new THREE.Group(), Ln = 0.46, R = 0.031;
   const pts = []; for (let i = 0; i <= 28; i++) { const t = i / 28; pts.push(new THREE.Vector2(Math.max(0.0005, R * Math.pow(Math.sin(Math.PI * (0.03 + t * 0.94)), 0.42)), (t - 0.5) * Ln)); }
   const geo = new THREE.LatheGeometry(pts, 28);
   const p = geo.attributes.position, uv = geo.attributes.uv, v = new THREE.Vector3();
@@ -175,10 +175,10 @@ export function makeBread(seed) {
   geo.computeVertexNormals();
   // LatheGeometry の u=0.25 は +x 方向。正面(+z)へ向ける
   const loaf = mesh(geo, std({ map: T.breadTex(), bumpMap: T.breadBump(), bumpScale: 1.4, roughness: 0.72 })); loaf.rotation.y = -Math.PI / 2 + Math.PI; g.add(loaf);
-  const sp = []; for (let i = 0; i <= 10; i++) { const t = i / 10; const y = -Ln / 2 - 0.004 + t * 0.19; sp.push(new THREE.Vector2(i === 0 ? 0.004 : R * (0.6 + 0.5 * Math.min(1, t * 5)) + 0.003 + (i === 10 ? 0.002 : 0), y)); }
+  const sp = []; for (let i = 0; i <= 10; i++) { const t = i / 10; const y = -Ln / 2 - 0.004 + t * 0.21; sp.push(new THREE.Vector2(i === 0 ? 0.004 : R * (0.6 + 0.5 * Math.min(1, t * 5)) + 0.003 + (i === 10 ? 0.002 : 0), y)); }
   const sgeo = new THREE.LatheGeometry(sp, 20);
   const sleeve = mesh(sgeo, std({ map: T.sleeveTex(seed), roughness: 0.82, side: THREE.DoubleSide, bumpMap: T.noiseBump(8, 10, 3), bumpScale: 0.8 })); sleeve.scale.z = 0.95; sleeve.rotation.y = Math.PI / 2; g.add(sleeve);
-  g.userData = { base: 0.03, h: Ln, r: 0.05, code: new THREE.Vector3(0, -0.11, 0.034) };
+  g.userData = { base: 0.03, h: Ln, r: 0.05, code: new THREE.Vector3(0, -0.13, 0.034) };
   return g;
 }
 

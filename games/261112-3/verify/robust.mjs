@@ -68,8 +68,9 @@ await run('WebGL 生成失敗', async () => {
 await run('WebGL 喪失', async () => {
   const g = await open({ browser, w: 390, h: 844, query: Q }); await g.ready();
   await g.page.evaluate(() => { window.__lc = document.getElementById('c').getContext('webgl2').getExtension('WEBGL_lose_context'); window.__lc.loseContext(); });
-  await sleep(700); await g.page.evaluate(() => window.__lc.restoreContext()); await sleep(2500);
-  const f0 = await g.q('perf.frames'); await sleep(1500); const f1 = await g.q('perf.frames');
+  await sleep(700); const f0 = await g.q('perf.frames'); await g.page.evaluate(() => window.__lc.restoreContext());
+  // 復旧後はシェーダーの作り直しで最初の数フレームが遅い (ソフトウェア描画では数十秒かかることがある)
+  await g.page.waitForFunction((f) => window.__gf.perf.frames >= f + 3, f0, { timeout: 120000, polling: 250 }).catch(() => {}); const f1 = await g.q('perf.frames');
   const m = await milkToShelf(g);
   ck('WebGL 喪失→復旧: 描画と遊びが続く', f1 > f0 && m.loc === 'shelf' && (await g.q('failed')) === false, { frames: [f0, f1], errors: g.log.errors.slice(0, 2) });
   await g.page.evaluate(() => window.__lc.loseContext()); await sleep(5500);

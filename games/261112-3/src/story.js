@@ -39,7 +39,7 @@ P.restoreActors = function () {
 };
 function walkTo(a, pts, done, keepRot) { a.path = pts.map((p) => ({ x: p[0], z: p[1] })); a.done = done; a.keepRot = keepRot; }
 function local(Pn, x, y, z) { return Pn.body.localToWorld(V(x, y, z)); }
-P.reach = function (Pn, i, t) { const sh = Pn.arms[i].sh.clone().applyMatrix4(Pn.body.matrixWorld); return sh.distanceTo(t) < 0.5 * Pn.k; };
+P.reach = function (Pn, i, t) { const sh = Pn.arms[i].sh.clone().applyMatrix4(Pn.body.matrixWorld); return sh.distanceTo(t) < 0.62 * Pn.k; };
 P.grip = function (Pn, i, out) { const h = Pn.arms[i].hand; h.updateWorldMatrix(true, false); return out.set(0, 0.072, -0.03).applyMatrix4(h.matrixWorld); };
 
 // ---------- 客 ----------
@@ -74,8 +74,8 @@ P.holdSequence = function () {
     if (!ok()) return; // 重い側を持ち直す
     this.tween(0.5, (k) => { if (!ok()) return; c.ht.y = y0 - dip * (1 - k); c.gap = lerp(0.026, 0.014, k); c.dyL = Math.max(0, -off) * 0.45 * k; c.dyR = Math.max(0, off) * 0.45 * k; c.ht.x = x0 + off * 0.4 * k; }, () => { if (ok() && c.heavy) { c.supDrop = (sim.pinL.y + sim.pinR.y) / 2 - sim.bottomY(); c.support = true; } });
   });
-  this.after(1.1, () => { if (!ok()) return; const a = c.P.group.worldToLocal(c.ht.clone()), b = V(-0.15, Math.max(1.43, a.y), 0.33); c.local = a.clone(); this.tween(0.9, (k) => { if (ok()) c.local.lerpVectors(a, b, k); }); });
-  this.after(2.1, () => { if (!ok()) return; sim.groundY = -2; walkTo(c, [[c.x + 0.02, c.z - 0.26]], null, true); const y1 = c.local.y; this.tween(0.9, (k) => { if (ok() && c.local) c.local.y = lerp(y1, 1.3, k); }); });
+  this.after(1.1, () => { if (!ok()) return; const a = c.P.group.worldToLocal(c.ht.clone()), b = V(c.heavy ? -0.07 : -0.15, Math.max(1.43, a.y), 0.33); c.local = a.clone(); this.tween(0.9, (k) => { if (ok()) c.local.lerpVectors(a, b, k); }); });
+  this.after(2.1, () => { if (!ok()) return; sim.groundY = -2; walkTo(c, [[c.x + 0.02, c.z - 0.26]], null, true); const y1 = c.local.y; this.tween(0.9, (k) => { if (ok() && c.local) c.local.y = lerp(y1, c.heavy ? 1.4 : 1.3, k); }); });
   this.after(2.9, () => { if (!ok()) return; this.tween(1.5, (k) => { if (ok()) { c.P.bow = Math.sin(k * Math.PI) * 0.36; c.P.headPitch = Math.sin(k * Math.PI) * 0.2; } }); });
   this.after(7.8, () => { if (!ok()) return; c.state = 'leaving'; c.support = false; walkTo(c, [[1.75, -2.4], [1.95, -4.3], [4.6, -5.2]], () => { if (ok()) this.finalizeSale(); }); });
 };

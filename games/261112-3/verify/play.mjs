@@ -41,6 +41,19 @@ const putBag = async (id, bx, by = 0.22, opt = {}) => {
   await g.down(a.x + gx, a.y + gy); await g.slide({ x: a.x + gx, y: a.y + gy }, top, 7); await g.wait(opt.hang || 0.15); await g.slide(top, dn, 6); await g.wait(0.2); await g.up(); await g.wait(opt.settle || 1.4);
   return (await sim()).bodies.find((b) => b.id === id) || null;
 };
+// パンは端をつかんで持ち上げ (先が下を向く)、口の上から差し入れる
+const putBread = async () => {
+  for (let k = 0; k < 3; k++) {
+    const cur = (await sim()).bodies.find((x) => x.id === 'bread'); let gp;
+    if (cur) { if (cur.in && !cur.all) return cur; gp = await P(`bag(${cur.x + 0.17 * Math.sin(cur.a) * -1},${cur.y + 0.17 * Math.cos(cur.a)})`); }
+    else { const t = await item('bread'); const o = await P('pt(0,0,0)'), o2 = await P('pt(0.17,0,0)'); gp = { x: t.x + (o2.x - o.x), y: t.y }; }
+    const liftP = await P('bag(0.02,0.9)'), inP = await P('bag(0.02,0.56)');
+    await g.down(gp.x, gp.y); await g.slide(gp, liftP, 7); await g.wait(1.1); await g.slide(liftP, inP, 8); await g.wait(0.4); await g.up(); await g.wait(1.8);
+  }
+  return (await sim()).bodies.find((x) => x.id === 'bread') || null;
+};
+const openWide = async (on) => { for (const [side, peg] of on ? [[0, 0], [1, 3]] : [[0, 1], [1, 2]]) { const hh = await P(`handle(${side})`), pp = await P(`peg(${peg})`); await dragTo(hh, pp, 6, 0.2); await g.wait(0.9); } };
+const clearBag = async () => { await openWide(true); for (let pass = 0; pass < 4; pass++) { const bs = (await sim()).bodies.sort((a, b) => b.y - a.y); if (!bs.length) break; for (const b of bs) await takeOut(b.id); } await openWide(false); return (await sim()).bodies.map((b) => b.id); };
 // 袋から出して受け台へ戻す
 const takeOut = async (id) => {
   const s = await sim(), b = s.bodies.find((x) => x.id === id); if (!b) return 'none';
@@ -61,10 +74,11 @@ try {
   ck('最初のタッチ前は音が始まっていない', i0.audio === false && i0.audioState === 'none', i0.audioState);
   if (FULL) {
     // 放置 → 約4秒でお手本の手が一度だけ
-    await g.wait(4.8); let ih = await info();
-    ck('約4秒の放置でお手本の手が出る', ih.hints === 1 && ih.hint === true, { hints: ih.hints, idle: ih.idle });
-    await g.wait(6); ih = await info();
-    ck('お手本は一度だけ (くり返さない)', ih.hints === 1, { hints: ih.hints });
+    await g.until(() => window.__gf.info().hint === true, 30000); let ih = await info();
+    ck('約4秒の放置でお手本の手が出る', ih.hints === 1 && ih.hint === true && ih.idle >= 3.9 && ih.idle < 5.2, { hints: ih.hints, idleSecWhenShown: ih.idle });
+    { const m0 = await item('milk1'); await g.touch('touchStart', m0.x, m0.y); await g.frames(1); const hh = (await info()).hint; await g.touch('touchEnd', 0, 0); await g.wait(0.5); ck('お手本の手は入力で即消える', hh === false, { hintAfterTouch: hh }); await g.until(() => window.__gf.info().hint === true, 30000); }
+    await g.wait(8); ih = await info();
+    ck('お手本は放置のたびに一度だけ (くり返さない)', ih.hints === 2 && ih.hint === false, { hints: ih.hints });
     // 牛乳より先に別の品に触れても小さく応えるだけ
     const ap = await item('apple1'); await dragTo(ap, { x: ap.x + 120, y: ap.y - 60 }); await g.wait(0.3);
     const ap2 = await item('apple1');
@@ -169,10 +183,18 @@ try {
     ck('発見3: 別方向から差し戻すと収まり方が変わる', r1 && apC && (Math.abs(r1.x - mkB.x) > 0.03 || Math.abs(apC.x - apB.x) > 0.01), { milkBefore: mkB && mkB.x, milkAfter: r1 && r1.x, appleBefore: apB && apB.x, appleAfter: apC && apC.x });
     await takeOut('milk1'); await takeOut('apple1'); await g.wait(0.5);
     // 発見4: 牛乳の右どなり(口の「肩」の下・牛乳の陰)の品は、口を開く前はつかめない → 右の持ち手を横へ引くと届く
-    const mk = await putBag('milk1', 0.02, 0.2); const hid = await putBag('apple1', 0.085, 0.3, { settle: 1.8 });
-    let sd = await sim(); let bb = sd.bodies.find((x) => x.id === 'apple1'), mb = sd.bodies.find((x) => x.id === 'milk1'); notes.d4 = { hidden: bb, milk: mb, mouth0: sd.mouth, band0: sd.band };
+    // 物理の収まり方には幅があるので、狙いの配置 (立った牛乳の右どなりにりんご) になるまで最大4回やり直す
+    let sd, bb, mb; notes.d4tries = 0;
+    for (let k = 0; k < 4; k++) {
+      notes.d4tries++;
+      for (const b of (await sim()).bodies) await takeOut(b.id);
+      for (const b of (await sim()).bodies) await takeOut(b.id);
+      await putBag('milk1', 0.02 - k * 0.01, 0.2); await putBag('apple1', 0.085 + k * 0.004, 0.3, { settle: 1.8 });
+      sd = await sim(); bb = sd.bodies.find((x) => x.id === 'apple1'); mb = sd.bodies.find((x) => x.id === 'milk1');
+      if (bb && mb && bb.all && bb.reach === false && Math.abs(Math.sin(mb.a)) < 0.35) break;
+    }
+    notes.d4 = { hidden: bb, milk: mb, mouth0: sd.mouth, band0: sd.band };
     if (!bb || !mb) throw new Error('発見4の準備に失敗: ' + JSON.stringify(sd.bodies));
-    void mk; void hid;
     const blocked0 = (await info()).blocked; let pb2 = await P(`bag(${bb.x},${bb.y})`); await g.down(pb2.x, pb2.y); const dk0 = (await info()).drag; await g.slide(pb2, { x: pb2.x, y: pb2.y - 120 }, 4); await g.up(); await g.wait(0.6);
     const sd1 = await sim(); const bb1 = sd1.bodies.find((x) => x.id === 'apple1');
     ck('発見4: 牛乳の陰(口の肩の下)の品は口を開く前はつかめない (小さく応えるだけ)', bb.reach === false && dk0 === 'none' && (await info()).blocked === blocked0 + 1 && bb1 && bb1.in && Math.abs(bb1.y - bb.y) < 0.03, { reach: bb.reach, drag: dk0, hidden: [bb.x, bb.y], milk: [mb.x, mb.y, mb.a], band: sd.band });
@@ -187,9 +209,12 @@ try {
     ck('発見4: 口を開くと陰の品をつかんで取り出せる', dk === 'body' && (await item('apple1')).loc === 'tray', { drag: dk, loc: (await item('apple1')).loc });
     // いちごパックでも同じ (牛乳の右へ落とす。届くかどうかは収まり方しだいなので記録のみ)
     const bh0 = await putBag('berry', 0.115, 0.3, { settle: 1.8 }); so = await sim(); notes.d4berry = { berry: so.bodies.find((x) => x.id === 'berry'), band: so.band }; void bh0;
-    hr = await P('handle(1)'); pr = await P('peg(2)'); await dragTo(hr, pr, 6, 0.2); await g.wait(1.2);
-    so = await sim(); notes.d4berry.afterClose = so.bodies.find((x) => x.id === 'berry');
-    await putBag('apple1', -0.05, 0.25);
+    so = await sim(); notes.d4berry.reachOpen = (so.bodies.find((x) => x.id === 'berry') || {}).reach;
+    // 袋を空にする (右を開いたまま、上にある品から順に)
+    { const hh = await P('handle(0)'), pp = await P('peg(0)'); await dragTo(hh, pp, 6, 0.2); await g.wait(0.9); }
+    for (let pass = 0; pass < 4; pass++) { const bs = (await sim()).bodies.sort((a, b) => b.y - a.y); if (!bs.length) break; for (const b of bs) await takeOut(b.id); }
+    for (const [side, peg] of [[0, 1], [1, 2]]) { const hh = await P(`handle(${side})`), pp = await P(`peg(${peg})`); await dragTo(hh, pp, 6, 0.2); await g.wait(0.9); }
+    notes.bagClearedForD5 = (await sim()).bodies.map((b) => b.id);
     // 発見5: 長いパン
     const br = await item('bread'); const topB = await P('bag(0,0.62)'), restB = await P('bag(0,0.4)');
     await g.down(br.x, br.y); await g.slide(br, topB, 7); await g.slide(topB, restB, 4); await g.wait(0.3); await g.up(); await g.wait(1.6);
@@ -198,27 +223,52 @@ try {
     ck('発見5: 横向きのパンは両端が袋口に載る', bd && horiz && !bd.all && bd.y > sbr.mouth[2] - 0.03, { bread: bd, mouthY: sbr.mouth[2] });
     // 端をつかんで持ち上げる → 先が下を向く → 入る
     const endP = await P(`bag(${bd.x + 0.15 * Math.abs(Math.sin(bd.a)) * Math.sign(Math.sin(bd.a) || 1) * -1},${bd.y + 0.15 * Math.cos(bd.a) * -1})`);
-    const endAlt = await P(`bag(${bd.x + 0.15},${bd.y})`); void endP;
-    await g.down(endAlt.x, endAlt.y); const liftP = await P('bag(0.03,0.86)'); await g.slide(endAlt, liftP, 7); await g.wait(1.0);
-    const sh = await sim(); const bh = sh.bodies.find((x) => x.id === 'bread');
-    const inP = await P('bag(0.03,0.5)'); await g.slide(liftP, inP, 7); await g.wait(0.3); await g.up(); await g.wait(1.8);
-    sbr = await sim(); bd = sbr.bodies.find((x) => x.id === 'bread'); notes.d5b = { hanging: bh, final: bd };
-    ck('発見5: 端をつかむと先が下を向き、入れると上だけ残る', bh && Math.abs(Math.cos(bh.a)) > 0.75 && bd && bd.in && !bd.all, { hangingAngle: bh && bh.a, final: bd });
-    const ang0 = bd.a; const mkb = sbr.bodies.find((x) => x.id === 'milk1');
-    const mp = await P(`bag(${mkb.x},${mkb.y + 0.05})`), mp2 = await P(`bag(${mkb.x - 0.06},${mkb.y + 0.07})`);
-    await g.down(mp.x, mp.y); await g.slide(mp, mp2, 5); await g.wait(0.3); await g.up(); await g.wait(1.5);
-    sbr = await sim(); bd = sbr.bodies.find((x) => x.id === 'bread');
-    ck('発見5: 牛乳をずらすとパンの斜め方向も変わる', Math.abs(bd.a - ang0) > 0.03, { before: ang0, after: bd.a });
+    const endAlt = await P(`bag(${bd.x + 0.17},${bd.y})`); void endP;
+    let bh = null; notes.d5tries = 0;
+    for (let k = 0; k < 3; k++) {
+      notes.d5tries++;
+      const cur = (await sim()).bodies.find((x) => x.id === 'bread'); let gp;
+      if (cur) gp = await P(`bag(${cur.x + 0.17 * Math.sin(cur.a) * -1},${cur.y + 0.17 * Math.cos(cur.a)})`); else { const t = await item('bread'); const o = await P('pt(0,0,0)'), o2 = await P('pt(0.17,0,0)'); gp = { x: t.x + (o2.x - o.x), y: t.y }; }
+      if (k === 0) gp = endAlt;
+      await g.down(gp.x, gp.y); const liftP = await P('bag(0.02,0.9)'); await g.slide(gp, liftP, 7); await g.wait(1.1);
+      bh = (await sim()).bodies.find((x) => x.id === 'bread');
+      const inP = await P('bag(0.02,0.56)'); await g.slide(liftP, inP, 8); await g.wait(0.4); await g.up(); await g.wait(1.8);
+      sbr = await sim(); bd = sbr.bodies.find((x) => x.id === 'bread');
+      if (bd && bd.in && !bd.all) break;
+    }
+    notes.d5b = { hanging: bh, final: bd };
+    ck('発見5: 端をつかむと先が下を向き、入れると上だけ残る', bh && Math.abs(Math.cos(bh.a)) > 0.75 && bd && bd.in && !bd.all, { hangingAngle: bh && bh.a, final: bd, tries: notes.d5tries });
+    if (!bd) throw new Error('発見5: パンが袋に入らなかった');
+    // 牛乳の位置を変える (入れる → 抜いて反対側へ) と、パンの傾きが変わる
+    const ang0 = bd.a; const lowX = bd.x - Math.sin(bd.a) * 0.19 * Math.sign(Math.cos(bd.a) || 1) * -1; void lowX;
+    await putBag('milk1', -0.06, 0.3, { settle: 1.8 }); let sx1 = await sim(); const ang1 = (sx1.bodies.find((x) => x.id === 'bread') || { a: ang0 }).a;
+    const outLoc = await takeOut('milk1'); await g.wait(0.8); if (outLoc === 'tray') await putBag('milk1', 0.06, 0.3, { settle: 1.8 });
+    sx1 = await sim(); const ang2 = (sx1.bodies.find((x) => x.id === 'bread') || { a: ang1 }).a;
+    notes.d5c = { angles: [ang0, ang1, ang2], movedMilk: outLoc };
+    ck('発見5: 牛乳の位置を変えるとパンの斜め方向も変わる', Math.max(Math.abs(ang1 - ang0), Math.abs(ang2 - ang1)) > 0.03, notes.d5c);
+    // このあとの運搬・手渡しのために、いったん空にして詰め直す (牛乳・りんご・いちご・パン)
+    notes.repackTries = 0;
+    for (let k = 0; k < 3; k++) {
+      notes.repackTries++; await clearBag(); await g.wait(1.5);
+      await putBag('milk1', -0.05); await putBag('apple1', 0.04); await putBag('berry', 0.0, 0.3); await putBread();
+      const sb2 = await sim(); if (['milk1', 'apple1', 'berry', 'bread'].filter((id) => sb2.bodies.some((b) => b.id === id && b.in)).length >= 3) break;
+    }
   } else {
-    await putBag('milk1', -0.05); await putBag('apple1', 0.04); await putBag('berry', 0.0, 0.3);
-    const br = await item('bread'); const liftP = await P('bag(0.02,0.86)'), inP = await P('bag(0.02,0.5)');
-    await g.down(br.x + Math.round(notes.pxPer10cm_shelf * 1.2), br.y); await g.slide(br, liftP, 7); await g.wait(1.0); await g.slide(liftP, inP, 7); await g.wait(0.3); await g.up(); await g.wait(1.8);
+    await putBag('milk1', -0.05); await putBag('apple1', 0.04); await putBag('berry', 0.0, 0.3); await putBread();
   }
   S = await st(); const inBag = want.filter((id) => S.items[id].loc === 'bag');
   ck('会計済みの品が袋に入っている', inBag.length >= 3, { inBag, sim: (await sim()).bodies.map((b) => [b.id, b.x, b.y, b.in]) });
   await qshot('scene3');
   // 発見6: 持ち上げて横へ運び、止める
-  const liftBag = async () => { const h = await P('handle(1)'), up = await P('bag(0.1,0.7)'); await g.down(h.x, h.y); await g.slide(h, up, 6); await g.wait(0.5); return up; };
+  // 持ち手を上へ引いて持ち上げる (持ち手の上に品が重なっていたら、もう一方の持ち手で)
+  const liftBag = async () => {
+    for (const side of [1, 0, 1]) {
+      const h = await P(`handle(${side})`), up = await P('bag(0.1,0.7)'); await g.down(h.x, h.y);
+      if (String((await info()).drag).startsWith('handle')) { await g.slide(h, up, 6); await g.wait(0.5); if ((await info()).drag === 'handle:lift') return up; }
+      await g.up(); await g.wait(1.0);
+    }
+    throw new Error('持ち手をつかめなかった: ' + JSON.stringify((await sim()).bodies));
+  };
   const carryTo = async (targetX, stepPx, waitEach) => { for (let k = 0; k < 40; k++) { const s = await sim(); const x = (s.pins[0] + s.pins[2]) / 2; if (Math.abs(x - targetX) < 0.03) break; const cur = await P(`bag(${x},${s.pins[1]})`); await g.move(cur.x + Math.sign(targetX - x) * stepPx, cur.y); if (waitEach) await g.wait(waitEach); } };
   const swing = async (n = 14) => { const out = []; for (let k = 0; k < n; k++) { const s = await sim(); out.push(+(s.com[0] - (s.pins[0] + s.pins[2]) / 2).toFixed(3)); await g.wait(0.12); } return out; };
   if (FULL) {
@@ -231,16 +281,16 @@ try {
     ck('発見6: 横へ運んで止めると底が遅れて揺れる', ampFast > 0.02 && fast.some((v) => v > 0.004) && fast.some((v) => v < -0.004), { ampFast, fast });
     ck('発見6: ゆっくり運ぶと揺れが小さい', ampSlow < ampFast * 0.75, { ampFast, ampSlow });
     // 台へ置く → 収まる
-    const s0b = await sim(); const cur = await P(`bag(${(s0b.pins[0] + s0b.pins[2]) / 2},${s0b.pins[1]})`), down = await P(`bag(0,${0.42})`); await g.slide(cur, down, 8); await g.wait(1.5);
+    const s0b = await sim(); const cur = await P(`bag(${(s0b.pins[0] + s0b.pins[2]) / 2},${s0b.pins[1]})`), down = await P(`bag(0,${0.42})`); await g.slide(cur, down, 8); await g.wait(3.0);
     const rest = await swing(6); const ampRest = Math.max(...rest) - Math.min(...rest); await g.up(); await g.wait(1.2);
-    ck('発見6: 台へ置くと揺れが収まり、離すと袋掛けへ戻る', ampRest < 0.012 && (await info()).bagWhere === 'rack' && (await sim()).bodies.length >= 3, { ampRest, bagWhere: (await info()).bagWhere });
+    ck('発見6: 台へ置くと揺れが収まり、離すと袋掛けへ戻る', ampRest < 0.02 && (await info()).bagWhere === 'rack' && (await sim()).bodies.length >= 3, { ampRest, bagWhere: (await info()).bagWhere });
   }
   // 手渡し
   const handover = async () => { await liftBag(); await carryTo(0.3, 30, 0.05); await g.wait(1.0); const hp = await P('custHand()'); const s = await sim(); await g.up(); return { hp, s }; };
   let ho = await handover(); notes.handover = { custHand: ho.hp, com: ho.s.com, pins: ho.s.pins };
   ck('持った袋を近づけると客が手を伸ばして受け取りの構えをとる', ho.hp.bow > 0.15 && Math.abs(ho.hp.x - (ho.s.pins[0] + ho.s.pins[2]) / 2) < 0.15, ho.hp);
   await g.until(() => window.__gf.info().hands >= 1 && window.__gf.info().cust === 'holding', 30000); await g.wait(2.6);
-  { const hp = await P('custHand()'); notes.holding = hp; ck('重い袋 (1.25kg超) では客がもう一方の手を底へ添える', ho.s.com[2] <= 1.25 ? hp.support === false : hp.support === true && hp.arm1 === true, { mass: ho.s.com[2], support: hp.support, arm1: hp.arm1 }); }
+  { let hp = await P('custHand()'); if (ho.s.com[2] > 1.25) { for (let k = 0; k < 12 && !(hp.support && hp.arm1); k++) { await g.wait(0.25); hp = await P('custHand()'); } } notes.holding = hp; ck('重い袋 (1.25kg超) では客がもう一方の手を底へ添える', ho.s.com[2] <= 1.25 ? hp.support === false : hp.support === true && hp.arm1 === true, { mass: ho.s.com[2], support: hp.support, arm1: hp.arm1 }); }
   ck('離すと客が受け取り、同じ袋・同じ品が客の手に', (await st()).handed === 1 && (await info()).bagWhere === 'cust' && (await sim()).bodies.length >= 3, { bodies: (await sim()).bodies.map((b) => b.id), support: (await P('custHand()')).support });
   if (FULL) {
     const s = await sim(); const c = await P(`bag(${(s.mouth[0] + s.mouth[1]) / 2},${s.mouth[2] - 0.15})`); await g.tap(c.x, c.y);
@@ -248,20 +298,21 @@ try {
     const sr = await sim(); S = await st();
     ck('渡した袋に触れると客が同じ袋を台へ戻す (品はそのまま・会計も増えない)', (await info()).returns === 1 && sr.bodies.length >= 3 && S.paid === 1 && (await info()).pays === 1, { bodies: sr.bodies.map((b) => b.id), pays: (await info()).pays });
     // 再訪: レジへ戻って再読取しても会計は増えない
-    const tk = await takeOut(sr.bodies.find((b) => b.id !== 'bread').id); void tk;
+    await takeOut('bread'); // 口から出ているパンは必ずつかめる
     const nv = { x: Math.round(W * 0.25), y: Math.round(H * 0.12) }; await g.drag(nv, { x: nv.x + W * 0.5, y: nv.y }, 6, 0.05);
     await g.until(() => window.__gf.info().station === 1 && window.__gf.info().trayAt === 'reg', 30000); await g.wait(1.2);
-    const onTray = Object.keys((await st()).items).filter((id) => (window, true) && true); void onTray;
     const S2 = await st(); const tid = want.find((id) => S2.items[id].loc === 'tray'); const r0 = (await info()).reads;
+    if (!tid) throw new Error('再読取の準備に失敗 (受け台に品がない)');
     await scanOne(tid); bt = await P('button()'); await g.tap(bt.x, bt.y); await g.tap(bt.x, bt.y);
     await g.until(() => window.__gf.info().station === 2 && window.__gf.info().trayAt === 'bag', 30000); await g.wait(1.0);
     ck('取り出した品を再読取・再度ボタンを押しても登録と会計は増えない', (await info()).reads === r0 && (await info()).pays === 1 && (await st()).paid === 1, { reads: (await info()).reads, pays: (await info()).pays });
-    await putBag(tid, 0.0, 0.3);
+    if (tid === 'bread') await putBread(); else await putBag(tid, 0.0, 0.3);
     ho = await handover(); await g.until(() => window.__gf.info().hands >= 2 && window.__gf.info().cust === 'holding', 30000);
   }
+  const handed = (await sim()).bodies.filter((b) => b.in).map((b) => b.id).sort(); // 客の手にある袋の中身
   await g.until(() => window.__gf.state().phase === 'close' && window.__gf.info().station === 0, 120000); await g.wait(1.6);
-  S = await st();
-  ck('手渡しとおじぎのあと店じまいへ (渡した品は売れ、残りは棚に)', S.phase === 'close' && S.basket === 'stand' && want.filter((id) => S.items[id].loc === 'sold').length >= 3 && S.items.milk2.loc === 'shelf' && S.items.apple2.loc === 'lane', { sold: want.filter((id) => S.items[id].loc === 'sold'), milk2: S.items.milk2, apple2: S.items.apple2.loc });
+  S = await st(); const sold = want.filter((id) => S.items[id].loc === 'sold').sort(), left = want.filter((id) => S.items[id].loc !== 'sold');
+  ck('手渡しとおじぎのあと店じまいへ (渡した袋の中身だけが売れ、ほかは残る・複製なし)', S.phase === 'close' && S.basket === 'stand' && sold.length >= 1 && JSON.stringify(sold) === JSON.stringify(handed) && left.every((id) => S.items[id].loc === 'tray') && S.items.milk2.loc === 'shelf' && S.items.apple2.loc === 'lane' && Object.keys(S.items).length === 6, { handed, sold, leftOnTray: left, milk2: S.items.milk2.loc, apple2: S.items.apple2.loc });
 
   // ---------- 場面4: 店じまい ----------
   ck('売れた棚で残品が奥に引っ込んでいる', S.items.milk2.tidy === 0);

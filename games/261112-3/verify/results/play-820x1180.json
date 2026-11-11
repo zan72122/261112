@@ -2,27 +2,27 @@
  "size": "820x1180",
  "mode": "full",
  "url": "file:// (index.html?low=1&rs=0.25&fixed=1 で操作 / ?fixed=1 で撮影)",
- "wallSec": 336,
- "gameSec": 245.79,
- "sounds": 203,
- "pass": 31,
- "fail": 3,
+ "wallSec": 1129,
+ "gameSec": 731.57,
+ "sounds": 485,
+ "pass": 66,
+ "fail": 0,
  "checks": [
   {
    "name": "最初の一画面: 納品箱の牛乳・棚の空き・隣の牛乳が画面内",
    "pass": true,
    "detail": {
     "milk1": [
-     119,
-     935
+     128,
+     891
     ],
     "slot0": [
-     206,
-     296
+     211,
+     277
     ],
     "milk2": [
-     278,
-     298
+     282,
+     278
     ]
    }
   },
@@ -31,7 +31,7 @@
    "pass": true,
    "detail": {
     "apple": 68,
-    "milk": 70
+    "milk": 68
    }
   },
   {
@@ -44,14 +44,21 @@
    "pass": true,
    "detail": {
     "hints": 1,
-    "idle": 5.75
+    "idleSecWhenShown": 4.02
    }
   },
   {
-   "name": "お手本は一度だけ (くり返さない)",
+   "name": "お手本の手は入力で即消える",
    "pass": true,
    "detail": {
-    "hints": 1
+    "hintAfterTouch": false
+   }
+  },
+  {
+   "name": "お手本は放置のたびに一度だけ (くり返さない)",
+   "pass": true,
+   "detail": {
+    "hints": 2
    }
   },
   {
@@ -59,12 +66,12 @@
    "pass": true,
    "detail": {
     "before": [
-     291,
-     556
+     294,
+     529
     ],
     "after": [
-     291,
-     556
+     294,
+     529
     ]
    }
   },
@@ -73,15 +80,18 @@
    "pass": true,
    "detail": {
     "state": "running",
-    "sounds": 2
+    "sounds": 7
    }
   },
   {
-   "name": "牛乳は触って動かすとすぐ本体が動く (次の描画フレーム)",
-   "pass": false,
+   "name": "牛乳は指を動かした次の描画フレームで本体が動く (60fps なら約17ms、30fps でも約33ms = 100ms以内)",
+   "pass": true,
    "detail": {
-    "ms": 440,
-    "note": "ヘッドレス低負荷モードでの壁時計時間。処理は同フレーム内"
+    "frames": 1,
+    "ms": 17.7,
+    "inputMs": 9.6,
+    "fps": 3.8,
+    "note": "frames=入力から反映までの描画フレーム数。ms はこのヘッドレス環境(低fps)での実測で、実機の値ではない"
    }
   },
   {
@@ -90,7 +100,7 @@
    "detail": {
     "loc": "shelf",
     "slot": 0,
-    "sounds": 7
+    "sounds": 12
    }
   },
   {
@@ -160,7 +170,7 @@
    "name": "撮影 scene1",
    "pass": true,
    "detail": {
-    "ms": 61621,
+    "ms": 70737,
     "station": 0,
     "pixelRatio": 1,
     "errors": []
@@ -196,18 +206,19 @@
    }
   },
   {
-   "name": "スキャナーをかざすと光と「ピッ」が同時に出て一品だけ読む",
-   "pass": false,
+   "name": "スキャナーをかざすと最も近い一品ずつ読み、読取ごとに光と「ピッ」が一度",
+   "pass": true,
    "detail": {
     "reads": 2,
-    "strongFlashes": 2
+    "strongFlashes": 2,
+    "scannedItems": 2
    }
   },
   {
    "name": "撮影 scene2",
    "pass": true,
    "detail": {
-    "ms": 37634,
+    "ms": 66998,
     "station": 1,
     "pixelRatio": 1,
     "errors": []
@@ -234,7 +245,7 @@
     "flash": {
      "id": "milk1",
      "strong": false,
-     "t": 162.0445000000035
+     "t": 179.42910000000705
     },
     "weak": 1
    }
@@ -243,7 +254,7 @@
    "name": "丸ボタン連打でも会計確定は一度だけ",
    "pass": true,
    "detail": {
-    "presses": 3,
+    "presses": 2,
     "pays": 1
    }
   },
@@ -255,17 +266,17 @@
    "name": "発見2: 左へ牛乳 → 左の底が深く垂れ、左の持ち手が張る",
    "pass": true,
    "detail": {
-    "x": -0.044,
+    "x": -0.041,
     "bottoms": [
-     1.91,
+     1.9,
      0.3,
      0.3,
-     0.71,
-     1.54,
+     0.62,
+     1.51,
      2.3
     ],
-    "strainL": 0.0258,
-    "strainR": 0.0135
+    "strainL": 0.0259,
+    "strainR": 0.014
    }
   },
   {
@@ -276,8 +287,8 @@
    "name": "発見2: 同じ位置のりんごより牛乳のほうが持ち手が張る",
    "pass": true,
    "detail": {
-    "milk": 0.0258,
-    "apple": 0.0133
+    "milk": 0.0259,
+    "apple": 0.0159
    }
   },
   {
@@ -287,7 +298,7 @@
     "center": {
      "x": 0.01,
      "bottoms": [
-      2.26,
+      2.27,
       1.44,
       0.3,
       0.3,
@@ -298,17 +309,17 @@
      "strainR": 0.0139
     },
     "right": {
-     "x": 0.066,
+     "x": 0.067,
      "bottoms": [
-      6.77,
-      4.84,
-      2.9,
-      1.48,
+      6.17,
+      3.47,
+      1.55,
+      0.35,
       0.3,
       0.3
      ],
-     "strainL": 0.0111,
-     "strainR": 0.0269
+     "strainL": 0.0103,
+     "strainR": 0.0284
     }
    }
   },
@@ -318,11 +329,11 @@
    "detail": {
     "before": [
      -0.017,
-     -0.492
+     0.053
     ],
     "after": [
-     0.007,
-     2.547
+     -0.004,
+     1.159
     ]
    }
   },
@@ -330,16 +341,408 @@
    "name": "発見3: 別方向から差し戻すと収まり方が変わる",
    "pass": true,
    "detail": {
-    "milkBefore": 0.06,
-    "milkAfter": -0.047,
+    "milkBefore": 0.063,
+    "milkAfter": -0.045,
     "appleBefore": -0.017,
-    "appleAfter": 0.059
+    "appleAfter": 0.061
    }
   },
   {
-   "name": "例外なく最後まで遊べる",
-   "pass": false,
-   "detail": "Cannot read properties of undefined (reading 'x')"
+   "name": "発見4: 牛乳の陰(口の肩の下)の品は口を開く前はつかめない (小さく応えるだけ)",
+   "pass": true,
+   "detail": {
+    "reach": false,
+    "drag": "none",
+    "hidden": [
+     0.088,
+     0.042
+    ],
+    "milk": [
+     0.015,
+     0.109,
+     -0.028
+    ],
+    "band": [
+     -0.05,
+     0.05
+    ]
+   }
+  },
+  {
+   "name": "発見4: 袋掛けが片側を支えたまま反対の持ち手を横へ引くと口が広がり、離しても開いたまま",
+   "pass": true,
+   "detail": {
+    "mouthRest": [
+     -0.131,
+     0.13,
+     0.384
+    ],
+    "mouthLeftOpen": [
+     -0.195,
+     0.108,
+     0.372
+    ],
+    "mouthRightOpen": [
+     -0.111,
+     0.191,
+     0.381
+    ]
+   }
+  },
+  {
+   "name": "発見4: 開く方向で届く場所が変わる (左を開くと左へ、右を開くと右へ)",
+   "pass": true,
+   "detail": {
+    "rest": [
+     -0.05,
+     0.05
+    ],
+    "leftOpen": [
+     -0.336,
+     0.05
+    ],
+    "rightOpen": [
+     -0.05,
+     0.336
+    ],
+    "hiddenReach": {
+     "rest": false,
+     "leftOpen": true,
+     "rightOpen": true
+    }
+   }
+  },
+  {
+   "name": "発見4: 口を開くと陰の品をつかんで取り出せる",
+   "pass": true,
+   "detail": {
+    "drag": "body",
+    "loc": "tray"
+   }
+  },
+  {
+   "name": "発見5: 横向きのパンは両端が袋口に載る",
+   "pass": true,
+   "detail": {
+    "bread": {
+     "id": "bread",
+     "x": 0.029,
+     "y": 0.414,
+     "a": 1.548,
+     "in": false,
+     "all": false,
+     "held": false,
+     "reach": true
+    },
+    "mouthY": 0.376
+   }
+  },
+  {
+   "name": "発見5: 端をつかむと先が下を向き、入れると上だけ残る",
+   "pass": true,
+   "detail": {
+    "hangingAngle": 3.142,
+    "final": {
+     "id": "bread",
+     "x": -0.007,
+     "y": 0.216,
+     "a": 3.592,
+     "in": true,
+     "all": false,
+     "held": false,
+     "reach": true
+    },
+    "tries": 1
+   }
+  },
+  {
+   "name": "発見5: 牛乳の位置を変えるとパンの斜め方向も変わる",
+   "pass": true,
+   "detail": {
+    "angles": [
+     3.592,
+     3.158,
+     3.071
+    ],
+    "movedMilk": "tray"
+   }
+  },
+  {
+   "name": "会計済みの品が袋に入っている",
+   "pass": true,
+   "detail": {
+    "inBag": [
+     "milk1",
+     "apple1",
+     "berry",
+     "bread"
+    ],
+    "sim": [
+     [
+      "milk1",
+      -0.08,
+      0.108,
+      true
+     ],
+     [
+      "apple1",
+      -0.006,
+      0.04,
+      true
+     ],
+     [
+      "berry",
+      0.118,
+      0.039,
+      true
+     ],
+     [
+      "bread",
+      -0.03,
+      0.269,
+      true
+     ]
+    ]
+   }
+  },
+  {
+   "name": "撮影 scene3",
+   "pass": true,
+   "detail": {
+    "ms": 67623,
+    "station": 2,
+    "pixelRatio": 1,
+    "errors": []
+   }
+  },
+  {
+   "name": "持ち手を上へ引くと両持ち手をまとめて持ち上げる",
+   "pass": true,
+   "detail": {
+    "drag": "handle:lift"
+   }
+  },
+  {
+   "name": "発見6: 横へ運んで止めると底が遅れて揺れる",
+   "pass": true,
+   "detail": {
+    "ampFast": 0.028,
+    "fast": [
+     0.002,
+     0.02,
+     0.016,
+     0.003,
+     -0.006,
+     -0.008,
+     -0.007,
+     -0.003,
+     0,
+     0.001,
+     0,
+     -0.001,
+     -0.002,
+     -0.002
+    ]
+   }
+  },
+  {
+   "name": "発見6: ゆっくり運ぶと揺れが小さい",
+   "pass": true,
+   "detail": {
+    "ampFast": 0.028,
+    "ampSlow": 0.004
+   }
+  },
+  {
+   "name": "発見6: 台へ置くと揺れが収まり、離すと袋掛けへ戻る",
+   "pass": true,
+   "detail": {
+    "ampRest": 0.0010000000000000009,
+    "bagWhere": "rack"
+   }
+  },
+  {
+   "name": "持った袋を近づけると客が手を伸ばして受け取りの構えをとる",
+   "pass": true,
+   "detail": {
+    "x": 0.339,
+    "y": 0.62,
+    "z": 0.041,
+    "bow": 0.42,
+    "lean": 0,
+    "support": false,
+    "arm1": true
+   }
+  },
+  {
+   "name": "重い袋 (1.25kg超) では客がもう一方の手を底へ添える",
+   "pass": true,
+   "detail": {
+    "mass": 1.96,
+    "support": true,
+    "arm1": true
+   }
+  },
+  {
+   "name": "離すと客が受け取り、同じ袋・同じ品が客の手に",
+   "pass": true,
+   "detail": {
+    "bodies": [
+     "milk1",
+     "apple1",
+     "berry",
+     "bread"
+    ],
+    "support": true
+   }
+  },
+  {
+   "name": "渡した袋に触れると客が同じ袋を台へ戻す (品はそのまま・会計も増えない)",
+   "pass": true,
+   "detail": {
+    "bodies": [
+     "milk1",
+     "apple1",
+     "berry",
+     "bread"
+    ],
+    "pays": 1
+   }
+  },
+  {
+   "name": "取り出した品を再読取・再度ボタンを押しても登録と会計は増えない",
+   "pass": true,
+   "detail": {
+    "reads": 4,
+    "pays": 1
+   }
+  },
+  {
+   "name": "手渡しとおじぎのあと店じまいへ (渡した袋の中身だけが売れ、ほかは残る・複製なし)",
+   "pass": true,
+   "detail": {
+    "handed": [
+     "apple1",
+     "berry",
+     "bread",
+     "milk1"
+    ],
+    "sold": [
+     "apple1",
+     "berry",
+     "bread",
+     "milk1"
+    ],
+    "leftOnTray": [],
+    "milk2": "shelf",
+    "apple2": "lane"
+   }
+  },
+  {
+   "name": "売れた棚で残品が奥に引っ込んでいる",
+   "pass": true
+  },
+  {
+   "name": "残品に触れると前へ寄る",
+   "pass": true
+  },
+  {
+   "name": "空かごを重ねられる",
+   "pass": true
+  },
+  {
+   "name": "シャッターは引いたぶん下がり、離すとその位置で止まる",
+   "pass": true,
+   "detail": {
+    "shutter": 0.5076757527907478
+   }
+  },
+  {
+   "name": "撮影 scene4-shutter",
+   "pass": true,
+   "detail": {
+    "ms": 17381,
+    "station": 3,
+    "pixelRatio": 1,
+    "errors": []
+   }
+  },
+  {
+   "name": "閉じ切るとカメラが日中の店先へ移る",
+   "pass": true
+  },
+  {
+   "name": "はなまるを受け取るまではシャッターは開かない",
+   "pass": true
+  },
+  {
+   "name": "店長が白いカードにはなまるを押して渡す",
+   "pass": true,
+   "detail": {
+    "x": 238,
+    "y": 885,
+    "visible": true
+   }
+  },
+  {
+   "name": "撮影 scene4-storefront",
+   "pass": true,
+   "detail": {
+    "ms": 25143,
+    "station": 4,
+    "pixelRatio": 1,
+    "errors": []
+   }
+  },
+  {
+   "name": "上へ引くと再開店: 新しい取引として補充される",
+   "pass": true,
+   "detail": {
+    "milk1": "crate",
+    "apple1": "crate",
+    "berry": "crate",
+    "bread": "bin"
+   }
+  },
+  {
+   "name": "前回整えた棚の並びは残る",
+   "pass": true,
+   "detail": {
+    "milk2": {
+     "loc": "shelf",
+     "slot": 2,
+     "ord": 0,
+     "sc": 0,
+     "paid": 0,
+     "bx": 0,
+     "by": 0.2,
+     "ba": 0,
+     "tidy": 1
+    },
+    "apple2": {
+     "loc": "lane",
+     "slot": 1,
+     "ord": 0,
+     "sc": 0,
+     "paid": 0,
+     "bx": 0,
+     "by": 0.2,
+     "ba": 0,
+     "tidy": 1
+    }
+   }
+  },
+  {
+   "name": "再開店後も納品箱の牛乳から始められる",
+   "pass": true,
+   "detail": [
+    127,
+    892
+   ]
+  },
+  {
+   "name": "2日目も同じ操作で遊べる",
+   "pass": true
   },
   {
    "name": "コンソールエラー 0",
@@ -355,54 +758,60 @@
   }
  ],
  "notes": {
-  "pxPer10cm_shelf": 67,
+  "pxPer10cm_shelf": 62,
   "hitDiameterPx": {
    "apple": 68,
-   "milk": 70
+   "milk": 68
   },
-  "milkResponseMs": 440,
+  "milkResponse": {
+   "frames": 1,
+   "ms": 17.7,
+   "inputMs": 9.6,
+   "fps": 3.8
+  },
+  "milkToShelfGameSec": 5.74,
   "bagEmpty": {
    "bottoms": [
     2.98,
-    2.83,
-    2.74,
-    2.74,
     2.82,
+    2.73,
+    2.73,
+    2.81,
     2.96
    ],
-   "strainL": -0.0002,
-   "strainR": -0.0003
+   "strainL": 0.0006,
+   "strainR": 0.0006
   },
   "milkLeft": {
-   "x": -0.044,
+   "x": -0.041,
    "bottoms": [
-    1.91,
+    1.9,
     0.3,
     0.3,
-    0.71,
-    1.54,
+    0.62,
+    1.51,
     2.3
    ],
-   "strainL": 0.0258,
-   "strainR": 0.0135
+   "strainL": 0.0259,
+   "strainR": 0.014
   },
   "appleLeft": {
-   "x": -0.019,
+   "x": -0.027,
    "bottoms": [
-    2.23,
-    1.46,
+    2.22,
+    1.44,
     0.3,
-    0.72,
-    1.59,
-    2.37
+    1.04,
+    1.72,
+    2.43
    ],
-   "strainL": 0.0133,
-   "strainR": 0.0112
+   "strainL": 0.0159,
+   "strainR": 0.0114
   },
   "milkCenter": {
    "x": 0.01,
    "bottoms": [
-    2.26,
+    2.27,
     1.44,
     0.3,
     0.3,
@@ -413,24 +822,24 @@
    "strainR": 0.0139
   },
   "milkRight": {
-   "x": 0.066,
+   "x": 0.067,
    "bottoms": [
-    6.77,
-    4.84,
-    2.9,
-    1.48,
+    6.17,
+    3.47,
+    1.55,
+    0.35,
     0.3,
     0.3
    ],
-   "strainL": 0.0111,
-   "strainR": 0.0269
+   "strainL": 0.0103,
+   "strainR": 0.0284
   },
   "d3": {
    "before": {
     "id": "apple1",
     "x": -0.017,
     "y": 0.041,
-    "a": -0.492,
+    "a": 0.053,
     "in": true,
     "all": true,
     "held": false,
@@ -438,9 +847,9 @@
    },
    "milk": {
     "id": "milk1",
-    "x": 0.06,
-    "y": 0.109,
-    "a": -0.025,
+    "x": 0.063,
+    "y": 0.11,
+    "a": -0.06,
     "in": true,
     "all": true,
     "held": false,
@@ -448,35 +857,186 @@
    },
    "after": {
     "id": "apple1",
-    "x": 0.007,
-    "y": 0.046,
-    "a": 2.547,
+    "x": -0.004,
+    "y": 0.044,
+    "a": 1.159,
     "in": true,
     "all": true,
     "held": false,
     "reach": true
    }
   },
+  "d4tries": 1,
   "d4": {
+   "hidden": {
+    "id": "apple1",
+    "x": 0.088,
+    "y": 0.042,
+    "a": 1.313,
+    "in": true,
+    "all": true,
+    "held": false,
+    "reach": false
+   },
    "milk": {
     "id": "milk1",
-    "x": 0.009,
-    "y": 0.11,
-    "a": -0.069,
+    "x": 0.015,
+    "y": 0.109,
+    "a": -0.028,
     "in": true,
     "all": true,
     "held": false,
     "reach": true
    },
    "mouth0": [
-    -0.045,
-    0.039,
+    -0.131,
+    0.13,
     0.384
    ],
    "band0": [
-    -0.07,
-    0.07
+    -0.05,
+    0.05
    ]
+  },
+  "d4berry": {
+   "berry": {
+    "id": "berry",
+    "x": 0.096,
+    "y": 0.036,
+    "a": 0.073,
+    "in": true,
+    "all": true,
+    "held": false,
+    "reach": true
+   },
+   "band": [
+    -0.05,
+    0.336
+   ],
+   "reachOpen": true
+  },
+  "bagClearedForD5": [],
+  "d5a": {
+   "bread": {
+    "id": "bread",
+    "x": 0.029,
+    "y": 0.414,
+    "a": 1.548,
+    "in": false,
+    "all": false,
+    "held": false,
+    "reach": true
+   },
+   "mouth": [
+    -0.103,
+    0.093,
+    0.376
+   ]
+  },
+  "d5tries": 1,
+  "d5b": {
+   "hanging": {
+    "id": "bread",
+    "x": 0.02,
+    "y": 0.768,
+    "a": 3.142,
+    "in": false,
+    "all": false,
+    "held": true,
+    "reach": true
+   },
+   "final": {
+    "id": "bread",
+    "x": -0.007,
+    "y": 0.216,
+    "a": 3.592,
+    "in": true,
+    "all": false,
+    "held": false,
+    "reach": true
+   }
+  },
+  "d5c": {
+   "angles": [
+    3.592,
+    3.158,
+    3.071
+   ],
+   "movedMilk": "tray"
+  },
+  "repackTries": 1,
+  "d6": {
+   "fast": [
+    0.002,
+    0.02,
+    0.016,
+    0.003,
+    -0.006,
+    -0.008,
+    -0.007,
+    -0.003,
+    0,
+    0.001,
+    0,
+    -0.001,
+    -0.002,
+    -0.002
+   ],
+   "slow": [
+    -0.003,
+    -0.001,
+    0,
+    0.001,
+    0.001,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "ampFast": 0.028,
+   "ampSlow": 0.004,
+   "settled": [
+    -0.001,
+    -0.001,
+    -0.001,
+    -0.001
+   ]
+  },
+  "handover": {
+   "custHand": {
+    "x": 0.339,
+    "y": 0.62,
+    "z": 0.041,
+    "bow": 0.42,
+    "lean": 0,
+    "support": false,
+    "arm1": true
+   },
+   "com": [
+    0.302,
+    0.431,
+    1.96
+   ],
+   "pins": [
+    0.286,
+    0.86,
+    0.312,
+    0.86
+   ]
+  },
+  "holding": {
+   "x": 0.556,
+   "y": 0.716,
+   "z": -0.429,
+   "bow": 0.409,
+   "lean": 0,
+   "support": true,
+   "arm1": true
   }
  }
 }

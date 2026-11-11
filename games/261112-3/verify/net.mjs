@@ -18,7 +18,8 @@ await new Promise((r) => srv.listen(0, '127.0.0.1', r)); const port = srv.addres
 const browser = await chromium.launch({ args: ARGS });
 const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const urls = [...new Set((html.match(/https?:\/\/[^\s"'`)\\<>]+/g) || []))];
-ck('index.html は 1 ファイル完結 (script src / link href / import() などの外部参照なし)', !/<script[^>]+src=/i.test(html) && !/<link[^>]+href="(?!data:)/i.test(html) && !/@import/.test(html) && !/\bfetch\(|XMLHttpRequest|importScripts|new WebSocket|sendBeacon/.test(html.replace(/three\.js/g, '')) === false || true, { bytes: html.length, sizeMB: +(html.length / 1048576).toFixed(2), urlLikeStrings: urls });
+const extRefs = { scriptSrc: /<script[^>]+src=/i.test(html), linkHref: /<link[^>]+href="(?!data:)/i.test(html), cssImport: /@import\s/.test(html), imgSrc: /<img[^>]+src="(?!data:)/i.test(html), cssUrl: /url\((?!['"]?data:)/i.test(html.slice(0, html.indexOf('<script>'))) };
+ck('index.html は 1 ファイル完結 (script src / link href / @import / 外部画像の参照なし)', !Object.values(extRefs).some(Boolean) && urls.every((u) => u.startsWith('http://www.w3.org/')), { bytes: html.length, sizeMB: +(html.length / 1048576).toFixed(2), externalRefs: extRefs, urlLikeStrings: urls });
 ck('容量 8MB 以内', html.length < 8 * 1048576, { MB: +(html.length / 1048576).toFixed(2) });
 const milk = async (g) => { const a = await g.q("item('milk1')"), s = await g.q('shelfSlot(0)'); await g.drag(a, { x: s.x, y: s.y + 20 }, 8, 0.12); await g.wait(0.6); return (await g.state()).items.milk1.loc; };
 for (const [label, url, q] of [['file://', FILE_URL, '?low=1&rs=0.25&fixed=1'], ['file:// (既定の画質)', FILE_URL, ''], ['http サブフォルダ', `http://127.0.0.1:${port}/261112/games/261112-3/`, '?low=1&rs=0.25&fixed=1'], ['http サブフォルダ index.html (既定の画質)', `http://127.0.0.1:${port}/261112/games/261112-3/index.html`, '']]) {

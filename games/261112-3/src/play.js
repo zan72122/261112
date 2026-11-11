@@ -171,7 +171,7 @@ P.nearestTarget = function (it) {
   const add = (loc, slot, x, y, z, sy) => { this.screen(this.tmp2.set(x, y, z), s); c.push({ loc, slot, d: Math.hypot(s.x - me.x, s.y - me.y), sy }); };
   if (t === 'milk') for (let k = 0; k < 3; k++) { if (this.list.some((o) => o !== it && o.st.loc === 'shelf' && o.st.slot === k)) continue; add('shelf', k, L.milkX[k], L.shelfTopY + BASE.milk, L.milkZ, L.shelfTopY); }
   if (t === 'apple' || t === 'berry') for (let l = 0; l < 3; l++) { if (this.laneUsed(l, it) + LANELEN[t] > L.laneLen + 1e-6) continue; add('lane', l, L.laneX[l], 0.9, -0.09, 0.84); }
-  if (t === 'bread') add('bin', 0, L.bin.x, L.bin.y + 0.2, L.bin.z, L.bin.y);
+  if (t === 'bread') add('bin', 0, L.bin.x, L.bin.y + 0.23, L.bin.z, L.bin.y);
   if (t !== 'bread') { const q = SLOT.crate[it.id]; add('crate', 0, L.crate.x + q[0], L.crate.y + q[1] + BASE[t], L.crate.z + q[2], L.crate.y + q[1]); }
   if (S.basket === 'stand' && S.phase === 'open' && S.intro && !this.carrying) { const q = SLOT.basket[it.id]; add('basket', 0, this.basketPos.x + q[0] * 0.5, this.basketPos.y + 0.12, this.basketPos.z + q[2] * 0.5, this.basketPos.y); }
   c.sort((a, b) => a.d - b.d);
@@ -291,7 +291,6 @@ P.releaseBody = function (it) {
 };
 P.parkToTray = function (it) {
   this.bodyPose(it, it.pos, it.q); this.dropBody(it); it.st.loc = 'tray'; it.zOff = 0;
-  if (this.trayAt !== 'bag') { this.trayAt = 'bag'; this.trayPos.copy(L.trayBag); }
   this.tweenTo(it, 0.3, 0.05, () => { this.sound.koton(it.type, 0.8); this.save(); });
 };
 P.afterBagStep = function () {

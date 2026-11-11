@@ -1,6 +1,6 @@
 {
- "pass": 21,
- "fail": 1,
+ "pass": 22,
+ "fail": 0,
  "checks": [
   {
    "name": "保存拒否(setItem が例外): メモリで継続して遊べる",
@@ -165,14 +165,14 @@
   },
   {
    "name": "WebGL 生成失敗: 埋め込み静止画の代替画面を表示 (エラーなし)",
-   "pass": false,
+   "pass": true,
    "detail": {
     "failed": true,
     "fb": "block",
     "canvas": "none",
-    "w": 1,
-    "h": 1,
-    "src": "data:image/gif;base64,",
+    "w": 560,
+    "h": 806,
+    "src": "data:image/jpeg;base64",
     "errors": [],
     "requests": 1
    }
@@ -182,8 +182,8 @@
    "pass": true,
    "detail": {
     "frames": [
-     61,
-     62
+     29,
+     32
     ],
     "errors": []
    }
