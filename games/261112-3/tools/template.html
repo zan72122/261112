@@ -18,6 +18,7 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#
 padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 
 #contact{position:fixed;left:0;top:0;width:76px;height:76px;box-sizing:border-box;border:4px solid #fff2cf;border-radius:50%;background:rgba(255,203,112,.3);box-shadow:0 0 18px rgba(255,190,85,.65);transform:translate(-50%,-50%);pointer-events:none;opacity:0;z-index:2}
+#contact[data-released]{width:104px;height:104px;border-color:#e7ffce;background:rgba(178,234,119,.28)}
 #contact[data-held]{width:90px;height:90px;background:rgba(255,203,112,.48)}
 </style>
 </head>
@@ -39,12 +40,12 @@ __BUNDLE__
   const place = e => { mark.style.left = e.clientX + 'px'; mark.style.top = e.clientY + 'px'; };
   const release = e => {
     if (e.pointerId !== finger) return;
-    finger = null; mark.removeAttribute('data-held');
+    finger = null; mark.removeAttribute('data-held'); mark.setAttribute('data-released', '');
     clearTimeout(timer); timer = setTimeout(() => { mark.style.opacity = '0'; }, 3000);
   };
   document.addEventListener('pointerdown', e => {
     if (finger !== null) return;
-    finger = e.pointerId; clearTimeout(timer); place(e);
+    finger = e.pointerId; clearTimeout(timer); mark.removeAttribute('data-released'); place(e);
     mark.setAttribute('data-held', ''); mark.style.opacity = '1';
   }, true);
   document.addEventListener('pointermove', e => { if (e.pointerId === finger) place(e); }, true);

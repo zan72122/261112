@@ -14,18 +14,18 @@ function boot() {
   const fail = () => { fb.style.display = 'block'; canvas.style.display = 'none'; dbg.failed = true; };
   let gl = null;
   try {
-    const attrs = { antialias: q.get('aa') !== '0' && q.get('low') !== '1', alpha: false, stencil: false, powerPreference: 'high-performance' };
+    const attrs = { antialias: q.get('aa') !== '0' && q.get('low') !== '1', alpha: false, stencil: false, powerPreference: 'default' };
     gl = canvas.getContext('webgl2', attrs);
   } catch (e) { gl = null; }
-  if (!gl) { fail(); return; }
+  // Keep the same playable scene when GPU rendering is unavailable.
   let renderer;
-  try { renderer = new THREE.WebGLRenderer({ canvas, context: gl, antialias: true }); } catch (e) { fail(); return; }
+  try { renderer = gl ? new THREE.WebGLRenderer({ canvas, context: gl, antialias: true }) : new window.StoreCanvasRenderer(canvas); } catch (e) { fail(); return; }
   let low = q.get('low') === '1' || (q.get('low') !== '0' && (navigator.hardwareConcurrency || 4) <= 2);
   renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.localClippingEnabled = true;
   const scene = new THREE.Scene(); scene.background = new THREE.Color(0xdfe7ee);
   const camera = new THREE.PerspectiveCamera(45, 1, 0.08, 120); scene.add(camera);
-  const makeEnv = () => { const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(buildEnvScene(), 0.03).texture; pm.dispose(); };
+  const makeEnv = () => { if (!gl) return; const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(buildEnvScene(), 0.03).texture; pm.dispose(); };
   makeEnv(); scene.environmentIntensity = 0.32;
   // 朝の日ざし (通り側から差し込む)
   const sun = new THREE.DirectionalLight(0xfff0d8, 7.5); const sdir = new THREE.Vector3(0.09, -0.46, 0.865).normalize();
@@ -144,7 +144,7 @@ function boot() {
     custHand: () => { const v = new THREE.Vector3(); game.grip(game.cust.P, 0, v); return { x: +(v.x - L.rack.x).toFixed(3), y: +(v.y - L.counterY).toFixed(3), z: +v.z.toFixed(3), bow: +game.cust.P.bow.toFixed(3), lean: +game.cust.P.lean.toFixed(3), support: !!game.cust.support, arm1: !!game.cust.P.armT[1] }; },
     cardScreen: () => { const v = new THREE.Vector3(); game.card.getWorldPosition(v); return Object.assign(scr(v), { visible: game.card.visible }); },
     tris: () => renderer.info.render.triangles, calls: () => renderer.info.render.calls,
-    bench: (n) => { const t0 = performance.now(); for (let i = 0; i < n; i++) { renderer.shadowMap.needsUpdate = true; renderer.render(scene, camera); } gl.finish(); return (performance.now() - t0) / n; },
+    bench: (n) => { const t0 = performance.now(); for (let i = 0; i < n; i++) { renderer.shadowMap.needsUpdate = true; renderer.render(scene, camera); } if (gl) gl.finish(); return (performance.now() - t0) / n; },
     lights: (a, b) => { sun.castShadow = !!a; key.castShadow = !!b; },
   });
 }
