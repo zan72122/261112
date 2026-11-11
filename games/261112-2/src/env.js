@@ -134,13 +134,15 @@ export function buildEnv(scene) {
   const floorM = new THREE.Mesh(new THREE.PlaneGeometry(L.SIDE_X * 2, 1.6), new THREE.MeshStandardMaterial({ map: fst.map, normalMap: fst.normalMap, roughness: 0.5 }));
   floorM.rotation.x = -Math.PI / 2; floorM.position.set(0, L.FLOOR_Y, 0.5 + 0.8); floorM.receiveShadow = true; scene.add(floorM);
 
+  // バスマット
+  { const wv = makeWeave(33, 128, 24); wv.map.repeat.set(4, 3); wv.normalMap.repeat.set(4, 3); const mat = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.012, 0.4), new THREE.MeshStandardMaterial({ color: 0xcfd8cf, map: wv.map, normalMap: wv.normalMap, normalScale: new THREE.Vector2(1.2, 1.2), roughness: 0.95 })); mat.position.set(-0.1, L.FLOOR_Y + 0.006, 0.82); mat.rotation.y = 0.06; mat.receiveShadow = true; scene.add(mat); }
   // タイル壁
   const tiles = makeTiles(9, 8, 8, 128, [169, 192, 181], 0.05, '#d6d4c8');
-  const tileMat = new THREE.MeshPhysicalMaterial({ map: tiles.map, normalMap: tiles.normalMap, roughnessMap: tiles.roughnessMap, roughness: 1, normalScale: new THREE.Vector2(0.9, 0.9), clearcoat: 0.6, clearcoatRoughness: 0.08, envMapIntensity: 0.85 });
+  const tileMat = new THREE.MeshPhysicalMaterial({ map: tiles.map, normalMap: tiles.normalMap, roughnessMap: tiles.roughnessMap, roughness: 1, normalScale: new THREE.Vector2(0.55, 0.55), clearcoat: 0.45, clearcoatRoughness: 0.16, envMapIntensity: 0.85 });
   env.mats.tile = tileMat;
   const TS = 1 / 0.8;
   const wallPiece = (w, h, x, y, z, ry, axes) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), tileMat); m.position.set(x, y, z); m.rotation.y = ry; m.receiveShadow = true; scene.add(m); worldUV(m.geometry, m, TS, axes); return m; };
-  const WX0 = -0.34, WX1 = 0.78, WY0 = 0.6, WY1 = 1.3, TOP = 1.7, REC = 0.09;
+  const WX0 = -0.34, WX1 = 0.78, WY0 = 0.6, WY1 = 1.3, TOP = 2.6, REC = 0.09;
   wallPiece(L.SIDE_X * 2, WY0, 0, WY0 / 2, L.WALL_Z, 0, ['x', 'y']);
   wallPiece(L.SIDE_X * 2, TOP - WY1, 0, (TOP + WY1) / 2, L.WALL_Z, 0, ['x', 'y']);
   wallPiece(WX0 + L.SIDE_X, WY1 - WY0, (WX0 - L.SIDE_X) / 2, (WY0 + WY1) / 2, L.WALL_Z, 0, ['x', 'y']);
@@ -190,24 +192,24 @@ export function buildEnv(scene) {
   const bask = new THREE.Mesh(lathe([[0.0, 0.004], [0.17, 0.004], [0.192, 0.012], [0.204, 0.04], [0.21, 0.066], [0.213, 0.074], [0.209, 0.079], [0.203, 0.076], [0.197, 0.06], [0.19, 0.03]], 64),
     new THREE.MeshStandardMaterial({ map: wick.map, normalMap: wick.normalMap, normalScale: new THREE.Vector2(1.4, 1.4), roughness: 0.62, side: THREE.DoubleSide }));
   bask.scale.set(B.rx / 0.2, 1, B.rz / 0.2); bask.position.set(B.x, 0, B.z); bask.castShadow = true; bask.receiveShadow = true; scene.add(bask);
-  const weave = makeWeave(12, 256, 48); weave.map.repeat.set(5, 5); weave.normalMap.repeat.set(5, 5);
+  const weave = makeWeave(12, 256, 48); weave.map.repeat.set(3.2, 3.2); weave.normalMap.repeat.set(3.2, 3.2);
   const sheetGeo = new THREE.BufferGeometry(); { const RS = 14, AS = 56; const pos = [], uv = [], idx = [];
     for (let j = 0; j <= RS; j++) for (let i = 0; i <= AS; i++) { const rr = j / RS, a = (i / AS) * Math.PI * 2; const x = Math.cos(a) * rr * 0.98 * B.rx, z = Math.sin(a) * rr * 0.98 * B.rz;
-      const fold = Math.sin(a * 5 + rr * 3) * 0.004 * rr + Math.sin(a * 9 + 1.3) * 0.002 * rr * rr;
-      const y = 0.034 + 0.03 * Math.pow(rr, 2.2) + fold + (rr > 0.93 ? (rr - 0.93) * 0.2 : 0); pos.push(x, y, z); uv.push(x / 0.5 + 0.5, z / 0.5 + 0.5); }
-    for (let j = 0; j < RS; j++) for (let i = 0; i < AS; i++) { const p0 = j * (AS + 1) + i, p1 = p0 + 1, p2 = p0 + AS + 1, p3 = p2 + 1; idx.push(p0, p2, p1, p1, p2, p3); }
+      const fold = Math.sin(a * 5 + rr * 4) * 0.007 * rr + Math.sin(a * 11 + 1.3 + rr * 9) * 0.004 * rr * rr + Math.sin(a * 3 - rr * 6) * 0.004 * Math.sin(rr * 3.1);
+      const y = 0.04 + 0.034 * Math.pow(rr, 2.0) + fold + (rr > 0.9 ? Math.sin((rr - 0.9) * 31.4) * 0.012 : 0); pos.push(x, y, z); uv.push(x / 0.54 + 0.5, z / 0.54 + 0.5); }
+    for (let j = 0; j < RS; j++) for (let i = 0; i < AS; i++) { const p0 = j * (AS + 1) + i, p1 = p0 + 1, p2 = p0 + AS + 1, p3 = p2 + 1; idx.push(p0, p1, p2, p1, p3, p2); }
     sheetGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); sheetGeo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); sheetGeo.setIndex(idx); sheetGeo.computeVertexNormals(); }
   const stainData = new Uint8Array(64 * 64); const stainTex = new THREE.DataTexture(stainData, 64, 64, THREE.RedFormat); stainTex.magFilter = THREE.LinearFilter; stainTex.minFilter = THREE.LinearFilter; stainTex.needsUpdate = true;
-  const sheetMat = new THREE.MeshStandardMaterial({ color: 0xf1e9da, map: weave.map, normalMap: weave.normalMap, normalScale: new THREE.Vector2(0.8, 0.8), roughness: 0.92 });
+  const sheetMat = new THREE.MeshStandardMaterial({ color: 0xe9dcc3, map: weave.map, normalMap: weave.normalMap, normalScale: new THREE.Vector2(1.3, 1.3), roughness: 0.92 });
   sheetMat.onBeforeCompile = (s) => {
     s.uniforms.uStain = { value: stainTex };
-    s.vertexShader = s.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 vSt;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvSt = vec2(position.x / 0.5 + 0.5, position.z / 0.5 + 0.5);');
+    s.vertexShader = s.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 vSt;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvSt = vec2(position.x / 0.54 + 0.5, position.z / 0.54 + 0.5);');
     s.fragmentShader = s.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec2 vSt; uniform sampler2D uStain;')
       .replace('#include <map_fragment>', '#include <map_fragment>\nfloat stn = smoothstep(0.02, 0.5, texture2D(uStain, vSt).r); diffuseColor.rgb *= mix(vec3(1.0), vec3(0.6, 0.65, 0.7), stn);')
       .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.55, stn);');
   };
   const sheet = new THREE.Mesh(sheetGeo, sheetMat); sheet.position.set(B.x, 0, B.z); sheet.receiveShadow = true; scene.add(sheet);
-  env.stain = { data: stainData, tex: stainTex, size: 64, span: 0.5 };
+  env.stain = { data: stainData, tex: stainTex, size: 64, span: 0.54 };
 
   // はなまるカード(壁に貼った無地の紙)
   const card = makeCard(); const cm = new THREE.Mesh(new THREE.PlaneGeometry(0.135, 0.135), new THREE.MeshStandardMaterial({ map: card.tex, roughness: 0.85 }));
@@ -215,6 +217,16 @@ export function buildEnv(scene) {
   const tape = new THREE.Mesh(new THREE.PlaneGeometry(0.045, 0.016), new THREE.MeshStandardMaterial({ color: 0xe8dcae, roughness: 0.6, transparent: true, opacity: 0.86 })); tape.position.set(B.x + 0.023, 0.467, L.WALL_Z + 0.0052); tape.rotation.z = 0.06; scene.add(tape);
   env.card = card; env.cardMesh = cm;
 
+  // 壁ぎわや物の下の、やわらかい陰り
+  { const c = document.createElement('canvas'); c.width = 8; c.height = 64; const x = c.getContext('2d'); const g = x.createLinearGradient(0, 0, 0, 64); g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.35, 'rgba(0,0,0,0.42)'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, 8, 64);
+    const t = new THREE.CanvasTexture(c); const m = new THREE.MeshBasicMaterial({ map: t, transparent: true, opacity: 0.3, depthWrite: false, color: 0x2a2018 });
+    const strip = (w, d, px, pz, ry) => { const q = new THREE.Mesh(new THREE.PlaneGeometry(w, d), m); q.rotation.set(-Math.PI / 2, 0, ry); q.position.set(px, 0.0012, pz); q.renderOrder = 1; scene.add(q); };
+    strip(L.SIDE_X * 2, 0.11, 0, L.WALL_Z + 0.055, 0);
+    const wq = new THREE.Mesh(new THREE.PlaneGeometry(L.SIDE_X * 2, 0.09), m); wq.rotation.x = Math.PI; wq.position.set(0, 0.045, L.WALL_Z + 0.0015); scene.add(wq);
+    const c2 = document.createElement('canvas'); c2.width = c2.height = 64; const x2 = c2.getContext('2d'); const g2 = x2.createRadialGradient(32, 32, 6, 32, 32, 32); g2.addColorStop(0, 'rgba(0,0,0,1)'); g2.addColorStop(0.55, 'rgba(0,0,0,0.6)'); g2.addColorStop(1, 'rgba(0,0,0,0)'); x2.fillStyle = g2; x2.fillRect(0, 0, 64, 64);
+    const m2 = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c2), transparent: true, opacity: 0.34, depthWrite: false, color: 0x2a2018 });
+    const blob = (px, pz, sx, sz) => { const q = new THREE.Mesh(new THREE.PlaneGeometry(sx, sz), m2); q.rotation.x = -Math.PI / 2; q.position.set(px, 0.0014, pz); q.renderOrder = 1; scene.add(q); };
+    blob(L.BED.x, L.BED.z, L.BED.rx * 2.5, L.BED.rz * 2.6); blob(-0.36, -0.75, 0.11, 0.11); blob(-0.27, -0.78, 0.12, 0.12); blob(-0.7, -0.52, 0.17, 0.13); blob(L.FAUCET.x, L.FAUCET.z, 0.14, 0.14); }
   // 生活感: ポンプボトルと石けん
   const amber = new THREE.MeshPhysicalMaterial({ color: 0x6b3a14, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.05 });
   const b1 = new THREE.Mesh(lathe([[0, 0], [0.03, 0], [0.033, 0.004], [0.033, 0.105], [0.028, 0.122], [0.013, 0.13], [0.013, 0.145], [0, 0.145]], 32), amber); b1.position.set(-0.36, 0, -0.75); b1.castShadow = true; scene.add(b1);

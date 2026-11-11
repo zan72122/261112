@@ -23,7 +23,7 @@ function hook(mat, U, opt = {}) {
       .replace('#include <beginnormal_vertex>', '#include <beginnormal_vertex>\nvRestN = objectNormal; objectNormal = dkDir(objectNormal);')
       .replace('#include <begin_vertex>', `#include <begin_vertex>
 vRest = position; vWet = dot(aPart, uWet); transformed = dkPos(transformed);
-${opt.shell ? 'float fl = uFurLen * uShell * (1.0 - 0.74 * vWet); transformed += dkDir(normal) * fl; transformed.y -= fl * uShell * 0.45;' : ''}`);
+${opt.shell ? 'float fl = uFurLen * uShell * (1.0 - 0.5 * vWet); transformed += dkDir(normal) * fl; transformed.y -= fl * uShell * (0.45 + 0.5 * vWet);' : ''}`);
     if (opt.depth) return;
     let fs = sh.fragmentShader.replace('#include <common>', `#include <common>
 varying float vWet; varying vec3 vRest; varying vec3 vRestN; uniform float uAxisY; uniform vec2 uXR; uniform sampler2D uFurTex; uniform float uFurScale; uniform float uShell; uniform vec3 uWetTint;`);
@@ -37,10 +37,10 @@ vec2 duckUv = vec2(fwidth(dua) <= fwidth(dub) ? dua : dub, clamp((vRest.x - uXR.
     }
     fs = fs.replace('#include <color_fragment>', `#include <color_fragment>
 ${opt.shell ? `{ vec3 an = abs(vRestN); vec2 fu = (an.y > an.x && an.y > an.z) ? vRest.xz : (an.x > an.z ? vRest.zy : vRest.xy);
-  vec4 fnz = texture2D(uFurTex, fu * uFurScale); float strand = mix(fnz.r, fnz.g * 0.9 + fnz.r * 0.1, vWet * 0.85);
+  vec4 fnz = texture2D(uFurTex, fu * uFurScale); float strand = mix(fnz.r, fnz.g * 0.6 + fnz.r * 0.4, vWet * 0.7);
   if (strand < uShell * 0.96) discard; diffuseColor.rgb *= mix(0.6, 1.06, uShell); }` : ''}
 diffuseColor.rgb *= mix(vec3(1.0), uWetTint, vWet);`)
-      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.36, vWet * 0.85);');
+      .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, ${opt.shell ? '0.7' : '0.5'}, vWet * 0.8);`);
     sh.fragmentShader = fs;
   };
   mat.customProgramCacheKey = () => 'dk' + (opt.shell ? 'S' : 'B') + (opt.cyl ? 'C' : '') + (opt.depth ? 'D' : '');
@@ -54,13 +54,13 @@ const PAL = {
   },
   kid: {
     base: (x, y, z, S) => { const b = smooth(0.005, 0.075, y); return [0.98, 0.86 - 0.1 * b, 0.42 - 0.24 * b]; },
-    bill: { bill: [0.86, 0.47, 0.3], mouth: [0.36, 0.14, 0.08], nail: [0.95, 0.72, 0.6] }, leg: 0xd9773a, wetTint: new THREE.Color(0.7, 0.62, 0.5),
+    bill: { bill: [0.86, 0.47, 0.3], mouth: [0.36, 0.14, 0.08], nail: [0.95, 0.72, 0.6] }, leg: 0xd9773a, wetTint: new THREE.Color(0.9, 0.8, 0.56),
   },
 };
 
 export function makeDuckShared(low) {
   return { furTex: makeFurNoise(41, 256), dropGeo: (() => { const g = new THREE.SphereGeometry(1, 7, 5); g.scale(1, 0.62, 1); return g; })(),
-    dropMat: new THREE.MeshStandardMaterial({ color: 0xc9d6dc, roughness: 0.02, transparent: true, opacity: 0.2, envMapIntensity: 5.5, depthWrite: false }), low };
+    dropMat: new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.3, roughness: 0.03, transparent: true, opacity: 0.3, envMapIntensity: 3.0, depthWrite: false }), low };
 }
 
 export class Duck {
@@ -72,7 +72,7 @@ export class Duck {
     this.patter = 0; this.wasFloating = false; this.groundedT = 0; this.shake = 0; this.other = null; this.lastQuack = -9; this.legPh = r() * 6; this.bedT = 0; this.dropT = 9;
     // 個体の模様
     let marks = [], fmarks = [];
-    if (kind === 'kid') marks = [{ p: [0.06, 0.155, 0.004], r: [0.03, 0.026, 0.026], c: [0.5, 0.36, 0.14], a: 0.8 }, { p: [-0.035, 0.085, -0.012], r: [0.035, 0.022, 0.03], c: [0.55, 0.4, 0.15], a: 0.7 }, { p: [0.075, 0.13, 0.03], r: [0.012, 0.008, 0.008], c: [0.45, 0.32, 0.12], a: 0.5 }];
+    if (kind === 'kid') marks = [{ p: [0.058, 0.156, 0.003], r: [0.026, 0.02, 0.022], c: [0.62, 0.45, 0.16], a: 0.6 }, { p: [-0.05, 0.08, -0.008], r: [0.026, 0.016, 0.02], c: [0.7, 0.52, 0.18], a: 0.42 }, { p: [0.076, 0.13, 0.03], r: [0.011, 0.007, 0.008], c: [0.55, 0.4, 0.14], a: 0.4 }];
     else fmarks = [{ u: 0.61, v: 0.4, ru: 0.06, rv: 0.13, dens: 0.75, col: (rr) => `rgb(${190 + rr() * 25 | 0},${160 + rr() * 22 | 0},${120 + rr() * 22 | 0})` }, { u: 0.44, v: 0.18, ru: 0.035, rv: 0.07, dens: 0.6, col: (rr) => `rgb(${170 + rr() * 30 | 0},${140 + rr() * 22 | 0},${105 + rr() * 22 | 0})` }];
     const tA = performance.now(); const built = buildDuckGeometry(S, seed, { base: P.base, marks }); const geo = (this.geo = built.geo); (G.prof = G.prof || {})[kind + 'Geo'] = performance.now() - tA; G.prof[kind + 'Verts'] = geo.attributes.position.count;
     const U = (this.U = { pose: { value: new THREE.Vector4() }, wet: { value: new THREE.Vector4() }, P1: { value: new THREE.Vector3(...S.P1) }, P2: { value: new THREE.Vector3(...S.P2) }, PT: { value: new THREE.Vector3(...S.PT) }, furLen: { value: S.furLen },
@@ -110,7 +110,7 @@ export class Duck {
     const pick = (cnt, test) => { const out = []; let guard = 0; while (out.length < cnt && guard++ < cnt * 400) { const i = (r() * n) | 0; if (!test(i)) continue; let p = 0, best = 0; for (let k = 0; k < 4; k++) if (part.getComponent(i, k) > best) { best = part.getComponent(i, k); p = k; } out.push({ p: new THREE.Vector3().fromBufferAttribute(pos, i), n: new THREE.Vector3().fromBufferAttribute(nrm, i), part: p, th: r(), s: 0.6 + r() * 0.8, rot: r() * 6.28 }); } return out; };
     const rigid = (i) => bend.getX(i) < 0.04 && bend.getZ(i) < 0.04, headV = (i) => bend.getY(i) > 0.97 && pos.getX(i) < S.eye[0] + 0.004;
     const dN = sh.low ? 60 : 110; this.dropsB = pick(kind === 'kid' ? dN * 0.6 : dN, (i) => rigid(i) && nrm.getY(i) > -0.55); this.dropsH = pick(kind === 'kid' ? 14 : 22, (i) => headV(i) && nrm.getY(i) > -0.3);
-    const dsz = kind === 'kid' ? 0.0021 : 0.003;
+    const dsz = kind === 'kid' ? 0.0013 : 0.0024;
     this.dropMeshB = new THREE.InstancedMesh(sh.dropGeo, sh.dropMat, this.dropsB.length); this.dropMeshH = new THREE.InstancedMesh(sh.dropGeo, sh.dropMat, this.dropsH.length); this.dropMeshB.frustumCulled = this.dropMeshH.frustumCulled = false; this.tilt.add(this.dropMeshB); this.headG.add(this.dropMeshH); this.dropSize = dsz; this.wetShown = [-1, -1, -1, -1];
     // 泡: 頭の帽子・背・左右
     const fsz = kind === 'kid' ? 0.0085 : 0.013;
@@ -132,7 +132,7 @@ export class Duck {
     const S = this.S, W = this.G.water;
     if (this.mode === 'tub') { const g = ground(this.x, this.z); const st = g + S.legLen; const fl = W.level > g + 0.004 ? W.surfaceAt(this.x, this.z) - S.draft : -9; return Math.max(st, fl); }
     if (this.mode === 'deck') return 0.006 + S.legLen;
-    if (this.mode === 'bed') { const dx = (this.x - L.BED.x) / L.BED.rx, dz = (this.z - L.BED.z) / L.BED.rz; return 0.036 + 0.03 * Math.pow(Math.min(1, Math.sqrt(dx * dx + dz * dz)), 2.2) - S.draft * 0.25; }
+    if (this.mode === 'bed') { const dx = (this.x - L.BED.x) / L.BED.rx, dz = (this.z - L.BED.z) / L.BED.rz; return 0.042 + 0.034 * Math.pow(Math.min(1, Math.sqrt(dx * dx + dz * dz)), 2.0) - S.draft * 0.3; }
     return this.y;
   }
   grab() { this.held = true; this.trail = null; this.mode = 'held'; this.walk = null; this.asleep = 0; this.sleepy = false; this.idle = 0; this.G.audio.voice(this.kind, 0.8); }
@@ -175,7 +175,8 @@ export class Duck {
     if (this.dropT > 0.6) this._splashed = false; if (this.dropT < 0.05) this._splashed = false;
     if (this.floating) {
       this.groundedT = 0; this.wasFloating = true; W.flowAt(this.x, this.z, this._fl); W.slopeAt(this.x, this.z, this._sl);
-      const k = Math.min(1, dt * (this.kind === 'kid' ? 3.2 : 1.7)); this.vx += (this._fl[0] * 0.92 - this._sl[0] * 0.35 - this.vx) * k; this.vz += (this._fl[1] * 0.92 - this._sl[1] * 0.35 - this.vz) * k;
+      const k = Math.min(1, dt * (this.kind === 'kid' ? 3.2 : 1.7)); const fs = Math.hypot(this._fl[0], this._fl[1]); const follow = 0.92 * smooth(0.025, 0.11, fs); // 弱い流れには足で踏んばる
+      this.vx += (this._fl[0] * follow - this._sl[0] * 0.3 - this.vx) * k; this.vz += (this._fl[1] * follow - this._sl[1] * 0.3 - this.vz) * k;
       // 子は離れすぎたらゆっくり寄る(置いた関係はすぐ崩さない)
       if (this.kind === 'kid' && o && o.mode === 'tub' && this.idle > 14 && o.idle > 6) { const dx = o.x - this.x, dz = o.z - this.z, d = Math.hypot(dx, dz); if (d > 0.46) { this.vx += dx / d * 0.012 * dt * 8; this.vz += dz / d * 0.012 * dt * 8; this.heading += angDiff(this.heading, Math.atan2(dz, dx)) * dt * 0.8; this.paddle = 1; } }
       this.x += this.vx * dt; this.z += this.vz * dt;
@@ -215,8 +216,10 @@ export class Duck {
   updateBed(dt, time) {
     const S = this.S, o = this.other, B = L.BED; this.floating = false; this.subm = -1; this.bedT += dt; this.roll = damp(this.roll, 0, 5, dt); this.pitch = damp(this.pitch, 0, 5, dt);
     // 寝床の中へ収め、二羽なら寄り添う
-    const lim = Math.max(0.12, 1 - (S.len * 1.05) / B.rx); let dx = (this.x - B.x) / B.rx, dz = (this.z - B.z) / B.rz; const rr = Math.hypot(dx, dz); if (rr > lim) { dx *= lim / rr; dz *= lim / rr; this.x = damp(this.x, B.x + dx * B.rx, 8, dt); this.z = damp(this.z, B.z + dz * B.rz, 8, dt); }
-    if (o && o.mode === 'bed') { const ex = this.x - o.x, ez = this.z - o.z; const d = Math.hypot(ex, ez) || 0.001; const want = (S.wid + o.S.wid) * 1.02; const k = this.kind === 'kid' ? 0.8 : 0.2; const mv = (want - d) * k * Math.min(1, dt * (d < want ? 8 : 1.4)); this.x += ex / d * mv; this.z += ez / d * mv; }
+    const lim = this.kind === 'kid' ? 0.78 : Math.max(0.1, 1 - (S.len * 1.12) / B.rx); let dx = (this.x - B.x) / B.rx, dz = (this.z - B.z) / B.rz; const rr = Math.hypot(dx, dz); if (rr > lim) { dx *= lim / rr; dz *= lim / rr; this.x = damp(this.x, B.x + dx * B.rx, 8, dt); this.z = damp(this.z, B.z + dz * B.rz, 8, dt); }
+    if (o && o.mode === 'bed' && this.kind === 'kid') { // 子は親の胴の外、すぐ脇へ寄り添う
+      const c = Math.cos(o.heading), s = Math.sin(o.heading); const ex = this.x - o.x, ez = this.z - o.z; let lx = ex * c + ez * s, lz = -ex * s + ez * c; const a = o.S.len * 0.95 + S.wid, b = o.S.wid + S.wid * 0.9; const e = Math.sqrt((lx * lx) / (a * a) + (lz * lz) / (b * b)) || 0.001;
+      if (Math.abs(lz) < 0.004 && e < 1) lz = (Math.cos(o.heading) > 0 ? 1 : -1) * 0.01; const k = Math.min(1, dt * (e < 1 ? 7 : 1.2)); const tx = lx / e, tz = lz / e; lx += (tx - lx) * k; lz += (tz - lz) * k; this.x = o.x + lx * c - lz * s; this.z = o.z + lx * s + lz * c; }
     this.y = damp(this.y, this.restY(), 8, dt);
     // 濡れた側が触れた布へ水が移る
     const st = this.G.env.stain; const c = Math.cos(this.heading), s = Math.sin(this.heading);
@@ -245,7 +248,7 @@ export class Duck {
     this.lookT -= dt; if (this.lookT < 0) { this.lookT = 1.6 + this.rand() * 3; tp.yaw = (this.rand() - 0.5) * 1.1; if (G.lookAt && this.kind === 'kid' && this.rand() < 0.75) { const a = Math.atan2(G.lookAt.z - this.z, G.lookAt.x - this.x); tp.yaw = clamp(-angDiff(this.heading, a), -1.2, 1.2); } }
     let neck = 0, head = 0, yaw = tp.yaw;
     const showered = time - this.showerT < 2.6;
-    if (this.asleep > 0.02) { neck = (this.kind === 'kid' ? 0.55 : 0.85) * this.asleep; head = 0.7 * this.asleep; yaw = lerp(yaw, -Math.sign(Math.cos(this.heading) || 1) * 0.95, this.asleep); }
+    if (this.asleep > 0.02) { neck = (this.kind === 'kid' ? 0.3 : 0.38) * this.asleep; head = 0.45 * this.asleep; yaw = lerp(yaw, -Math.sign(Math.cos(this.heading) || 1) * 1.45, this.asleep); }
     else if (showered) { neck = this.kind === 'parent' ? 0.95 : 0.6; head = 0.25; yaw *= 0.2; }
     else if (this.held) { neck = -0.12; head = -0.1; }
     else if (this.floating && this.kind === 'parent') { this.dabT -= dt; if (this.dabT < 0) { this.dab = 1.5; this.dabT = 7 + this.rand() * 6; } }
@@ -285,6 +288,6 @@ export class Duck {
   refreshFoam() {
     let ch = false; for (let k = 0; k < 4; k++) if (Math.abs(this.foam[k] - this.foamShown[k]) > 0.008) ch = true; if (!ch) return; for (let k = 0; k < 4; k++) this.foamShown[k] = this.foam[k];
     const m = this._m2, q = this._q, v = this._v, s = this._s;
-    for (const [arr, mesh] of [[this.foamB, this.foamMeshB], [this.foamH, this.foamMeshH]]) { let n = 0; for (const d of arr) { const f = this.foam[d.part]; const k = sat((f - d.th * 0.55) / 0.3); if (k <= 0.03) continue; const sz = this.foamSize * (0.7 + d.s * 0.5) * (0.45 + 0.55 * k) * (d.part === 0 ? 1.15 : 1); q.setFromUnitVectors(this._up, d.n); v.copy(d.p).addScaledVector(d.n, sz * 0.35); s.set(sz * 1.15, sz * 0.75, sz * 1.15); m.compose(v, q, s); mesh.setMatrixAt(n++, m); } mesh.count = n; mesh.instanceMatrix.needsUpdate = true; }
+    for (const [arr, mesh] of [[this.foamB, this.foamMeshB], [this.foamH, this.foamMeshH]]) { let n = 0; for (const d of arr) { const f = this.foam[d.part]; const k = sat((f - d.th * 0.55) / 0.3); if (k <= 0.03) continue; const sz = this.foamSize * (0.7 + d.s * 0.5) * (0.45 + 0.55 * k) * (d.part === 0 ? 1.15 : 1); q.setFromUnitVectors(this._up, d.n); v.copy(d.p).addScaledVector(d.n, sz * 0.35); s.set(sz * 1.2, sz * 0.55, sz * 1.2); m.compose(v, q, s); mesh.setMatrixAt(n++, m); } mesh.count = n; mesh.instanceMatrix.needsUpdate = true; }
   }
 }

@@ -21,13 +21,15 @@ function fallback() { const f = document.getElementById('fb'); if (window.__FALL
 
 function boot() {
   let renderer;
+  // 先に自前で確かめる(描画できない端末では静止画へ)
+  try { const probe = document.createElement('canvas'); const gl = probe.getContext('webgl2') || probe.getContext('webgl'); if (!gl) return fallback(); const ext = gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); } catch (e) { return fallback(); }
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', alpha: false, stencil: false }); } catch (e) { return fallback(); }
   if (!renderer || !renderer.getContext() || (renderer.getContext().isContextLost && renderer.getContext().isContextLost())) return fallback();
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.02; renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.shadowMap.enabled = !Q.get('lite'); renderer.shadowMap.type = THREE.PCFShadowMap;
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
   const scene = new THREE.Scene(); scene.background = new THREE.Color(0xe6e1d8);
   const camera = new THREE.PerspectiveCamera(34, 1, 0.05, 12); const rig = new CameraRig(camera);
-  G.renderer = renderer; G.scene = scene; G.camera = camera; G.rig = rig; G.low = Q.get('q') === 'low'; G.lite = !!Q.get('lite'); // lite: 検証を速く回すための描画省略(産毛の層と影)。状態や操作の経路は同じ
+  G.renderer = renderer; G.scene = scene; G.camera = camera; G.rig = rig; G.low = Q.get('q') === 'low'; G.lite = !!Q.get('lite'); // lite: 検証を速く回すための描画省略(産毛の層だけ)。状態や操作の経路は同じ
   const env = (G.env = buildEnv(scene));
   // 窓からの自然光と、部屋の照り返し
   const key = new THREE.DirectionalLight(0xfff0de, 3.3); key.position.set(0.75, 1.9, -1.35); key.target.position.set(0, 0, -0.1); scene.add(key, key.target);
@@ -46,7 +48,7 @@ function boot() {
   const parent = new Duck('parent', G, 101), kid = new Duck('kid', G, 202); parent.other = kid; kid.other = parent; G.ducks = [parent, kid];
   const towel = (G.towel = new Towel(G)); const tools = (G.tools = new Tools(G));
   const stain = env.stain;
-  G.stainAdd = (wx, wz, rad, amt) => { const n = stain.size; const cu = ((wx - L.BED.x) / 0.5 + 0.5) * n, cv = ((wz - L.BED.z) / 0.5 + 0.5) * n; const rr = (rad / 0.5) * n; const d = stain.data;
+  G.stainAdd = (wx, wz, rad, amt) => { const n = stain.size; const cu = ((wx - L.BED.x) / 0.54 + 0.5) * n, cv = ((wz - L.BED.z) / 0.54 + 0.5) * n; const rr = (rad / 0.54) * n; const d = stain.data;
     for (let j = Math.max(0, Math.floor(cv - rr)); j <= Math.min(n - 1, Math.ceil(cv + rr)); j++) for (let i = Math.max(0, Math.floor(cu - rr)); i <= Math.min(n - 1, Math.ceil(cu + rr)); i++) { const q = ((i - cu) * (i - cu) + (j - cv) * (j - cv)) / (rr * rr); if (q < 1) { const k = j * n + i; const add = amt * 255 * (1 - q) * 1.6; d[k] = Math.min(255, d[k] + Math.floor(add) + (Math.random() < add - Math.floor(add) ? 1 : 0)); } } stain.tex.needsUpdate = true; };
   G.stainSum = () => { let s = 0; for (let i = 0; i < stain.data.length; i++) s += stain.data[i]; return s / 255; };
   const game = (G.game = new Game(G));
@@ -131,8 +133,8 @@ function boot() {
     foamList() { const o = []; for (let k = 0; k < water.fn; k++) if (!water.ftmp[k]) o.push([+water.fx[k].toFixed(3), +water.fz[k].toFixed(3)]); return o; },
     flowAt(x, z) { const o = [0, 0]; water.flowAt(x, z, o); return o; }, waveAt(x, z) { return water.hAt(x, z); },
     towelStats() { let mx = 0; const w = towel.wet; let left = 0, right = 0; for (let i = 0; i < w.length; i++) { mx = Math.max(mx, w[i]); if (i % 15 < 7) left += w[i]; else if (i % 15 > 7) right += w[i]; } return { max: mx, left, right, mean: towel.wetMean() }; },
-    stainCentroid() { const n = stain.size; let sx = 0, sz = 0, s = 0; for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) { const v = stain.data[j * n + i]; s += v; sx += v * i; sz += v * j; } return s ? { x: L.BED.x + (sx / s / n - 0.5) * 0.5, z: L.BED.z + (sz / s / n - 0.5) * 0.5, sum: s / 255 } : null; },
-    setQuality(o) { perf.mode = 'lock'; if (o.lite !== undefined && o.lite !== G.lite) { G.lite = o.lite; renderer.shadowMap.enabled = !o.lite; scene.traverse((m) => { if (m.material) m.material.needsUpdate = true; }); for (const d of G.ducks) d.setShells(G.low); } if (o.low !== undefined) setLow(o.low); if (o.scale) { perf.scale = o.scale; applyScale(); } },
+    stainCentroid() { const n = stain.size; let sx = 0, sz = 0, s = 0; for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) { const v = stain.data[j * n + i]; s += v; sx += v * i; sz += v * j; } return s ? { x: L.BED.x + (sx / s / n - 0.5) * 0.54, z: L.BED.z + (sz / s / n - 0.5) * 0.54, sum: s / 255 } : null; },
+    setQuality(o) { perf.mode = 'lock'; if (o.lite !== undefined && o.lite !== G.lite) { G.lite = o.lite; for (const d of G.ducks) d.setShells(G.low); } if (o.low !== undefined) setLow(o.low); if (o.scale) { perf.scale = o.scale; applyScale(); } },
     save() { return saveState(G); },
   };
 }

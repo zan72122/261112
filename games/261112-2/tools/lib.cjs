@@ -13,7 +13,7 @@ async function open(opts = {}) {
   page.on('pageerror', (e) => log.errors.push('pageerror: ' + e.message + '\n' + (e.stack || '')));
   page.on('request', (r) => { const u = r.url(); if (!u.startsWith('file://') && !u.startsWith('data:') && !u.startsWith('blob:')) log.requests.push(u); });
   if (opts.init) await page.addInitScript(opts.init);
-  const q = opts.q === undefined ? 'fresh=1&q=low&rs=0.3&lite=1&simcap=0.25' : opts.q;
+  const q = opts.q === undefined ? 'fresh=1&q=low&rs=0.3&lite=1&simcap=0.35' : opts.q;
   await page.goto((opts.url || FILE) + (q ? '?' + q : ''), { timeout: 120000 });
   if (!opts.noWait) await page.waitForFunction('window.__duckbath && window.__duckbath.ready', null, { timeout: 180000 });
   const cdp = await ctx.newCDPSession(page);
@@ -38,7 +38,12 @@ async function open(opts = {}) {
     async until(fn, timeout = 30000, every = 250) { const t0 = Date.now(); for (;;) { const s = await T.st(); if (fn(s)) return s; if (Date.now() - t0 > timeout) return null; await page.waitForTimeout(every); } },
     async settle(timeout = 8000) { return T.until((s) => !s.camMoving, timeout, 150); },
     // 高品質に切り替えて撮影し、検証用の軽い設定へ戻す
-    async shot(file, full = true) { if (full) { await page.evaluate(() => window.__duckbath.debug.setQuality({ low: false, lite: false, scale: 1 })); await page.waitForTimeout(opts.shotWait || 6000); } await page.screenshot({ path: file, timeout: 240000 }); if (full) { await page.evaluate(() => window.__duckbath.debug.setQuality({ low: true, lite: true, scale: 0.3 })); await page.waitForTimeout(300); } },
+    async shot(file, full = true) {
+      const frames = async (n) => { const f0 = await page.evaluate(() => window.__duckbath.frame); await page.waitForFunction((a) => window.__duckbath.frame >= a, f0 + n, { timeout: 300000, polling: 200 }); };
+      if (full) { await page.evaluate(() => window.__duckbath.debug.setQuality({ low: false, lite: false, scale: 1 })); await frames(5); }
+      await page.screenshot({ path: file, timeout: 300000 });
+      if (full) { await page.evaluate(() => window.__duckbath.debug.setQuality({ low: true, lite: true, scale: 0.3 })); await frames(2); }
+    },
     // ワールド座標の列を画面座標へ
     async w2s(pts) { return page.evaluate((a) => a.map((p) => { const s = window.__duckbath.debug.toScreen(p[0], p[1], p[2]); return [s.x, s.y]; }), pts); },
     // 水面をなぞる(ワールドxzの列)

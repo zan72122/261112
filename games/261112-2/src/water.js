@@ -42,17 +42,21 @@ export class Water {
     const geo = new THREE.PlaneGeometry(SX, SZ, NX - 1, NZ - 1); geo.rotateX(-Math.PI / 2);
     this.geo = geo; this.pos = geo.attributes.position; this.nrm = geo.attributes.normal; this.pos.setUsage(THREE.DynamicDrawUsage); this.nrm.setUsage(THREE.DynamicDrawUsage);
     const ripple = makeRipple(3, 256); ripple.repeat.set(5, 3); this.ripple = ripple;
-    this.matFull = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transmission: 1, roughness: 0.03, ior: 1.33, thickness: 0.09, attenuationColor: new THREE.Color(0.62, 0.88, 0.86), attenuationDistance: 0.55, normalMap: ripple, normalScale: new THREE.Vector2(0.05, 0.05), envMapIntensity: 1.15, specularIntensity: 1 });
+    this.matFull = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transmission: 1, roughness: 0.03, ior: 1.33, thickness: 0.09, attenuationColor: new THREE.Color(0.62, 0.88, 0.86), attenuationDistance: 0.42, normalMap: ripple, normalScale: new THREE.Vector2(0.1, 0.1), envMapIntensity: 1.5, specularIntensity: 1 });
     this.matLow = new THREE.MeshStandardMaterial({ color: 0xd3ecea, transparent: true, opacity: 0.42, roughness: 0.04, metalness: 0, normalMap: ripple, normalScale: new THREE.Vector2(0.05, 0.05), envMapIntensity: 1.6, depthWrite: false });
     this.mesh = new THREE.Mesh(geo, this.low ? this.matLow : this.matFull); this.mesh.renderOrder = 2; this.mesh.frustumCulled = false; scene.add(this.mesh);
     // 波/泡の影テクスチャ
     this.waveData = new Uint8Array(NX * NZ * 4); this.waveTex = new THREE.DataTexture(this.waveData, NX, NZ, THREE.RGBAFormat); this.waveTex.magFilter = THREE.LinearFilter; this.waveTex.minFilter = THREE.LinearFilter; this.waveTex.needsUpdate = true; waterU.uWaveTex.value = this.waveTex;
     // 泡の塊
-    const ig = new THREE.IcosahedronGeometry(1, this.low ? 1 : 2); const ip = ig.attributes.position; const nn = new Float32Array(ip.count * 3); const r = rng(8);
-    for (let i = 0; i < ip.count; i++) { const x = ip.getX(i), y = ip.getY(i), z = ip.getZ(i); const k = 1 + 0.16 * Math.sin(x * 7 + y * 5) * Math.cos(z * 6 + x * 3) + 0.08 * Math.sin(y * 13 + z * 11); ip.setXYZ(i, x * k, y * k, z * k); nn[i * 3] = x; nn[i * 3 + 1] = y; nn[i * 3 + 2] = z; }
-    ig.setAttribute('normal', new THREE.BufferAttribute(nn, 3));
-    const bub = makeBubbles(5, 256); bub.repeat.set(3, 2);
-    this.foamMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.42, normalMap: bub, normalScale: new THREE.Vector2(0.9, 0.9), emissive: 0xf0f6f8, emissiveIntensity: 0.16, envMapIntensity: 1.25 });
+    // 泡の塊: 大小の気泡が寄り集まった形
+    const parts = [[0, 0, 0, 1, 1], [0.62, 0.16, 0.2, 0.56, 0], [-0.5, 0.2, 0.42, 0.6, 0], [0.1, 0.2, -0.64, 0.58, 0], [-0.38, 0.24, -0.46, 0.5, 0], [0.46, 0.3, -0.36, 0.44, 0], [0.04, 0.6, 0.08, 0.5, 0], [-0.62, 0.1, -0.04, 0.46, 0], [0.3, 0.12, 0.66, 0.48, 0], [-0.1, 0.42, 0.5, 0.36, 0], [0.5, 0.48, 0.1, 0.33, 0]];
+    const P = [], NR = [], UV = [], I = []; let base = 0;
+    for (const pt of parts.slice(0, this.low ? 7 : 11)) { const g0 = new THREE.IcosahedronGeometry(1, pt[4] ? 2 : 1); const gi = g0.index ? g0 : (() => { g0.setIndex([...Array(g0.attributes.position.count).keys()]); return g0; })(); const pp = gi.attributes.position, uu = gi.attributes.uv;
+      for (let i = 0; i < pp.count; i++) { const x = pp.getX(i), y = pp.getY(i), z = pp.getZ(i); P.push(pt[0] + x * pt[3], pt[1] + y * pt[3], pt[2] + z * pt[3]); NR.push(x, y, z); UV.push(uu.getX(i) * pt[3] + pt[0], uu.getY(i) * pt[3] + pt[2]); }
+      const ix = gi.index.array; for (let i = 0; i < ix.length; i++) I.push(ix[i] + base); base += pp.count; g0.dispose(); }
+    const ig = new THREE.BufferGeometry(); ig.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); ig.setAttribute('normal', new THREE.Float32BufferAttribute(NR, 3)); ig.setAttribute("uv", new THREE.Float32BufferAttribute(UV, 2)); ig.setIndex(I);
+    const bub = makeBubbles(5, 256); bub.repeat.set(2.2, 2.2);
+    this.foamMat = new THREE.MeshStandardMaterial({ color: 0xf3f6f7, roughness: 0.36, normalMap: bub, normalScale: new THREE.Vector2(0.7, 0.7), emissive: 0xeef4f6, emissiveIntensity: 0.1, envMapIntensity: 1.15 });
     this.foamGeo = ig; this.bubTex = bub;
     this.foamMesh = new THREE.InstancedMesh(ig, this.foamMat, this.FCAP); this.foamMesh.frustumCulled = false; this.foamMesh.castShadow = false; this.foamMesh.count = 0; scene.add(this.foamMesh);
     // 縁に乗る水の膜
@@ -258,7 +262,7 @@ export class Water {
     const m = this._m, q = this._q, s = this._s, p = this._p; let n = 0; const wd = this.waveData;
     for (let k = 0; k < this.fn; k++) { const x = this.fx[k], z = this.fz[k]; const gy = ground(x, z); const sy = Math.max(this.level + this.hAt(x, z), gy); const grounded = this.level - gy < 0.004;
       const lifeT = this.fage[k] / this.flife[k]; const fade = sat(this.fage[k] * 6) * sat((1 - lifeT) * (this.ftmp[k] ? 4 : 14)); const sz = this.fs[k] * fade * (grounded ? 0.8 : 1); if (sz < 0.0015) continue;
-      const sd = this.fseed[k]; p.set(x, sy + sz * (this.ftmp[k] ? 0.05 : 0.22), z); q.setFromAxisAngle(this._up, sd * 6.283); s.set(sz * (1.05 + sd * 0.3), sz * (0.62 + ((sd * 5.1) % 1) * 0.3), sz * (1.1 - sd * 0.2)); m.compose(p, q, s); this.foamMesh.setMatrixAt(n++, m);
+      const sd = this.fseed[k]; p.set(x, sy + sz * (this.ftmp[k] ? 0.02 : 0.06), z); q.setFromAxisAngle(this._up, sd * 6.283); s.set(sz * (1.15 + sd * 0.3), sz * (0.4 + ((sd * 5.1) % 1) * 0.22), sz * (1.25 - sd * 0.2)); m.compose(p, q, s); this.foamMesh.setMatrixAt(n++, m);
       if (!this.ftmp[k]) { const ci = clamp(Math.round((x - X0) / DX), 1, NX - 2), cj = clamp(Math.round((z - Z0) / DZ), 1, NZ - 2); const c4 = (cj * NX + ci) * 4; const add = 90 * fade; wd[c4 + 1] = Math.min(255, wd[c4 + 1] + add); wd[c4 + 5] = Math.min(255, wd[c4 + 5] + add * 0.6); wd[c4 - 3] = Math.min(255, wd[c4 - 3] + add * 0.6); wd[c4 + NX * 4 + 1] = Math.min(255, wd[c4 + NX * 4 + 1] + add * 0.6); wd[c4 - NX * 4 + 1] = Math.min(255, wd[c4 - NX * 4 + 1] + add * 0.6); } }
     this.foamMesh.count = n; this.foamMesh.instanceMatrix.needsUpdate = true; this.waveTex.needsUpdate = true;
     // 水柱
@@ -270,7 +274,7 @@ export class Water {
   }
 
   seedFoam() { // 最初の少量の泡(奥の壁ぎわ)
-    const r = rng(77); for (let i = 0; i < 42; i++) { const a = r() * 6.283, d = Math.sqrt(r()) * 0.085; this.addFoam(0.1 + Math.cos(a) * d * 1.5, -0.215 + Math.sin(a) * d * 0.6, 0.014 + r() * 0.014, 240 + r() * 300, false); }
+    const r = rng(77); for (let i = 0; i < 42; i++) { const a = r() * 6.283, d = Math.sqrt(r()) * 0.085; this.addFoam(0.05 + Math.cos(a) * d * 1.35, -0.215 + Math.sin(a) * d * 0.6, 0.014 + r() * 0.014, 240 + r() * 300, false); }
   }
 }
 export const WGRID = { NX, NZ, X0, Z0, DX, DZ };

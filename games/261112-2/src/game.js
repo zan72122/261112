@@ -33,7 +33,7 @@ export class Game {
     const G = this.G, t = G.tools, list = []; const add = (name, pos, r, locked) => { const s = this.project(pos, {}); list.push({ name, x: s.x, y: s.y, r, locked: !!locked }); };
     add('handle', t.handleTip(this.v), 48, false); add('ring', t.ringPos(this.v), 46, this.stage < 4); add('shower', t.showerGrip(this.v), 50, this.stage < 3);
     for (const side of [0, 1]) { G.towel.corner(side, this.v); add('towel' + side, this.v, 46, this.stage < 4); }
-    for (const d of G.ducks) { const ppm = this.pxPerM(d.center); add(d.kind, d.center, Math.max(40, d.S.len * 1.05 * ppm), false); }
+    for (const d of G.ducks) { const ppm = this.pxPerM(d.center); add(d.kind, d.center, Math.max(40, d.S.len * 0.74 * ppm), false); }
     return list;
   }
   pick(x, y) {
@@ -52,7 +52,7 @@ export class Game {
     if (hit.locked) { // まだ先の道具は小さく揺れるだけ
       if (hit.name === 'ring') G.tools.ringWiggle = 0.5; else if (hit.name === 'shower') G.tools.sh.wiggle = 0.5; else this.towelWig = 0.4; G.audio.tok(); return; }
     try { G.canvas.setPointerCapture(e.pointerId); } catch (err) { /* 続行 */ }
-    const d = (this.drag = { kind: hit.name, id: e.pointerId, x0: x, y0: y, lx: x, ly: y, t0: this.time, moved: 0 });
+    const d = (this.drag = { kind: hit.name, id: e.pointerId, x0: x, y0: y, lx: x, ly: y, t0: this.time, w0: performance.now(), moved: 0 });
     if (hit.name === 'handle') { this.scene(1); G.audio.squeak(); }
     else if (hit.name === 'ring') { const p = this.planeZ(x, y, L.RING.z, this.v); d.off = p ? p.y - G.tools.ringH : 0; this.scene(4); G.audio.squeak(); }
     else if (hit.name === 'shower') { G.tools.grabShower(); this.scene(3); }
@@ -68,12 +68,12 @@ export class Game {
     d.lx = x; d.ly = y;
   }
   onUp(e, cancelled) {
-    const d = this.drag; if (!d || e.pointerId !== d.id) return; this.endDrag(cancelled);
+    if (!cancelled) this.G.audio.start(); const d = this.drag; if (!d || e.pointerId !== d.id) return; this.endDrag(cancelled);
   }
   // つかみを離す(復帰時や回転時にも使う)
   endDrag(cancelled) {
     const d = this.drag; if (!d) return; this.drag = null; const G = this.G; try { G.canvas.releasePointerCapture(d.id); } catch (err) { /* 続行 */ }
-    const tap = !cancelled && this.time - d.t0 < 0.35 && d.moved < 10;
+    const tap = !cancelled && (this.time - d.t0 < 0.4 || performance.now() - d.w0 < 900) && d.moved < 12; // 動かさずに離せばタップ
     if (d.kind === 'handle') { if (tap) G.tools.tapFaucet(); if (this.stage >= 3) this.auto(this.stage >= 4 ? 4 : 3, 2.2); }
     else if (d.kind === 'ring') { if (tap) G.tools.tapRing(); }
     else if (d.kind === 'shower') { G.tools.releaseShower(); }
@@ -130,7 +130,7 @@ export class Game {
     const G = this.G, W = G.water, [parent, kid] = G.ducks, tl = G.tools;
     // 段階の解放(時間ではなく、起きた事で進む)
     if (this.stage === 1) { if (kid.floating && kid.mode === 'tub') this.kidFloatT += dt; if (this.kidFloatT > 0.6) { this.setStage(2); this.auto(2, 0.6); } }
-    else if (this.stage === 2) { if (this.strokeDist > 1.1 || (W.made || 0) - this.madeBase > 14 || this.parentCarried) { this.setStage(3); this.auto(3, 0.5); } }
+    else if (this.stage === 2) { if (this.strokeDist > 1.0 || this.parentCarried) { this.setStage(3); this.auto(3, 0.5); } }
     else if (this.stage === 3) { if (tl.sh.used > 2.0) { this.setStage(4); this.auto(4, 0.8); } }
     else if (this.stage === 4) { if (G.ducks.some((q) => q.mode === 'deck')) this.setStage(5); }
     if (this.autoScene && !this.drag) { this.autoScene.t -= dt; if (this.autoScene.t <= 0) { const n = this.autoScene.n; this.autoScene = null; G.rig.setScene(n); } }
