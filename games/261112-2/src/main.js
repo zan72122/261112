@@ -85,9 +85,10 @@ function boot() {
   }
   G.setLow = setLow;
   function perfTick(ms, dt) {
-    if (ms > 400) return; perf.ema += (ms - perf.ema) * 0.06; perf.frames++; const el = performance.now() - perf.t0; if (el > 1000) { perf.fps = (perf.frames * 1000) / el; perf.frames = 0; perf.t0 = performance.now(); }
+    if (perf.skip) { perf.skip = false; return; } // 復帰直後の1フレームは数えない
+    const wall = Math.min(ms, 1000) / 1000; perf.ema += (Math.min(ms, 400) - perf.ema) * (ms > 200 ? 0.3 : 0.06); perf.frames++; const el = performance.now() - perf.t0; if (el > 1000) { perf.fps = (perf.frames * 1000) / el; perf.frames = 0; perf.t0 = performance.now(); }
     if (perf.mode !== 'auto' || G.frame < 20) return;
-    if (perf.ema > 36) perf.slowT += dt; else perf.slowT = Math.max(0, perf.slowT - dt); if (perf.ema < 21) perf.fastT += dt; else perf.fastT = 0;
+    if (perf.ema > 36) perf.slowT += wall; else perf.slowT = Math.max(0, perf.slowT - wall); if (perf.ema < 21) perf.fastT += wall; else perf.fastT = 0;
     if (perf.slowT > 1.5) { perf.slowT = 0; if (perf.scale > perf.minScale + 0.01) { perf.scale = Math.max(perf.minScale, perf.scale - 0.12); applyScale(); perf.log.push({ t: +(performance.now() / 1000).toFixed(1), scale: +perf.scale.toFixed(2) }); } else if (!G.low) setLow(true); }
     if (perf.fastT > 4 && perf.scale < 1) { perf.fastT = 0; perf.scale = Math.min(1, perf.scale + 0.08); applyScale(); }
   }
@@ -116,7 +117,7 @@ function boot() {
 
   // ---- 非表示・復帰・描画喪失 ----
   function pause() { if (!running) return; running = false; cancelAnimationFrame(raf); game.endDrag(true); G.audio.suspend(); saveState(G); }
-  function resume() { if (running) return; running = true; last = performance.now(); acc = 0; game.endDrag(true); game.idle = 0; G.audio.resume(); raf = requestAnimationFrame(frame); }
+  function resume() { if (running) return; running = true; last = performance.now(); acc = 0; perf.skip = true; game.endDrag(true); game.idle = 0; G.audio.resume(); raf = requestAnimationFrame(frame); }
   document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); else resume(); });
   window.addEventListener('pagehide', () => { game.endDrag(true); saveState(G); }); window.addEventListener('blur', () => game.endDrag(true));
   canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); document.getElementById('veil').style.opacity = 1; }); canvas.addEventListener('webglcontextrestored', () => { document.getElementById('veil').style.opacity = 0; });

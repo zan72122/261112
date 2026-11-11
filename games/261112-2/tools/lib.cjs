@@ -47,12 +47,13 @@ async function open(opts = {}) {
     // ワールド座標の列を画面座標へ
     async w2s(pts) { return page.evaluate((a) => a.map((p) => { const s = window.__duckbath.debug.toScreen(p[0], p[1], p[2]); return [s.x, s.y]; }), pts); },
     // 水面をなぞる(ワールドxzの列)
-    async stroke(xz, ms = 900) { const s = await T.st(); const pts = await T.w2s(xz.map((p) => [p[0], s.level, p[1]])); await T.drag(pts, ms); },
+    async stroke(xz, ms = 900, o) { const s = await T.st(); const pts = await T.w2s(xz.map((p) => [p[0], s.level, p[1]])); await T.drag(pts, ms, o); },
     // あひるを運んで離す。dest=[x,z] へ来るまで指の位置を補正する
     async carry(name, dest, o = {}) {
       const i = name === 'parent' ? 0 : 1; let tg = await T.tg(); let px = tg[name].x, py = tg[name].y; await T.down(px, py); await page.waitForTimeout(250);
-      for (let it = 0; it < (o.iters || 7); it++) { const s = await T.st(); const d = s.ducks[i]; const a = await T.scr(d.x, d.y, d.z), b = await T.scr(dest[0], d.y, dest[1]); const ex = b.x - a.x, ey = b.y - a.y; if (Math.hypot(ex, ey) < 4 && it > 0) break; const n = Math.max(2, Math.round(Math.hypot(ex, ey) / 40)); for (let k = 1; k <= n; k++) { await T.move(px + (ex * k) / n, py + (ey * k) / n); await page.waitForTimeout(o.stepMs || 60); } px += ex; py += ey; await page.waitForTimeout(350); }
-      if (o.keep) return [px, py]; await page.waitForTimeout(o.hold || 150); await T.up(); await page.waitForTimeout(o.after === undefined ? 900 : o.after);
+      for (let it = 0; it < (o.iters || 8); it++) { await T.settle(5000); const s = await T.st(); const d = s.ducks[i]; const a = await T.scr(d.x, d.y, d.z), b = await T.scr(dest[0], d.y, dest[1]); const ex = b.x - a.x, ey = b.y - a.y; if (Math.hypot(ex, ey) < 4 && it > 0) break; const vp = page.viewportSize(); const tx = Math.max(6, Math.min(vp.width - 6, px + ex)), ty = Math.max(6, Math.min(vp.height - 6, py + ey)); // 指は画面の外へは出ない
+        const n = Math.max(2, Math.round(Math.hypot(tx - px, ty - py) / 40)); for (let k = 1; k <= n; k++) { await T.move(px + ((tx - px) * k) / n, py + ((ty - py) * k) / n); await page.waitForTimeout(o.stepMs || 60); } px = tx; py = ty; await page.waitForTimeout(350); }
+      if (o.keep) return [px, py]; await T.settle(5000); await page.waitForTimeout(o.hold || 150); await T.up(); await page.waitForTimeout(o.after === undefined ? 900 : o.after);
     },
     // 保存データを書いて読み直す(探索用の近道。最終検証の通し遊びでは使わない)
     async preset(o) {

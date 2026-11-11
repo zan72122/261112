@@ -25,7 +25,9 @@ const shotDir = path.resolve(__dirname, 'shots');
   tg = await T.tg(); await T.down(tg.handle.x, tg.handle.y); await T.wait(700); s = await T.st(); ok('hint_retreats_on_touch', !s.handOn, { handOn: s.handOn });
   ok('audio_starts_on_first_touch', s.audio === 'running', { audio: s.audio });
   await T.move(tg.handle.x - 14, tg.handle.y + 5); await T.wait(350); s = await T.st(); ok('short_drag_moves_handle', s.open > 0.02 && s.drag === 'handle', { open: f(s.open), flow: f(s.flow) });
-  for (let k = 2; k <= 6; k++) { await T.move(tg.handle.x - 14 * k, tg.handle.y + 5 * k); await T.wait(70); } await T.up(); s = await mark('faucet_open'); ok('faucet_continuous', s.open > 0.3 && s.open < 1, { open: f(s.open) });
+  // 取っ手の長さ(画面上)に合わせて、半分ほど開く量だけ引く
+  const pa = await T.scr(-0.1, 0.245, -0.5), pb = await T.scr(0.005, 0.245, -0.5); const lp = Math.max(60, Math.hypot(pb.x - pa.x, pb.y - pa.y)); const total = lp * 1.6 * 0.55;
+  for (let k = 2; k <= 6; k++) { const d = 14 + ((total - 14) * (k - 1)) / 5; await T.move(tg.handle.x - d, tg.handle.y + 5); await T.wait(70); } await T.up(); s = await mark('faucet_open'); ok('faucet_continuous', s.open > 0.3 && s.open < 1, { open: f(s.open) });
   const lv0 = R.timeline[0].level; const fl = await T.until((st) => st.ducks[1].floating, 40000, 200); ok('d1_kid_floats_on_step_when_filled', !!fl && fl.level > lv0, fl && { level: f(fl.level), simT: f(fl.simT), kidY: f(fl.ducks[1].y) }); await mark('kid_floats');
   s = await T.until((st) => st.stage >= 2 && st.scene === 2, 15000); ok('scene2_follows_same_water', !!s, s && { scene: s.scene, level: f(s.level) }); await T.settle();
   // 満水近くまでためる(オーバーフロー口へ流れ出すまで)
@@ -33,7 +35,7 @@ const shotDir = path.resolve(__dirname, 'shots');
   tg = await T.tg(); await T.tap(tg.handle.x, tg.handle.y); s = await T.until((st) => st.flow < 0.02, 8000); ok('faucet_tap_closes', !!s, s && { open: f(s.open) });
 
   // ---- 2 泡を混ぜる ----
-  const foam0 = (await T.st()).foam; await T.stroke([[0.3, 0.1], [0.27, -0.08], [0.24, -0.26]], 600); await T.wait(300); s = await T.st(); ok('stroke_moves_camera_to_water', s.scene === 2, { scene: s.scene }); await T.settle();
+  const foam0 = (await T.st()).foam; await T.stroke([[0.13, 0.12], [0.11, -0.06], [0.09, -0.24]], 600); /* 場面1で見えている水面をなでる */ await T.wait(300); s = await T.st(); ok('stroke_moves_camera_to_water', s.scene === 2, { scene: s.scene }); await T.settle();
   for (let i = 0; i < 4; i++) { await T.stroke(i % 2 ? [[-0.02, 0.12], [0.0, -0.08], [0.02, -0.26]] : [[0.3, 0.12], [0.27, -0.08], [0.24, -0.26]], 600); await T.wait(250); if (i === 1) await shot('s2_awa'); }
   s = await mark('stroked'); ok('stroking_mixes_foam_and_unlocks_shower', s.stage >= 3 && s.foam >= foam0, { stage: s.stage, foam0, foam: s.foam, made: s.made });
   s = await T.until((st) => st.scene === 3, 15000); ok('scene3_after_mixing', !!s); await T.settle();
@@ -43,19 +45,22 @@ const shotDir = path.resolve(__dirname, 'shots');
   s = await T.st(); const lvBefore = s.level; let peak = 0, lvMax = -1, lifted = 0; let done = false;
   const cp = T.carry('parent', [0.14, 0.02], { after: 0 }).then(() => { done = true; }); while (!done) { const q = await T.st(); if (q.ducks[0].mode === 'held') lifted = lifted ? Math.min(lifted, q.level) : q.level; peak = Math.max(peak, q.spillPeak); await T.wait(120); } await cp;
   for (let i = 0; i < 12; i++) { const q = await T.st(); peak = Math.max(peak, q.spillPeak, q.spill); lvMax = Math.max(lvMax, q.level); await T.wait(120); }
-  s = await mark('parent_dropped'); ok('d4_parent_displaces_water_onto_rim', peak > 0.3 && s.ducks[0].floating && lifted < lvBefore - 0.004 && s.open === 0, { levelBefore: f(lvBefore), lifted: f(lifted), maxAfterDrop: f(lvMax), spillPeak: f(peak), faucetOpen: s.open, disc: s.disc });
+  s = await mark('parent_dropped'); ok('d4_parent_displaces_water_onto_rim', peak > 0.3 && s.ducks[0].floating && lifted < lvBefore - 0.002 && s.open === 0, { levelBefore: f(lvBefore), lifted: f(lifted), maxAfterDrop: f(lvMax), spillPeak: f(peak), faucetOpen: s.open, disc: s.disc });
   // シャワー: 親の頭の横から
   tg = await T.tg(); ok('shower_unlocked', !tg.shower.locked && onScreen(tg.shower), tg.shower); await T.down(tg.shower.x, tg.shower.y); await T.wait(500); await T.settle();
+  let neck = 0, hitDuck = 0, shOn = true; const shPoll = (async () => { while (shOn) { try { const q = await T.st(); neck = Math.max(neck, q.ducks[0].neck); if (q.shower.kind === 2) hitDuck++; } catch (e) { /* 続行 */ } await T.wait(150); } })(); // 流れに押されて親が動いても見逃さないよう並行して見張る
   s = await T.st(); const P0 = s.ducks[0]; const cl = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   let p = await T.w2s([[cl(P0.x - 0.3, -0.7, 0.6), 0.3, cl(P0.z - 0.3, -0.48, 0.45)], [cl(P0.x - 0.2, -0.7, 0.6), 0.3, cl(P0.z - 0.26, -0.48, 0.45)]]); for (const q of p) { await T.move(q[0], q[1]); await T.wait(450); } await T.wait(1400); s = await T.st(); const hd = s.ducks[0].head;
   const dz = hd[2] - 0.34 >= -0.48 ? 1 : -1; // 奥から手前へ、届かなければ手前から奥へ
   p = await T.w2s([[hd[0], 0.3, cl(hd[2] - dz * 0.46, -0.49, 0.49)], [hd[0], 0.3, hd[2] - dz * 0.37], [hd[0], 0.3, hd[2] - dz * 0.31]]); for (const q of p) { await T.move(q[0], q[1]); await T.wait(500); }
-  let neck = 0, hitDuck = 0; for (let i = 0; i < 8; i++) { await T.wait(350); const q = await T.st(); neck = Math.max(neck, q.ducks[0].neck); if (q.shower.kind === 2) hitDuck++; }
+  await T.wait(2800); shOn = false; await shPoll;
   await shot('s3_arau'); s = await T.st(); ok('shower_wets_feathers_and_parent_lowers_head', s.shower.held && neck > 0.6 && hitDuck > 0 && s.ducks[0].wet[0] > 0.5, { neck: f(neck), hitDuck, parentWet: s.ducks[0].wet.map(f) });
   await T.up(); await T.wait(600); s = await T.st(); ok('shower_returns_and_stops', !s.shower.held && s.drag === null); s = await T.until((st) => st.stage >= 4 && st.scene === 4, 15000); ok('stage4_after_shower', !!s); await T.settle(); await mark('washed');
 
   // ---- 4 排水して拭く ----
   // 子を段へ運ぶ→浮く。栓を少し上げる→同じ子が再び立つ。栓を戻す→止まる
+  // シャワーの流れが静まるのを待ってから段へ置く(流れが残っていると浮いた子は流される)
+  for (let i = 0; i < 40; i++) { const v = await T.ev(() => { const d = window.__duckbath.debug; const a = d.flowAt(-0.38, 0.05), b = d.flowAt(-0.3, 0.0); return Math.max(Math.hypot(a[0], a[1]), Math.hypot(b[0], b[1])); }); if (v < 0.02) break; await T.wait(500); }
   await T.carry('kid', [-0.4, 0.06]); await T.wait(1500); await T.settle(); s = await T.st(); const kidOnStepFloat = s.ducks[1].floating && s.ducks[1].x < -0.22;
   tg = await T.tg(); ok('ring_unlocked', !tg.ring.locked && onScreen(tg.ring), tg.ring);
   let a = await T.scr(0.552, 0.042, 0.1), b = await T.scr(0.552, 0.042 + 0.04, 0.1); await T.drag([[tg.ring.x, tg.ring.y], [tg.ring.x, tg.ring.y + (b.y - a.y)]], 500); s = await T.st(); const ringPartial = s.ring; ok('ring_partial_position_drains', s.ring > 0.02 && s.ring < 0.12 && s.drainQ > 0, { ring: f(s.ring), drainQ: f(s.drainQ * 1000) });
@@ -64,14 +69,15 @@ const shotDir = path.resolve(__dirname, 'shots');
   // 水面を回してから栓を抜く→泡が排水口へ集まる。足のついた二羽は残る
   for (let i = 0; i < 2; i++) await T.stroke([[0.46, 0.1], [0.33, 0.22], [0.2, 0.1], [0.33, -0.02], [0.46, 0.1], [0.33, 0.22], [0.2, 0.1]], 1100); await T.wait(300); await T.settle();
   s = await T.st(); const gam = s.gamma; const foamBefore = s.foam; tg = await T.tg(); a = await T.scr(0.552, 0.042, 0.1); b = await T.scr(0.552, 0.042 + 0.13, 0.1); await T.drag([[tg.ring.x, tg.ring.y], [tg.ring.x, tg.ring.y + (b.y - a.y)]], 500); await T.settle();
-  let walked = false; s = await T.until((st) => { if (st.ducks.some((d) => d.walking)) walked = true; return st.level < -0.2 || st.sucked > 8; }, 60000, 300); const suckedMid = s ? s.sucked : 0;
+  let walked = false, pollOn = true; const poller = (async () => { while (pollOn) { try { const q = await T.st(); if (q.ducks.some((d) => d.walking)) walked = true; } catch (e) { /* 続行 */ } await T.wait(200); } })(); // とことこ歩きを見逃さないよう並行して見張る
+  s = await T.until((st) => st.level < -0.2 || st.sucked > 8, 60000, 300); const suckedMid = s ? s.sucked : 0;
   // 途中で栓を戻す→吸い込みが止まり、残った泡でまた遊べる
   tg = await T.tg(); a = await T.scr(0.552, 0.042 + 0.13, 0.1); b = await T.scr(0.552, 0.042 - 0.04, 0.1); await T.drag([[tg.ring.x, tg.ring.y], [tg.ring.x, tg.ring.y + (b.y - a.y)]], 400); s = await T.st(); const lvMid = s.level, foamMid = s.foam; for (let i = 0; i < 4; i++) { await T.wait(300); const q = await T.st(); if (q.ducks.some((d) => d.walking)) walked = true; } const s3 = await T.st();
   ok('d6_swirl_then_drain_gathers_foam', suckedMid > 0 && foamBefore > 0, { circulation: f(gam), foamBefore, sucked: suckedMid }); ok('d6_plug_back_stops_suction_foam_remains', s3.drainQ === 0 && Math.abs(s3.level - lvMid) < 0.002 && s3.sucked - s.sucked <= 1, { level: f(lvMid), foamLeft: foamMid, suckedAfterStop: s3.sucked - s.sucked });
   await T.stroke([[0.1, 0.1], [0.2, 0.0], [0.3, -0.1]], 500); await T.settle(); await mark('mid_drain');
   tg = await T.tg(); a = await T.scr(0.552, 0.042, 0.1); b = await T.scr(0.552, 0.042 + 0.14, 0.1); await T.drag([[tg.ring.x, tg.ring.y], [tg.ring.x, tg.ring.y + (b.y - a.y)]], 500);
   for (let i = 0; i < 160; i++) { const q = await T.st(); if (q.ducks.some((d) => d.walking)) walked = true; if (q.level < -0.332 && (walked || i > 120)) break; await T.wait(350); }
-  await T.wait(2500); await T.settle(); s = await mark('drained'); ok('d6_ducks_stay_and_waddle_when_water_leaves', s.ducks.every((d) => d.mode === 'tub' && !d.floating) && walked && s.level < -0.3, { level: f(s.level), walked, ducks: s.ducks.map((d) => [d.kind, f(d.x), f(d.z)]) });
+  await T.wait(2500); pollOn = false; await poller; await T.settle(); s = await mark('drained'); ok('d6_ducks_stay_and_waddle_when_water_leaves', s.ducks.every((d) => d.mode === 'tub' && !d.floating) && walked && s.level < -0.3, { level: f(s.level), walked, ducks: s.ducks.map((d) => [d.kind, f(d.x), f(d.z)]) });
   await shot('s4_haisui');
   // タオルへ運ぶ
   tg = await T.tg(); ok('towel_unlocked', !tg.towel0.locked && !tg.towel1.locked);

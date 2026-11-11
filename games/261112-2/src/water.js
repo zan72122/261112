@@ -14,7 +14,7 @@ const Q_IN = 0.0042, K_OVER = 0.8;
 export class Water {
   constructor(scene, opts) {
     this.low = !!opts.low; this.rand = rng(1234);
-    this.h = new Float32Array(NX * NZ); this.v = new Float32Array(NX * NZ); this.mask = new Uint8Array(NX * NZ); this.c2 = new Float32Array(NX * NZ);
+    this.h = new Float32Array(NX * NZ); this.v = new Float32Array(NX * NZ); this.mask = new Uint8Array(NX * NZ); this.c2 = new Float32Array(NX * NZ); this.calm = new Float32Array(NX * NZ);
     this.g = new Float32Array(NX * NZ); this.inside = new Uint8Array(NX * NZ);
     for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) { const x = X0 + i * DX, z = Z0 + j * DZ; this.g[j * NX + i] = ground(x, z); this.inside[j * NX + i] = insideDist(x, z) > 0.001 ? 1 : 0; }
     // 体積表(水位→体積)
@@ -101,7 +101,7 @@ export class Water {
     let wz = (this.w[k] * (1 - a) + this.w[k + 1] * a) * (1 - b) + (this.w[k + GX] * (1 - a) + this.w[k + GX + 1] * a) * b;
     if (this.drainQ > 1e-6 || Math.abs(this.gamma) > 1e-4) { // 排水口への吸い込みと渦
       const dx = x - L.DRAIN.x, dz = z - L.DRAIN.z; const r = Math.max(0.035, Math.sqrt(dx * dx + dz * dz)); const dep = Math.max(0.05, this.level - L.DEEP);
-      const vr = Math.min(0.5, 2.6 * this.drainQ / (6.283 * r * dep)); const vt = clamp(this.gamma / (6.283 * r), -0.45, 0.45) * sat(this.drainQ / 0.003);
+      const vr = Math.min(0.5, 2.6 * this.drainQ / (6.283 * r * dep)); const vt = clamp(this.gamma / (6.283 * r), -0.45, 0.45) * sat(this.drainQ / 0.003) * Math.exp(-Math.max(0, r - 0.12) / 0.2); // 渦は排水口の近くだけ
       ux += (-dx * vr - dz * vt) / r; wz += (-dz * vr + dx * vt) / r;
     }
     out[0] = ux; out[1] = wz; return out;
@@ -141,17 +141,18 @@ export class Water {
   rebuildMask() {
     const lv = this.level; const ob = this.obst;
     for (let j = 0; j < NZ; j++) { const z = Z0 + j * DZ; for (let i = 0; i < NX; i++) { const k = j * NX + i; let m = 0; const dep = lv - this.g[k];
-      if (!this.inside[k] || dep < 0.004) m = 1; else { for (let o = 0; o < ob.length; o++) { const b = ob[o]; const dx = X0 + i * DX - b.x, dz = z - b.z; const lx = dx * b.c + dz * b.s, lz = -dx * b.s + dz * b.c; if ((lx * lx) / (b.a * b.a) + (lz * lz) / (b.b * b.b) < 1) { m = 1; break; } } }
+      let calm = 0; if (!this.inside[k] || dep < 0.004) m = 1; else { for (let o = 0; o < ob.length; o++) { const b = ob[o]; const dx = X0 + i * DX - b.x, dz = z - b.z; const lx = dx * b.c + dz * b.s, lz = -dx * b.s + dz * b.c; const e = (lx * lx) / (b.a * b.a) + (lz * lz) / (b.b * b.b); if (e < 1) { m = 1; break; } if (e < 4.4) calm = Math.max(calm, 1 - (e - 1) / 3.4); } }
+      this.calm[k] = calm; // 親の体のまわりは波が静まる
       this.mask[k] = m; const c = 0.62 * Math.sqrt(clamp(dep / 0.16, 0.12, 1)); this.c2[k] = (c * c) / (DX * DX); } }
     for (let j = 0; j < GZ; j++) { const z = Z0 + (j + 0.5) * FDZ; for (let i = 0; i < GX; i++) { const k = j * GX + i; const x = X0 + (i + 0.5) * FDX; let s = 0; if (insideDist(x, z) < 0.006 || lv - this.fg[k] < 0.008) s = 1; else { for (let o = 0; o < ob.length; o++) { const b = ob[o]; const dx = x - b.x, dz = z - b.z; const lx = dx * b.c + dz * b.s, lz = -dx * b.s + dz * b.c; if ((lx * lx) / (b.a * b.a) + (lz * lz) / (b.b * b.b) < 1) { s = 1; break; } } } this.solid[k] = s; if (s) { this.u[k] = 0; this.w[k] = 0; } } }
   }
   isSolid(x, z) { const i = Math.floor((x - X0) / FDX), j = Math.floor((z - Z0) / FDZ); if (i < 0 || i >= GX || j < 0 || j >= GZ) return true; return this.solid[j * GX + i] === 1; }
 
   stepWaves(dt) {
-    const h = this.h, v = this.v, m = this.mask, c2 = this.c2; const dmp = Math.exp(-1.05 * dt);
+    const h = this.h, v = this.v, m = this.mask, c2 = this.c2, calm = this.calm; const dmp = Math.exp(-1.05 * dt);
     for (let j = 0; j < NZ; j++) { const row = j * NX; for (let i = 0; i < NX; i++) { const k = row + i; if (m[k]) { v[k] = 0; h[k] *= 0.9; continue; } const hc = h[k];
       const l = i > 0 && !m[k - 1] ? h[k - 1] : hc, r = i < NX - 1 && !m[k + 1] ? h[k + 1] : hc, u = j > 0 && !m[k - NX] ? h[k - NX] : hc, d = j < NZ - 1 && !m[k + NX] ? h[k + NX] : hc;
-      v[k] = (v[k] + c2[k] * (l + r + u + d - 4 * hc) * dt) * dmp; } }
+      v[k] = (v[k] + c2[k] * (l + r + u + d - 4 * hc) * dt) * dmp * (1 - Math.min(0.5, calm[k] * dt * 9)); } }
     let sum = 0, cnt = 0, en = 0; for (let k = 0; k < h.length; k++) { if (m[k]) continue; let nh = h[k] + v[k] * dt; if (nh > 0.05) nh = 0.05; else if (nh < -0.05) nh = -0.05; h[k] = nh; sum += nh; cnt++; en += v[k] * v[k]; }
     if (cnt) { const mean = sum / cnt * 0.2; for (let k = 0; k < h.length; k++) if (!m[k]) h[k] -= mean; this.waveEnergy = en / cnt; }
   }
@@ -164,7 +165,7 @@ export class Water {
       u2[k] = ((u[q] * (1 - a) + u[q + 1] * a) * (1 - b) + (u[q + GX] * (1 - a) + u[q + GX + 1] * a) * b) * dmp; w2[k] = ((w[q] * (1 - a) + w[q + 1] * a) * (1 - b) + (w[q + GX] * (1 - a) + w[q + GX + 1] * a) * b) * dmp; }
     // 波の勾配が流れを押す
     for (let j = 0; j < GZ; j++) for (let i = 0; i < GX; i++) { const k = j * GX + i; if (s[k]) continue; const wi = clamp(Math.round((i + 0.5) * FDX / DX), 1, NX - 2), wj = clamp(Math.round((j + 0.5) * FDZ / DZ), 1, NZ - 2), q = wj * NX + wi;
-      u2[k] -= (this.h[q + 1] - this.h[q - 1]) / (2 * DX) * 2.4 * dt; w2[k] -= (this.h[q + NX] - this.h[q - NX]) / (2 * DZ) * 2.4 * dt; }
+      u2[k] -= (this.h[q + 1] - this.h[q - 1]) / (2 * DX) * 0.6 * dt; w2[k] -= (this.h[q + NX] - this.h[q - NX]) / (2 * DZ) * 0.6 * dt; }
     // 非圧縮化(壁と親を避けて回り込む)
     const p = this.p, div = this.div;
     for (let j = 0; j < GZ; j++) for (let i = 0; i < GX; i++) { const k = j * GX + i; if (s[k]) { div[k] = 0; p[k] = 0; continue; }

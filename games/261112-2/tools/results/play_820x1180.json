@@ -5,7 +5,7 @@
    "pass": true,
    "info": {
     "stage": 1,
-    "level": -0.081,
+    "level": -0.0809,
     "audio": "none"
    }
   },
@@ -18,8 +18,8 @@
     ],
     "hitR": {
      "handle": 48,
-     "kid": 63.9811,
-     "parent": 133.8497
+     "kid": 45.0914,
+     "parent": 94.3322
     }
    }
   },
@@ -31,13 +31,16 @@
     "shower": 100,
     "towel0": 92,
     "towel1": 92,
-    "parent": 268,
-    "kid": 128
+    "parent": 189,
+    "kid": 90
    }
   },
   "hint_appears_when_idle": {
-   "pass": false,
-   "info": null
+   "pass": true,
+   "info": {
+    "hint": "handle",
+    "simT": 4.0833
+   }
   },
   "hint_retreats_on_touch": {
    "pass": true,
@@ -55,35 +58,35 @@
    "pass": true,
    "info": {
     "open": 0.1216,
-    "flow": 0.0879
+    "flow": 0.0134
    }
   },
   "faucet_continuous": {
    "pass": true,
    "info": {
-    "open": 0.7185
+    "open": 0.5615
    }
   },
   "d1_kid_floats_on_step_when_filled": {
-   "pass": false,
+   "pass": true,
    "info": {
-    "level": -0.0698,
-    "simT": 8.3833,
-    "kidY": -0.0843
+    "level": -0.0708,
+    "simT": 12.2667,
+    "kidY": -0.0802
    }
   },
   "scene2_follows_same_water": {
    "pass": true,
    "info": {
     "scene": 2,
-    "level": -0.0608
+    "level": -0.0653
    }
   },
   "overflow_outlet_takes_excess": {
    "pass": true,
    "info": {
-    "level": -0.0164,
-    "overQ": 2.7996
+    "level": -0.0178,
+    "overQ": 1.392
    }
   },
   "faucet_tap_closes": {
@@ -102,20 +105,20 @@
    "pass": true,
    "info": {
     "stage": 3,
-    "foam0": 96,
-    "foam": 113,
-    "made": 66
+    "foam0": 107,
+    "foam": 166,
+    "made": 122
    }
   },
   "scene3_after_mixing": {
    "pass": true
   },
   "d4_parent_displaces_water_onto_rim": {
-   "pass": false,
+   "pass": true,
    "info": {
-    "levelBefore": -0.0303,
-    "lifted": -0.0318,
-    "maxAfterDrop": -0.0059,
+    "levelBefore": -0.02,
+    "lifted": -0.0302,
+    "maxAfterDrop": -0.0052,
     "spillPeak": 1,
     "faucetOpen": 0,
     "disc": {
@@ -134,13 +137,13 @@
    }
   },
   "shower_wets_feathers_and_parent_lowers_head": {
-   "pass": false,
+   "pass": true,
    "info": {
-    "neck": 0,
-    "hitDuck": 0,
+    "neck": 0.95,
+    "hitDuck": 55,
     "parentWet": [
-     0.35,
-     0,
+     1,
+     1,
      1,
      1
     ]
@@ -155,8 +158,8 @@
   "ring_unlocked": {
    "pass": true,
    "info": {
-    "x": 724.4331569118009,
-    "y": 932.8926550276125,
+    "x": 724.7584925945495,
+    "y": 932.8680749441468,
     "r": 46,
     "locked": false
    }
@@ -164,17 +167,17 @@
   "ring_partial_position_drains": {
    "pass": true,
    "info": {
-    "ring": 0.0854,
-    "drainQ": 5.9558
+    "ring": 0.0708,
+    "drainQ": 4.9158
    }
   },
   "d1_same_kid_stands_again_when_drained": {
-   "pass": false,
+   "pass": true,
    "info": {
-    "level": -0.2886,
+    "level": -0.0867,
     "kid": [
-     0.1983,
-     0.096
+     -0.3872,
+     0.0719
     ],
     "floatedBefore": true
    }
@@ -184,42 +187,42 @@
    "info": {
     "ring": 0,
     "level": [
-     -0.3299,
-     -0.3299
+     -0.1175,
+     -0.1175
     ]
    }
   },
   "d6_swirl_then_drain_gathers_foam": {
    "pass": true,
    "info": {
-    "circulation": 0,
-    "foamBefore": 26,
-    "sucked": 93
+    "circulation": 0.086,
+    "foamBefore": 63,
+    "sucked": 105
    }
   },
   "d6_plug_back_stops_suction_foam_remains": {
    "pass": true,
    "info": {
-    "level": -0.34,
-    "foamLeft": 21,
+    "level": -0.338,
+    "foamLeft": 19,
     "suckedAfterStop": 0
    }
   },
   "d6_ducks_stay_and_waddle_when_water_leaves": {
-   "pass": false,
+   "pass": true,
    "info": {
     "level": -0.34,
-    "walked": false,
+    "walked": true,
     "ducks": [
      [
       "parent",
-      0.1934,
-      -0.0226
+      0.184,
+      -0.0266
      ],
      [
       "kid",
-      0.2666,
-      0.1759
+      -0.3872,
+      0.0719
      ]
     ]
    }
@@ -242,25 +245,25 @@
    }
   },
   "d7_wipe_one_side_dries_only_that_side": {
-   "pass": false,
+   "pass": true,
    "info": {
     "wetBefore": [
-     1,
-     0.525,
+     0.11,
+     0.025,
      1,
      1
     ],
     "wetAfter": [
-     1,
-     0.4454,
-     0.002,
-     0.0017
+     0.11,
+     0.025,
+     0.9972,
+     0
     ],
     "wipedPart": 3,
     "towel": {
-     "left": 0.3391,
-     "right": 2.577,
-     "max": 0.2023
+     "left": 0.1527,
+     "right": 1.9315,
+     "max": 0.1958
     }
    }
   },
@@ -272,16 +275,16 @@
    }
   },
   "d7_wet_side_leaves_stain_on_bed": {
-   "pass": false,
+   "pass": true,
    "info": {
-    "stainSum": null,
-    "stainLocalZ": 0,
+    "stainSum": 69.2,
+    "stainLocalZ": -0.0278,
     "wetSide": "left(-z)",
     "kidWet": [
-     1,
-     0.4454,
-     0.002,
-     0.0017
+     0.11,
+     0.025,
+     0.1328,
+     0
     ]
    }
   },
@@ -292,8 +295,8 @@
    "pass": true,
    "info": {
     "asleep": [
-     0.9348,
-     0.9348
+     0.9358,
+     0.9358
     ],
     "card": true,
     "cycles": 1
@@ -311,25 +314,25 @@
    "pass": true,
    "info": {
     "towelWet": [
-     0.0008,
-     0.0001
+     0.0029,
+     0.002
     ],
     "stain": [
-     381.0941,
-     380.9255
+     460.2039,
+     459.8824
     ],
     "parentWet": [
      [
-      0.6683,
-      0,
-      0.0196,
-      0.0195
+      0.8525,
+      1,
+      0.0199,
+      0.019
      ],
      [
-      0.6683,
-      0,
-      0.0196,
-      0.0195
+      0.8525,
+      1,
+      0.0199,
+      0.019
      ]
     ]
    }
@@ -339,7 +342,7 @@
    "info": {
     "level": [
      -0.34,
-     -0.314
+     -0.3141
     ],
     "scene": 4
    }
@@ -349,39 +352,39 @@
    "info": {
     "before": {
      "stage": 5,
-     "level": -0.3078,
+     "level": -0.3087,
      "ducks": [
       [
        "tub",
-       0.1002,
-       -0.0002
+       0.0998,
+       0.0028
       ],
       [
        "bed",
-       0.651,
-       -0.5724
+       0.652,
+       -0.5716
       ]
      ],
-     "towel": 0,
-     "stain": 380.6706
+     "towel": 0.0008,
+     "stain": 459.4627
     },
     "after": {
      "stage": 5,
-     "level": -0.3078,
+     "level": -0.3087,
      "ducks": [
       [
        "tub",
-       0.1002,
-       -0.0002
+       0.0998,
+       0.0028
       ],
       [
        "bed",
-       0.651,
-       -0.5724
+       0.652,
+       -0.5716
       ]
      ],
-     "towel": 0,
-     "stain": 380.8941
+     "towel": 0.0008,
+     "stain": 459.8314
     }
    }
   },
@@ -399,146 +402,146 @@
   {
    "label": "start",
    "wall": 0,
-   "simT": 0.0333,
+   "simT": 0.1167,
    "stage": 1,
    "scene": 1,
-   "level": -0.081,
+   "level": -0.0809,
    "foam": 42,
-   "fps": 0.5889
+   "fps": 0.6046
   },
   {
    "label": "faucet_open",
-   "wall": 77.2,
-   "simT": 8.3833,
+   "wall": 118.4,
+   "simT": 11.3333,
    "stage": 1,
    "scene": 1,
-   "level": -0.0698,
-   "foam": 53,
-   "fps": 7.8486
+   "level": -0.0762,
+   "foam": 44,
+   "fps": 0.2608
   },
   {
    "label": "kid_floats",
-   "wall": 77.2,
-   "simT": 8.3833,
+   "wall": 119.4,
+   "simT": 12.2667,
    "stage": 1,
    "scene": 1,
-   "level": -0.0698,
-   "foam": 53,
-   "fps": 7.8486
+   "level": -0.0708,
+   "foam": 49,
+   "fps": 6.977
   },
   {
    "label": "full",
-   "wall": 86.4,
-   "simT": 16.2833,
-   "stage": 3,
-   "scene": 3,
-   "level": -0.0164,
-   "foam": 91,
-   "fps": 3.6563
+   "wall": 132.9,
+   "simT": 22.5833,
+   "stage": 2,
+   "scene": 2,
+   "level": -0.0173,
+   "foam": 100,
+   "fps": 1.5014
   },
   {
    "label": "stroked",
-   "wall": 186,
-   "simT": 58.0833,
+   "wall": 241.6,
+   "simT": 68.6167,
    "stage": 3,
-   "scene": 3,
-   "level": -0.0303,
-   "foam": 113,
-   "fps": 4.7769
+   "scene": 2,
+   "level": -0.0206,
+   "foam": 166,
+   "fps": 2.5632
   },
   {
    "label": "parent_dropped",
-   "wall": 196.9,
-   "simT": 66.0167,
+   "wall": 259.6,
+   "simT": 83.9667,
    "stage": 3,
    "scene": 3,
-   "level": -0.0138,
-   "foam": 111,
-   "fps": 4.1712
+   "level": -0.0104,
+   "foam": 163,
+   "fps": 3.651
   },
   {
    "label": "washed",
-   "wall": 245.8,
-   "simT": 77.55,
+   "wall": 310.4,
+   "simT": 98.6667,
    "stage": 4,
    "scene": 4,
    "level": -0.018,
-   "foam": 124,
-   "fps": 0.3117
+   "foam": 152,
+   "fps": 0.5194
   },
   {
    "label": "kid_stands_again",
-   "wall": 295.3,
-   "simT": 105.6,
+   "wall": 349.1,
+   "simT": 114.3667,
    "stage": 4,
    "scene": 4,
-   "level": -0.2886,
-   "foam": 30,
-   "fps": 3.5679
+   "level": -0.0867,
+   "foam": 69,
+   "fps": 3.317
   },
   {
    "label": "mid_drain",
-   "wall": 354.6,
-   "simT": 161.6833,
+   "wall": 424.9,
+   "simT": 177.8667,
    "stage": 4,
-   "scene": 3,
-   "level": -0.34,
-   "foam": 17,
-   "fps": 5.3543
+   "scene": 4,
+   "level": -0.338,
+   "foam": 19,
+   "fps": 4.1439
   },
   {
    "label": "drained",
-   "wall": 407.1,
-   "simT": 211.7167,
+   "wall": 435.4,
+   "simT": 187.0667,
    "stage": 4,
    "scene": 4,
    "level": -0.34,
-   "foam": 16,
-   "fps": 5.3121
+   "foam": 15,
+   "fps": 4.5554
   },
   {
    "label": "on_towel",
-   "wall": 447.5,
-   "simT": 229.8333,
+   "wall": 478.6,
+   "simT": 208.3,
    "stage": 5,
    "scene": 5,
    "level": -0.34,
-   "foam": 13,
-   "fps": 5.0454
+   "foam": 11,
+   "fps": 4.3256
   },
   {
    "label": "wiped",
-   "wall": 491.5,
-   "simT": 251.3167,
+   "wall": 520.6,
+   "simT": 233.75,
    "stage": 5,
    "scene": 5,
    "level": -0.34,
-   "foam": 13,
-   "fps": 5.2016
+   "foam": 10,
+   "fps": 7.4808
   },
   {
    "label": "asleep",
-   "wall": 516.2,
-   "simT": 275.45,
+   "wall": 545,
+   "simT": 258.2,
    "stage": 5,
    "scene": 5,
    "level": -0.34,
-   "foam": 13,
-   "fps": 4.4248
+   "foam": 8,
+   "fps": 3.7951
   },
   {
    "label": "replay",
-   "wall": 561.2,
-   "simT": 298.9833,
+   "wall": 590.2,
+   "simT": 287.9667,
    "stage": 5,
    "scene": 4,
-   "level": -0.3078,
-   "foam": 29,
-   "fps": 5.1414
+   "level": -0.3087,
+   "foam": 18,
+   "fps": 5.3581
   }
  ],
- "seconds": 570,
- "passed": 33,
+ "seconds": 599,
+ "passed": 41,
  "total": 41,
  "mode": "操作検証は軽量描画(q=low, rs=0.3, lite=1)。撮影時のみ高品質へ切替"
 }

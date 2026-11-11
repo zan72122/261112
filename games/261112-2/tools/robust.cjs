@@ -33,10 +33,10 @@ const tests = {
   },
   async rotate() {
     const T = await open({ w: 820, h: 1180 }); let tg = await T.tg(); await T.down(tg.kid.x, tg.kid.y); await T.wait(300); await T.move(tg.kid.x + 60, tg.kid.y - 30); await T.wait(300); const held = (await T.st()).ducks[1].mode;
-    await T.page.setViewportSize({ width: 1180, height: 820 }); await T.wait(1500); let s = await T.st(); tg = await T.tg(); const vis = (p) => p.x > 0 && p.x < 1180 && p.y > 0 && p.y < 820;
+    await T.page.setViewportSize({ width: 1180, height: 820 }); await T.page.waitForFunction(() => window.__duckbath.w === 1180, null, { timeout: 60000, polling: 200 }); await T.wait(800); await T.settle(15000); let s = await T.st(); /* 描画が遅い環境では resize の反映とカメラの落ち着きを待つ */ tg = await T.tg(); const vis = (p) => p.x > 0 && p.x < 1180 && p.y > 0 && p.y < 820;
     ok('rotate_releases_grab_and_reframes', held === 'held' && s.drag === null && s.ducks[1].mode === 'tub' && vis(tg.handle) && vis(tg.kid) && vis(tg.parent), { heldBefore: held, after: s.ducks[1].mode, handle: [f(tg.handle.x), f(tg.handle.y)] });
     await T.up(); await T.drag([[tg.handle.x, tg.handle.y], [tg.handle.x - 70, tg.handle.y + 20]], 400); s = await T.st(); const o1 = s.open;
-    await T.page.setViewportSize({ width: 375, height: 667 }); await T.wait(1200); await T.page.setViewportSize({ width: 820, height: 1180 }); await T.wait(1200); tg = await T.tg(); await T.tap(tg.handle.x, tg.handle.y); await T.wait(900); s = await T.st();
+    await T.page.setViewportSize({ width: 375, height: 667 }); await T.page.waitForFunction(() => window.__duckbath.w === 375, null, { timeout: 60000, polling: 200 }); await T.wait(800); await T.page.setViewportSize({ width: 820, height: 1180 }); await T.page.waitForFunction(() => window.__duckbath.w === 820, null, { timeout: 60000, polling: 200 }); await T.wait(800); await T.settle(15000); tg = await T.tg(); await T.tap(tg.handle.x, tg.handle.y); await T.wait(900); s = await T.st();
     ok('rotate_back_and_play_on', o1 > 0.2 && s.open < 0.05 && clean(T), { openAfterLandscapeDrag: f(o1), openAfterTap: f(s.open), errors: T.log.errors }); await T.close();
   },
   async hidden() {
@@ -92,6 +92,6 @@ const tests = {
     ok('pages_subfolder_boots_single_file', s.flow > 0.1 && reqs.length === 0 && T.log.errors.length === 0, { url: '/261112/games/261112-2/index.html', otherRequests: reqs, errors: T.log.errors }); await T.close(); srv.close();
   },
 };
-(async () => { const names = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(tests); const t0 = Date.now(); for (const n of names) { try { await tests[n](); } catch (e) { ok(n + '_crashed', false, String(e && e.stack || e).slice(0, 600)); } }
+(async () => { const names = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(tests); const t0 = Date.now(); for (const n of names) { try { await tests[n](); } catch (e) { ok(n + '_crashed', false, String(e && e.stack || e).slice(0, 600)); require('child_process').spawnSync('pkill', ['-f', 'chrome']); } }
   let prev = {}; const fp = path.resolve(__dirname, 'results/robust.json'); try { prev = JSON.parse(fs.readFileSync(fp, 'utf8')).checks || {}; } catch (e) { /* 初回 */ }
-  R.checks = Object.assign(prev, R.checks); R.passed = Object.values(R.checks).filter((c) => c.pass).length; R.total = Object.keys(R.checks).length; rec('robust', R); console.log(`== robust ${R.passed}/${R.total} pass, ${((Date.now() - t0) / 1000).toFixed(0)}s`); })();
+  R.checks = Object.assign(prev, R.checks); R.passed = Object.values(R.checks).filter((c) => c.pass).length; R.total = Object.keys(R.checks).length; rec('robust', R); console.log(`== robust ${R.passed}/${R.total} pass, ${((Date.now() - t0) / 1000).toFixed(0)}s`); process.exit(0); })();

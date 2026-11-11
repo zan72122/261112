@@ -118,7 +118,7 @@ export class Game {
       else if (d.kind === 'water') { const p = this.planeY(this.ptr.x, this.ptr.y, W.level, this.v);
         if (p && insideDist(p.x, p.z) > 0.004) { // なめらかに追う点の速さで水を押す(指の報告間隔に左右されない)
           const k = 1 - Math.exp(-16 * dt); const nx = d.wx + (p.x - d.wx) * k, nz = d.wz + (p.z - d.wz) * k; const vx = clamp((nx - d.wx) / dt, -1.3, 1.3), vz = clamp((nz - d.wz) / dt, -1.3, 1.3); const sp = Math.hypot(vx, vz);
-          if (sp > 0.02 && W.level > ground(nx, nz) + 0.004) { W.push(nx, nz, vx * 0.85, vz * 0.85, 0.085, Math.min(1, dt * 22)); W.dipole(nx, nz, vx, vz, Math.min(2.6, sp * 3.2), 0.034); this.strokeDist += sp * dt; }
+          if (sp > 0.02 && W.level > ground(nx, nz) + 0.004) { W.push(nx, nz, vx * 0.9, vz * 0.9, 0.1, Math.min(1, dt * 24)); W.dipole(nx, nz, vx, vz, Math.min(2.6, sp * 3.2), 0.034); this.strokeDist += sp * dt; }
           this.strokeSp = damp(this.strokeSp, sp, 12, dt); d.wx = nx; d.wz = nz; } }
     }
     if (!d || d.kind !== 'water') this.strokeSp = damp(this.strokeSp, 0, 8, dt);

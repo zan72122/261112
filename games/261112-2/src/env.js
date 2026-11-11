@@ -147,8 +147,10 @@ export function buildEnv(scene) {
   wallPiece(L.SIDE_X * 2, TOP - WY1, 0, (TOP + WY1) / 2, L.WALL_Z, 0, ['x', 'y']);
   wallPiece(WX0 + L.SIDE_X, WY1 - WY0, (WX0 - L.SIDE_X) / 2, (WY0 + WY1) / 2, L.WALL_Z, 0, ['x', 'y']);
   wallPiece(L.SIDE_X - WX1, WY1 - WY0, (WX1 + L.SIDE_X) / 2, (WY0 + WY1) / 2, L.WALL_Z, 0, ['x', 'y']);
-  wallPiece(2.2, TOP - L.FLOOR_Y, -L.SIDE_X, (TOP + L.FLOOR_Y) / 2, L.WALL_Z + 1.1, Math.PI / 2, ['z', 'y']);
-  wallPiece(2.2, TOP - L.FLOOR_Y, L.SIDE_X, (TOP + L.FLOOR_Y) / 2, L.WALL_Z + 1.1, -Math.PI / 2, ['z', 'y']);
+  // 横の壁は斜めから見るので、映り込みのちらつきを抑える
+  const sideMat = tileMat.clone(); sideMat.normalScale = new THREE.Vector2(0.25, 0.25); sideMat.clearcoat = 0.2; sideMat.clearcoatRoughness = 0.3;
+  wallPiece(2.2, TOP - L.FLOOR_Y, -L.SIDE_X, (TOP + L.FLOOR_Y) / 2, L.WALL_Z + 1.1, Math.PI / 2, ['z', 'y']).material = sideMat;
+  wallPiece(2.2, TOP - L.FLOOR_Y, L.SIDE_X, (TOP + L.FLOOR_Y) / 2, L.WALL_Z + 1.1, -Math.PI / 2, ['z', 'y']).material = sideMat;
   // 窓のくぼみと枠
   const white = new THREE.MeshStandardMaterial({ color: 0xf2f0ea, roughness: 0.45 });
   const sill = new THREE.Mesh(new THREE.BoxGeometry(WX1 - WX0 + 0.04, 0.02, REC + 0.03), white); sill.position.set((WX0 + WX1) / 2, WY0 - 0.01, L.WALL_Z - REC / 2 + 0.015); sill.receiveShadow = true; scene.add(sill);

@@ -175,10 +175,11 @@ export class Duck {
     if (this.dropT > 0.6) this._splashed = false; if (this.dropT < 0.05) this._splashed = false;
     if (this.floating) {
       this.groundedT = 0; this.wasFloating = true; W.flowAt(this.x, this.z, this._fl); W.slopeAt(this.x, this.z, this._sl);
-      const k = Math.min(1, dt * (this.kind === 'kid' ? 3.2 : 1.7)); const fs = Math.hypot(this._fl[0], this._fl[1]); const follow = 0.92 * smooth(0.025, 0.11, fs); // 弱い流れには足で踏んばる
+      const k = Math.min(1, dt * (this.kind === 'kid' ? 3.2 : 1.7)); const fs = Math.hypot(this._fl[0], this._fl[1]); const follow = 0.92 * smooth(0.025, 0.1, fs); // 弱い流れには足で踏んばる
       this.vx += (this._fl[0] * follow - this._sl[0] * 0.3 - this.vx) * k; this.vz += (this._fl[1] * follow - this._sl[1] * 0.3 - this.vz) * k;
       // 子は離れすぎたらゆっくり寄る(置いた関係はすぐ崩さない)
-      if (this.kind === 'kid' && o && o.mode === 'tub' && this.idle > 14 && o.idle > 6) { const dx = o.x - this.x, dz = o.z - this.z, d = Math.hypot(dx, dz); if (d > 0.46) { this.vx += dx / d * 0.012 * dt * 8; this.vz += dz / d * 0.012 * dt * 8; this.heading += angDiff(this.heading, Math.atan2(dz, dx)) * dt * 0.8; this.paddle = 1; } }
+      // (段の上に置かれた子は動かさない。排水・給水中も寄らない)
+      if (this.kind === 'kid' && o && o.mode === 'tub' && o.floating && this.idle > 18 && o.idle > 8 && this.x > L.STEP_X1 + 0.05 && W.drainQ < 1e-6 && W.faucet < 0.02) { const dx = o.x - this.x, dz = o.z - this.z, d = Math.hypot(dx, dz); if (d > 0.46) { this.vx += dx / d * 0.012 * dt * 8; this.vz += dz / d * 0.012 * dt * 8; this.heading += angDiff(this.heading, Math.atan2(dz, dx)) * dt * 0.8; this.paddle = 1; } }
       this.x += this.vx * dt; this.z += this.vz * dt;
       const sp = Math.hypot(this.vx, this.vz); if (sp > 0.05) this.heading += angDiff(this.heading, Math.atan2(this.vz, this.vx)) * Math.min(1, dt * 0.5 * sat(sp / 0.2));
       const c = Math.cos(this.heading), s = Math.sin(this.heading); const fwd = this._sl[0] * c + this._sl[1] * s, lat = -this._sl[0] * s + this._sl[1] * c;

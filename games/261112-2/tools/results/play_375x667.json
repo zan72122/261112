@@ -1,0 +1,547 @@
+{
+ "size": "375x667",
+ "checks": {
+  "start_first_bath": {
+   "pass": true,
+   "info": {
+    "stage": 1,
+    "level": -0.081,
+    "audio": "none"
+   }
+  },
+  "start_targets_visible": {
+   "pass": true,
+   "info": {
+    "handle": [
+     260.2583,
+     274.2531
+    ],
+    "hitR": {
+     "handle": 48,
+     "kid": 40,
+     "parent": 44.3413
+    }
+   }
+  },
+  "hit_areas_64px": {
+   "pass": true,
+   "info": {
+    "handle": 96,
+    "ring": 92,
+    "shower": 100,
+    "towel0": 92,
+    "towel1": 92,
+    "parent": 89,
+    "kid": 80
+   }
+  },
+  "hint_appears_when_idle": {
+   "pass": true,
+   "info": {
+    "hint": "handle",
+    "simT": 4.05
+   }
+  },
+  "hint_retreats_on_touch": {
+   "pass": true,
+   "info": {
+    "handOn": false
+   }
+  },
+  "audio_starts_on_first_touch": {
+   "pass": true,
+   "info": {
+    "audio": "running"
+   }
+  },
+  "short_drag_moves_handle": {
+   "pass": true,
+   "info": {
+    "open": 0.1719,
+    "flow": 0.0189
+   }
+  },
+  "faucet_continuous": {
+   "pass": true,
+   "info": {
+    "open": 0.576
+   }
+  },
+  "d1_kid_floats_on_step_when_filled": {
+   "pass": true,
+   "info": {
+    "level": -0.0703,
+    "simT": 11.2167,
+    "kidY": -0.0837
+   }
+  },
+  "scene2_follows_same_water": {
+   "pass": true,
+   "info": {
+    "scene": 2,
+    "level": -0.0625
+   }
+  },
+  "overflow_outlet_takes_excess": {
+   "pass": true,
+   "info": {
+    "level": -0.0159,
+    "overQ": 2.8863
+   }
+  },
+  "faucet_tap_closes": {
+   "pass": true,
+   "info": {
+    "open": 0
+   }
+  },
+  "stroke_moves_camera_to_water": {
+   "pass": true,
+   "info": {
+    "scene": 2
+   }
+  },
+  "stroking_mixes_foam_and_unlocks_shower": {
+   "pass": true,
+   "info": {
+    "stage": 3,
+    "foam0": 101,
+    "foam": 166,
+    "made": 122
+   }
+  },
+  "scene3_after_mixing": {
+   "pass": true
+  },
+  "d4_parent_displaces_water_onto_rim": {
+   "pass": true,
+   "info": {
+    "levelBefore": -0.0215,
+    "lifted": -0.0305,
+    "maxAfterDrop": -0.0051,
+    "spillPeak": 1,
+    "faucetOpen": 0,
+    "disc": {
+     "floatOnStep": true,
+     "spill": true
+    }
+   }
+  },
+  "shower_unlocked": {
+   "pass": true,
+   "info": {
+    "x": 46.179601428567025,
+    "y": 300.6688229166707,
+    "r": 50,
+    "locked": false
+   }
+  },
+  "shower_wets_feathers_and_parent_lowers_head": {
+   "pass": true,
+   "info": {
+    "neck": 0.95,
+    "hitDuck": 48,
+    "parentWet": [
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  "shower_returns_and_stops": {
+   "pass": true
+  },
+  "stage4_after_shower": {
+   "pass": true
+  },
+  "ring_unlocked": {
+   "pass": true,
+   "info": {
+    "x": 333.028566845506,
+    "y": 541.0986573338051,
+    "r": 46,
+    "locked": false
+   }
+  },
+  "ring_partial_position_drains": {
+   "pass": true,
+   "info": {
+    "ring": 0.0801,
+    "drainQ": 5.6055
+   }
+  },
+  "d1_same_kid_stands_again_when_drained": {
+   "pass": true,
+   "info": {
+    "level": -0.086,
+    "kid": [
+     -0.3863,
+     0.0762
+    ],
+    "floatedBefore": true
+   }
+  },
+  "ring_down_stops_drain": {
+   "pass": true,
+   "info": {
+    "ring": 0,
+    "level": [
+     -0.1124,
+     -0.1124
+    ]
+   }
+  },
+  "d6_swirl_then_drain_gathers_foam": {
+   "pass": true,
+   "info": {
+    "circulation": 0,
+    "foamBefore": 42,
+    "sucked": 98
+   }
+  },
+  "d6_plug_back_stops_suction_foam_remains": {
+   "pass": true,
+   "info": {
+    "level": -0.3397,
+    "foamLeft": 36,
+    "suckedAfterStop": 0
+   }
+  },
+  "d6_ducks_stay_and_waddle_when_water_leaves": {
+   "pass": true,
+   "info": {
+    "level": -0.34,
+    "walked": true,
+    "ducks": [
+     [
+      "parent",
+      0.1781,
+      -0.0281
+     ],
+     [
+      "kid",
+      -0.3809,
+      0.0556
+     ]
+    ]
+   }
+  },
+  "towel_unlocked": {
+   "pass": true
+  },
+  "carry_kid_to_towel": {
+   "pass": true,
+   "info": {
+    "kid": "deck",
+    "stage": 5
+   }
+  },
+  "carry_parent_to_towel": {
+   "pass": true,
+   "info": {
+    "parent": "deck",
+    "scene": 5
+   }
+  },
+  "d7_wipe_one_side_dries_only_that_side": {
+   "pass": true,
+   "info": {
+    "wetBefore": [
+     0.11,
+     0.025,
+     1,
+     1
+    ],
+    "wetAfter": [
+     0.11,
+     0.025,
+     0.9977,
+     0.0015
+    ],
+    "wipedPart": 3,
+    "towel": {
+     "left": 0.1512,
+     "right": 1.9448,
+     "max": 0.2022
+    }
+   }
+  },
+  "carry_kid_to_bed": {
+   "pass": true,
+   "info": {
+    "mode": "bed",
+    "scene": 5
+   }
+  },
+  "d7_wet_side_leaves_stain_on_bed": {
+   "pass": true,
+   "info": {
+    "stainSum": 69.1961,
+    "stainLocalZ": -0.0276,
+    "wetSide": "left(-z)",
+    "kidWet": [
+     0.11,
+     0.025,
+     0.1548,
+     0.0015
+    ]
+   }
+  },
+  "carry_parent_to_bed": {
+   "pass": true
+  },
+  "both_sleep_and_hanamaru": {
+   "pass": true,
+   "info": {
+    "asleep": [
+     0.9404,
+     0.9404
+    ],
+    "card": true,
+    "cycles": 1
+   }
+  },
+  "replay_parent_back_to_tub": {
+   "pass": true,
+   "info": {
+    "mode": "tub",
+    "card": false,
+    "scene": 3
+   }
+  },
+  "state_carries_across_scenes": {
+   "pass": true,
+   "info": {
+    "towelWet": [
+     0.0034,
+     0.0026
+    ],
+    "stain": [
+     460.9647,
+     460.7961
+    ],
+    "parentWet": [
+     [
+      0.8588,
+      1,
+      0.0198,
+      0.0195
+     ],
+     [
+      0.8588,
+      1,
+      0.0198,
+      0.0195
+     ]
+    ]
+   }
+  },
+  "replay_fill_again": {
+   "pass": true,
+   "info": {
+    "level": [
+     -0.34,
+     -0.314
+    ],
+    "scene": 4
+   }
+  },
+  "reload_restores_memory": {
+   "pass": true,
+   "info": {
+    "before": {
+     "stage": 5,
+     "level": -0.3089,
+     "ducks": [
+      [
+       "tub",
+       0.0999,
+       0.0011
+      ],
+      [
+       "bed",
+       0.6499,
+       -0.5742
+      ]
+     ],
+     "towel": 0.0015,
+     "stain": 460.4745
+    },
+    "after": {
+     "stage": 5,
+     "level": -0.3089,
+     "ducks": [
+      [
+       "tub",
+       0.0999,
+       0.0011
+      ],
+      [
+       "bed",
+       0.6499,
+       -0.5742
+      ]
+     ],
+     "towel": 0.0013,
+     "stain": 460.6706
+    }
+   }
+  },
+  "no_console_errors": {
+   "pass": true,
+   "info": []
+  },
+  "no_external_requests": {
+   "pass": true,
+   "info": []
+  }
+ },
+ "notes": {},
+ "timeline": [
+  {
+   "label": "start",
+   "wall": 0,
+   "simT": 0.05,
+   "stage": 1,
+   "scene": 1,
+   "level": -0.081,
+   "foam": 42,
+   "fps": 0.5708
+  },
+  {
+   "label": "faucet_open",
+   "wall": 67.9,
+   "simT": 9.8,
+   "stage": 1,
+   "scene": 1,
+   "level": -0.0791,
+   "foam": 42,
+   "fps": 3.4495
+  },
+  {
+   "label": "kid_floats",
+   "wall": 69.3,
+   "simT": 11.2167,
+   "stage": 1,
+   "scene": 1,
+   "level": -0.0703,
+   "foam": 48,
+   "fps": 6.6661
+  },
+  {
+   "label": "full",
+   "wall": 79.8,
+   "simT": 21.2667,
+   "stage": 2,
+   "scene": 2,
+   "level": -0.0159,
+   "foam": 96,
+   "fps": 3.645
+  },
+  {
+   "label": "stroked",
+   "wall": 151.7,
+   "simT": 64.55,
+   "stage": 3,
+   "scene": 2,
+   "level": -0.0222,
+   "foam": 166,
+   "fps": 4.8379
+  },
+  {
+   "label": "parent_dropped",
+   "wall": 161.6,
+   "simT": 74.05,
+   "stage": 3,
+   "scene": 3,
+   "level": -0.0107,
+   "foam": 168,
+   "fps": 3.4214
+  },
+  {
+   "label": "washed",
+   "wall": 204,
+   "simT": 88.9833,
+   "stage": 4,
+   "scene": 4,
+   "level": -0.018,
+   "foam": 161,
+   "fps": 1.5615
+  },
+  {
+   "label": "kid_stands_again",
+   "wall": 224.5,
+   "simT": 101.5833,
+   "stage": 4,
+   "scene": 4,
+   "level": -0.086,
+   "foam": 73,
+   "fps": 4.8407
+  },
+  {
+   "label": "mid_drain",
+   "wall": 285.7,
+   "simT": 158.6667,
+   "stage": 4,
+   "scene": 4,
+   "level": -0.3397,
+   "foam": 33,
+   "fps": 4.7286
+  },
+  {
+   "label": "drained",
+   "wall": 294.2,
+   "simT": 167.0333,
+   "stage": 4,
+   "scene": 4,
+   "level": -0.34,
+   "foam": 25,
+   "fps": 5.6465
+  },
+  {
+   "label": "on_towel",
+   "wall": 320,
+   "simT": 185.95,
+   "stage": 5,
+   "scene": 5,
+   "level": -0.34,
+   "foam": 17,
+   "fps": 6.3137
+  },
+  {
+   "label": "wiped",
+   "wall": 349.1,
+   "simT": 210.85,
+   "stage": 5,
+   "scene": 5,
+   "level": -0.34,
+   "foam": 14,
+   "fps": 8.6182
+  },
+  {
+   "label": "asleep",
+   "wall": 368.3,
+   "simT": 230.0833,
+   "stage": 5,
+   "scene": 5,
+   "level": -0.34,
+   "foam": 11,
+   "fps": 7.4467
+  },
+  {
+   "label": "replay",
+   "wall": 398.7,
+   "simT": 256.3333,
+   "stage": 5,
+   "scene": 4,
+   "level": -0.3089,
+   "foam": 21,
+   "fps": 6.8527
+  }
+ ],
+ "seconds": 407,
+ "passed": 41,
+ "total": 41,
+ "mode": "操作検証は軽量描画(q=low, rs=0.3, lite=1)。撮影時のみ高品質へ切替"
+}

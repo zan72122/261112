@@ -74,7 +74,7 @@ float tw = smoothstep(0.03, 0.75, vTw); diffuseColor.rgb *= mix(vec3(1.0), vec3(
     if (ns) for (let i = CW; i < n; i++) { const k = i * 3; const x = p[k], y = p[k + 1], z = p[k + 2];
       for (let s = 0; s < ns; s++) { const sp = this.sph[s]; const dx = x - sp.x, dy = y - sp.y, dz = z - sp.z; const rr = sp.w + 0.016; if (dx * dx + dy * dy + dz * dz < rr * rr) { const duck = this.duckOf(s); const part = s % 3 === 2 ? 0 : duck.partAt(x, y, z);
           const sp2 = Math.hypot(p[k] - q[k], p[k + 1] - q[k + 1], p[k + 2] - q[k + 2]) / dt; contact++; rub += sp2;
-          const w = duck.wet[part]; const room = 1 - this.wet[i]; let hand = 0; if (gi >= 0) { const gc = this.grab ? CW - 1 : 0; const dc = Math.abs((i % CW) - gc), dr = CH - 1 - Math.floor(i / CW); hand = 1 - sat((Math.hypot(dc, dr) - 3.5) / 3.5); } // 指で押さえている端の近くだけがよく拭ける
+          const w = duck.wet[part]; const room = 1 - this.wet[i]; let hand = 0; if (gi >= 0) { const gc = this.grab ? CW - 1 : 0; const dc = Math.abs((i % CW) - gc), dr = CH - 1 - Math.floor(i / CW); hand = 1 - sat((Math.hypot(dc, dr) - 2.0) / 2.2); } // 指で押さえている端の近くだけがよく拭ける
           if (w > 0.002 && room > 0.02) { const amt = Math.min(w, dt * (0.0015 + hand * sat((sp2 - 0.03) / 0.3) * (duck.kind === 'kid' ? 0.3 : 0.2)) * room); duck.wet[part] = w - amt; this.wet[i] = Math.min(1, this.wet[i] + amt * (duck.kind === 'kid' ? 2.4 : 4.2)); duck.wiped = (duck.wiped || 0) + amt; if (w > 0.06 && duck.wet[part] <= 0.06) { duck.wag = 0.9; duck.shake = 0.5; G.audio.voice(duck.kind, 0.6); } }
           if (duck.foam[part] > 0) duck.foam[part] = Math.max(0, duck.foam[part] - dt * 0.25);
           break; } } }

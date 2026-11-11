@@ -26,6 +26,10 @@ p();
 const ref = plays['820x1180'] || plays[sizes.find((s) => plays[s])];
 if (ref) { p('### 820×1180 での実測値(抜粋)'); p('```'); for (const [k, v] of Object.entries(ref.checks)) p(`${v.pass ? 'PASS' : 'FAIL'} ${k} ${v.info === undefined ? '' : JSON.stringify(v.info)}`); p('```'); p(); p('進行の記録 (wall=実時間秒, simT=ゲーム内秒):'); p('```'); for (const t of ref.timeline) p(JSON.stringify(t)); p('```'); }
 p();
+p('蛇口を開け終えてから子のおなかが浮くまで(ゲーム内時間) / 最初の画面から二羽が眠るまでに使ったゲーム内時間:'); p();
+p('| 画面 | 開栓→子が浮く | 眠るまで |'); p('|---|---|---|');
+for (const s of sizes) { const r = plays[s]; if (!r) continue; const t = Object.fromEntries(r.timeline.map((x) => [x.label, x])); if (t.kid_floats && t.faucet_open && t.asleep) p(`| ${s} | ${(t.kid_floats.simT - t.faucet_open.simT).toFixed(1)} 秒 | ${t.asleep.simT.toFixed(0)} 秒 |`); }
+p(); p('(検証スクリプトの操作は待ち時間を含むので、眠るまでの時間は子どもの実プレイ時間の目安ではない)'); p();
 p('## 2. 発見の比較実験 (条件をそろえた A/B)');
 p('`tools/disc.cjs`。あひると泡の初期配置だけは保存データの読込経路でそろえ(=再現性のため)、そこからの操作は実際のタッチ。発見 1・4・6・7 は上の通し遊びの中でも確認している。');
 p();
@@ -34,7 +38,7 @@ if (d2) { p('**発見2 壁へのひとなでで泡の帯が折り返す**: 泡�
 if (d3) { p('**発見3 親が流れを分け、後ろの子の揺れが小さい**'); p('```'); p('親が間にいる  : ' + JSON.stringify(d3.d3_true)); p('親をどけた    : ' + JSON.stringify(d3.d3_false)); p('```'); p(); }
 if (d4) { p('**発見4 満水近くで親を下ろすと縁へ水が乗る / 少ない水では乗らない**'); p('```'); for (const [k, v] of Object.entries(d4)) p(k + ': ' + JSON.stringify(v)); p('```'); p(); }
 if (d5) { p('**発見5 泡帽子へ横からシャワー → 隣の子の背へ / 離れていれば水面へ**'); p('```'); p('子が隣    : ' + JSON.stringify(d5.d5_true)); p('子が離れる: ' + JSON.stringify(d5.d5_false)); p('```'); p(); }
-if (d7) { p('**発見7 片側だけ拭いて寝床へ → 濡れた側の下にだけ水跡 / 置く向きで跡の位置が変わる**'); p('```'); for (const [k, v] of Object.entries(d7)) p(k + ': ' + JSON.stringify({ wetAfterWipe: v.wetAfterWipe, heading: v.heading, stain: v.stain, stainLocalZ: v.stainLocalZ, kid: v.kid })); p('```'); p(); }
+if (d7) { p('**発見7 片側だけ拭いて寝床へ → 濡れた側の下にだけ水跡 / 置く向きで跡の位置が変わる**'); p('```'); for (const [k, v] of Object.entries(d7)) p(k + ': ' + JSON.stringify({ wetAfterWipe: v.wetAfterWipe, heading: v.heading, stain: v.stain, stainLocalZ: v.stainLocalZ, stainWorldDz: v.stainWorldDz, kid: v.kid })); p('```'); p(); }
 p('## 3. 壊れにくさ');
 const rb = rd('robust.json'); if (rb) { p(`\`tools/robust.cjs\`: ${rb.passed} / ${rb.total} 合格`); p('```'); for (const [k, v] of Object.entries(rb.checks)) p(`${v.pass ? 'PASS' : 'FAIL'} ${k} ${v.info === undefined ? '' : JSON.stringify(v.info)}`); p('```'); } else p('未実施');
 p();
@@ -42,14 +46,26 @@ p('## 4. 描画速度 (ヘッドレス・ソフトウェア描画での実測)')
 p('`tools/perf.cjs`。各場面を 7 秒暖機したあと 10 秒間のフレーム数を数えた。「high」= 通常品質(屈折つきの水・産毛の層 11 枚・影 2048)、「low」= 低負荷モード(水は半透明反射・産毛 6 枚・影 1024 を隔フレーム更新・泡の上限 230)。');
 p();
 const pf = fs.readdirSync(dir).filter((f) => f.startsWith('perf_')).map((f) => rd(f)).filter(Boolean);
-if (pf.length) { p('| 画面 | 品質 | 場面 | fps | 描画命令数 | 三角形数 | JS 物理 ms/フレーム |'); p('|---|---|---|---|---|---|---|'); for (const f of pf) for (const r of f.rows) p(`| ${r.size} | ${r.quality} | ${r.scene} | ${r.fps} | ${r.drawCalls} | ${r.triangles} | ${r.jsSimMsPerFrame} |`); p(); p('ソフトウェア描画のため fps は GPU 搭載機より桁違いに低い。iPad での 30fps は**未検証**。JS 側の物理(水・泡・布)は 1 ステップ 1ms 未満で、負荷の大半は描画。'); } else p('未実施');
+if (pf.length) { p('| 画面 | 品質 | 場面 | fps | 描画命令数 | 三角形数 | JS 物理 ms/フレーム |'); p('|---|---|---|---|---|---|---|'); for (const f of pf) for (const r of f.rows) p(`| ${r.size} | ${r.quality} | ${r.scene} | ${r.fps} | ${r.drawCalls} | ${r.triangles} | ${r.jsSimMsPerFrame} |`); p(); p('ソフトウェア描画のため fps は GPU 搭載機より桁違いに低い(0.1〜2fps)。iPad での 30fps は**未検証**。JS 側の物理(水・泡・布)は表のとおり 1 フレームあたりおおむね 1ms 前後(数ステップまとめて進めたフレームで 10ms 程度)で、負荷の大半は描画側。品質自動調整は、この遅い環境で解像度 1.0→0.55 倍→低負荷モードの順に切り替わることを確認(3 章 auto_lowers_resolution_then_low_mode)。'); } else p('未実施');
 p();
 p('## 5. スクリーンショット');
-const shots = fs.readdirSync(path.resolve(__dirname, 'shots')).filter((f) => f.endsWith('.png')); p(`\`tools/shots/\` に ${shots.length} 枚。通し遊びの各場面を 4 サイズで撮影:`); p(); for (const s of shots) p('- ' + s);
+const shots = fs.readdirSync(path.resolve(__dirname, 'shots')).filter((f) => f.endsWith('.jpg')); p(`\`tools/shots/\` に ${shots.length} 枚。通し遊びの各場面を 4 サイズで撮影:`); p(); for (const s of shots) p('- ' + s);
 p();
-p('## 6. 確認していないこと');
+p('## 6. 検証で見つけて直したこと');
+p('- 低い描画速度だとタップが「長押し扱い」になり蛇口が閉まらなかった → 動かさずに離せばタップと判定');
+p('- 指の報告間隔が粗いと、シャワーの向き・あひるの向き・水を押す強さが変わってしまった → 少し遅れて追う点を基準にして間隔に依存しないようにした');
+p('- オーバーフローが速すぎて、親を下ろしても水位が上がって見えなかった → 流出量に上限を設け、縁へ乗ってから戻るようにした');
+p('- 排水の渦が遠くの子まで運び、段に置いた子が立ち直る前に流されていた / 放置で子が段を離れていた → 渦は排水口の近くだけ、段の上の子は自分から動かない');
+p('- タオルが体全体を一度に乾かしてしまい片側だけ拭けなかった → 指で押さえている端の近くだけがよく拭ける');
+p('- 親が波も流れもほとんど遮らなかった → 親の体のまわりで波が静まり、流れは体を回り込む(発見3の実測参照)');
+p('- 非常に遅い端末では品質の自動引き下げが働かなかった → 長いフレームも遅さとして数える');
+p('- 水かさの多い状態の子の産毛が、ガラス質の暗い色に見えていた → 濡れ色と水滴の描き方を修正');
+p();
+p('## 7. 確認していないこと');
 p('- iPad / iPhone 実機での表示・タッチ・音・fps (Safari の WebGL、Safe Area の実寸、音の解禁挙動を含む)');
 p('- 実際の 5 歳児による初見プレイ(説明なしで成立するかは、当たり判定の大きさ・お手本の指・解放順の確認にとどまる)');
 p('- 音の聞こえ方(合成音の生成と開始状態は確認、音質は未聴取)');
 p('- 高品質設定のままの通し操作(操作検証は軽量描画で実施。高品質は撮影と fps 測定のみ)');
+p('- 「最初のタッチから 100ms 以内の反応」の実時間計測(処理上はタッチと同じフレームで取っ手が動き音が鳴るが、この環境は 1 フレームが 100ms を超えるため実時間では確かめられない)');
+p('- 親が波・流れを遮る効果(発見3)は数値で確認したが、子どもの目に「分かれて見える」かは未確認。素早く払うなで方での実測であり、ゆっくりなでると流れは弱い');
 fs.writeFileSync(path.resolve(__dirname, '../VERIFY.md'), L.join('\n') + '\n'); console.log('VERIFY.md', L.length, 'lines');

@@ -10,7 +10,7 @@ const FRAMES = {
   2: { pitch: [52, 54], pts: [[-0.57, 0, 0.36], [0.59, 0, 0.36], [-0.57, 0, -0.38], [0.59, 0, -0.38], [-0.1, 0.33, -0.5], [0, 0.26, 0], [0.56, 0.2, 0.1]] },
   3: { pitch: [45, 48], pts: [[-0.63, 0, 0.42], [0.63, 0, 0.42], [-0.66, 0.0, -0.45], [0.63, 0.0, -0.45], [-0.6, 0.5, -0.84], [-0.1, 0.27, -0.5], [0, 0.3, 0]] },
   4: { pitch: [43, 45], pts: [[-0.62, 0, 0.42], [0.63, 0, 0.42], [-0.62, 0.0, -0.45], [0.86, 0.0, -0.5], [T.x0 - 0.06, T.railY + 0.06, L.WALL_Z], [T.x1 + 0.05, T.railY + 0.06, L.WALL_Z], [B.x + B.rx, 0.1, B.z], [0.58, 0.2, 0.1], [B.x + 0.1, 0.48, L.WALL_Z]] },
-  5: { pitch: [44, 48], vb: 0.2, pts: [[T.x0 - 0.2, 0, -0.36], [B.x + B.rx + 0.03, 0, -0.36], [T.x0 - 0.14, T.railY + 0.05, L.WALL_Z], [B.x + 0.1, 0.5, L.WALL_Z], [B.x + B.rx + 0.02, 0.12, B.z], [T.x0 - 0.2, 0.3, -0.55]] },
+  5: { pitch: [44, 48], vb: [0.2, 0.74], pts: [[T.x0 - 0.2, 0, -0.36], [B.x + B.rx + 0.03, 0, -0.36], [T.x0 - 0.14, T.railY + 0.05, L.WALL_Z], [B.x + 0.1, 0.5, L.WALL_Z], [B.x + B.rx + 0.02, 0.12, B.z], [T.x0 - 0.2, 0.3, -0.55]] },
 };
 
 export class CameraRig {
@@ -38,7 +38,7 @@ export class CameraRig {
     // 余った方向は「奥を多めに見せる」側へ寄せる
     const range = (key, tanA, tanB) => { let lo = -Infinity, hi = Infinity; for (const p of pr) { const dd = p.f - cf; lo = Math.max(lo, p[key] - dd * tanB); hi = Math.min(hi, p[key] + dd * tanA); } return [lo, hi]; };
     const [ulo, uhi] = range('u', tv * (1 - 2 * mB), tv * (1 - 2 * mT)); const [rlo, rhi] = range('r', th * (1 - 2 * mL), th * (1 - 2 * mR));
-    const cu2 = uhi >= ulo ? ulo + (uhi - ulo) * (fr.vb === undefined ? (portrait ? 0.93 : 0.6) : fr.vb) : cu; const cr2 = rhi >= rlo ? (rlo + rhi) / 2 : cr;
+    const cu2 = uhi >= ulo ? ulo + (uhi - ulo) * (fr.vb === undefined ? (portrait ? 0.93 : 0.6) : fr.vb[portrait ? 1 : 0]) : cu; const cr2 = rhi >= rlo ? (rlo + rhi) / 2 : cr;
     this.tPos.set(cr2, 0, 0).addScaledVector(U, cu2).addScaledVector(F, cf); this.tPitch = pitch;
   }
   update(dt) {
