@@ -117,11 +117,12 @@ export class Washer {
     const fl = om > 6 ? lerp(0.85, 0.3, clamp((om - 6) / 8, 0, 1)) : 2, rate = 0.35 + 0.13 * Math.max(0, om - 6);
     for (const c of G.list) {
       if (c.loc !== 'drum' || !c.frame) continue;
-      let wall = 0, cnt = 0;
+      let wall = 0, cnt = 0, slip = 0;
       for (let i = 0; i < c.n; i++) {
         if (!c.active[i]) continue; cnt++;
         const a = i * 3, x = c.p[a], y = c.p[a + 1], yw = x * sn + y * cs;
-        if (Math.hypot(x, y) > L.drum.R - 0.075) wall++;
+        slip += Math.hypot(x - c.q[a], y - c.q[a + 1]);
+        if (Math.hypot(x, y) > L.drum.R - 0.1) wall++;
         if (this.water > 0.03 && yw < ys + 0.01) {
           if (c.wetF[i] < 1) { c.wetF[i] = Math.min(1, c.wetF[i] + dt * 5); c.wetB[i] = Math.min(1, c.wetB[i] + dt * 5); }
           if (zone === 'wash' && om > 2 && c.dirt[i] > 0) { const d = Math.min(c.dirt[i], dt * 0.2); c.dirt[i] -= d; removed += d; }
@@ -133,9 +134,11 @@ export class Washer {
           if (c.wetB[i] > fl) { const d = (c.wetB[i] - fl) * rate * dt; c.wetB[i] -= d; extracted += d; }
         }
       }
-      const onWall = wall > cnt * 0.72 && om > 5.5;
+      // pressed on the wall = lying against it AND turning with the drum (a heap sliding along the bottom is not)
+      c.slip = (c.slip || 0) * 0.8 + (slip / cnt / H) / Math.max(0.5, om * L.drum.R) * 0.2;
+      const onWall = wall > cnt * 0.7 && om > 5.5 && c.slip < 0.3;
       if (onWall) c.stickT = (c.stickT || 0) + dt; else if (om < 5) c.stickT = Math.max(0, (c.stickT || 0) - dt * 0.6);
-      if (c.onWall && wall < cnt * 0.45) { c.onWall = false; au.play('wetthud', 0.6); }
+      if (c.onWall && (wall < cnt * 0.45 || c.slip > 0.5 || om < 5.5)) { c.onWall = false; au.play('wetthud', 0.6); }
       else if (!c.onWall && onWall) c.onWall = true;
       c.updateWetMean();
       if (c.wrap && this.water < 0.03 && om > 6) c.wrap.spun = true;
@@ -220,7 +223,7 @@ export class Washer {
     const gx = -9.8 * sn, gy = -9.8 * cs, R = L.drum.R, ys = YS0 + this.water * WDEPTH, wet = this.water > 0.03;
     const corK = clamp(1 - (Math.abs(om) - 5) / 3, 0, 1), om2 = om * om;
     for (const c of drumCloths) {
-      const p = c.p, q = c.q, e = c.ext, rr = c.rad * 0.7, adh = (c.adh || 1) * clamp(c.wetMean, 0, 1) * (Math.abs(om) > 4 ? 1 : 0);
+      const p = c.p, q = c.q, e = c.ext, rr = c.rad * 0.7, adh = (c.adh || 1) * clamp(c.wetMean * 2.5, 0, 1) * (Math.abs(om) > 4 ? 1 : 0);
       for (let i = 0; i < c.n; i++) {
         if (!c.active[i]) continue; const a = i * 3, x = p[a], y = p[a + 1];
         const vx = (x - q[a]) / H, vy = (y - q[a + 1]) / H, vz = (p[a + 2] - q[a + 2]) / H;

@@ -20,7 +20,7 @@ const sane = (st) => Object.values(st.cloths).every((c) => ['basket', 'drum', 'r
     await T.raw('touchMove', [{ x: s.x + 30, y: s.y - 30, id: 0 }]); await T.wait(100);
     await T.raw('touchStart', [{ x: s.x + 30, y: s.y - 30, id: 0 }, { x: hd.x, y: hd.y, id: 1 }]); await T.wait(150);   // second finger on the door handle
     await T.raw('touchMove', [{ x: s.x + 60, y: s.y - 60, id: 0 }, { x: hd.x + 20, y: hd.y, id: 1 }]); await T.wait(150);
-    await T.raw('touchEnd', [{ x: s.x + 60, y: s.y - 60, id: 0 }]); await T.wait(300);
+    await T.raw('touchMove', [{ x: s.x + 60, y: s.y - 60, id: 0 }]); await T.wait(300);   // the second finger lifts (CDP: a point missing from the list is released)
     st = await T.state(); check('a second finger is ignored: the sleeve stays held, the door handle did nothing', st.cloths.shirt.grab >= 0 && st.m.door === 1 && Object.values(st.cloths).filter((c) => c.grab >= 0).length === 1, { grab: st.cloths.shirt.grab, door: st.m.door });
     for (let i = 1; i <= 8; i++) { await T.raw('touchMove', [{ x: s.x + 60 + (port.x - s.x - 60) * i / 8, y: s.y - 60 + (port.y - s.y + 60) * i / 8, id: 0 }]); await T.wait(60); }
     await T.wait(200); await T.raw('touchEnd', []); await T.until(() => { const c = __G.cl.shirt; return c.loc === 'drum' && c.insert <= 0; }, null, 25000);

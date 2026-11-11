@@ -221,7 +221,7 @@ export class Dry {
     this.simT += dt;
     if (st.tz !== null) { st.z += clamp(st.tz - st.z, -dt * 1.3, dt * 1.3); if (Math.abs(st.tz - st.z) < 0.002) st.tz = null; }
     W.stand.position.z = st.z;
-    const t = this.simT; this.windBase = 0.8 + 2.1 * n1(t * 0.27, 3) + 1.1 * n1(t * 1.05, 5);
+    const t = this.simT; this.windBase = 1.0 + 1.9 * n1(t * 0.3, 3) + 1.0 * n1(t * 1.15, 5) + 0.45 * Math.sin(t * 2.1 + 1.4 * Math.sin(t * 0.63));   // a breeze that never quite settles
     // pins
     for (const pin of this.pins) {
       if (pin.state === 'fly') { const f = pin.fly; f.t = Math.min(1, f.t + dt * 2.6); pin.state = 'tray'; const dst = this.pinWorld(pin, this._v); pin.state = 'fly'; pin.pos.lerpVectors(f.from, dst, f.t * f.t * (3 - 2 * f.t)); pin.pos.y += Math.sin(f.t * Math.PI) * 0.12; if (f.t >= 1) { pin.state = 'tray'; au.play('click', 0.4); } }
@@ -232,7 +232,7 @@ export class Dry {
     }
     // rain: passes once per wash while laundry is out
     const R = this.rainS, anyRod = G.list.some((c) => c.rod);
-    if (R.state === 'idle') { if (onBal && anyRod && G.progress.rainFor !== G.progress.washCount) { R.t += dt; if (R.t > 48) { R.state = 'rain'; R.t = 0; } } }
+    if (R.state === 'idle') { if (onBal && anyRod && G.progress.rainFor !== G.progress.washCount) { R.t += dt; if (R.t > 55) { R.state = 'rain'; R.t = 0; } } }
     else if (R.state === 'rain') { R.t += dt; R.k = Math.min(1, R.t / 2.5) * clamp((21 - R.t) / 3.5, 0, 1); if (R.t >= 21) { R.state = 'idle'; R.t = 0; R.k = 0; G.progress.rainFor = G.progress.washCount; G.markDirty(); } }
     G.sunK = 1 - 0.42 * R.k;
     this.wetFloor = R.k > 0.05 ? Math.min(1, this.wetFloor + dt * 0.35 * R.k) : Math.max(0, this.wetFloor - dt * 0.03);

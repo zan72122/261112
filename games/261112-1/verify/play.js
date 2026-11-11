@@ -16,14 +16,19 @@ function check(name, ok, detail) { R.checks.push({ name, ok: !!ok, detail }); co
   const shot = (n) => T.shot(path.join(OUT, n + '.png'));
   const V3 = 'new (__G.cam.pos.constructor)()';
   const partPt = (id, i, j) => T.ev(([id, i, j]) => __T.part(id, __G.cl[id].idx(i, j)), [id, i, j]);
-  const grabPoint = (id) => T.ev((id) => { const G = __G, c = G.cl[id], f = (o) => o.site === G.station && (o.loc === 'basket' || o.loc === 'rod' || (o.loc === 'drum' && !o.frame)); let best = null;
-    for (let k = 0; k < c.n; k++) { if (!c.active[k]) continue; const w = __T.wpart(id, k), s = __T.part(id, k); if (s.x < 8 || s.y < 8 || s.x > G.vw - 8 || s.y > G.vh - 8) continue; const np = G.nearParticle(s.x, s.y, f); if (np && np.c === c && (!best || w[1] > best.wy)) best = { x: s.x, y: s.y, wy: w[1], k }; }
-    if (!best && c.loc === 'basket') { // lying low behind the basket wall: reach in just under the rim, above where it lies
-      const b = G.basket, bal = G.station === 'bal', v = c.center(new (G.cam.pos.constructor)()), s = __T.pt(v.x, v.y, v.z);
+  // candidate touch points on a piece (highest on screen first); the last resort reaches in just under the basket rim
+  const grabPoints = (id) => T.ev((id) => { const G = __G, c = G.cl[id], f = (o) => o.site === G.station && (o.loc === 'basket' || o.loc === 'rod' || (o.loc === 'drum' && !o.frame)), out = [];
+    for (let k = 0; k < c.n; k++) { if (!c.active[k]) continue; const w = __T.wpart(id, k), s = __T.part(id, k); if (s.x < 8 || s.y < 8 || s.x > G.vw - 8 || s.y > G.vh - 8) continue; const np = G.nearParticle(s.x, s.y, f); if (np && np.c === c) out.push({ x: s.x, y: s.y, wy: w[1], k, zone: __T.zone(s.x, s.y) }); }
+    out.sort((p, q) => p.y - q.y); const pick = []; for (let i = 0; i < out.length && pick.length < 10; i += Math.max(1, Math.floor(out.length / 10))) pick.push(out[i]);
+    if (c.loc === 'basket') { const b = G.basket, bal = G.station === 'bal', v = c.center(new (G.cam.pos.constructor)()), s = __T.pt(v.x, v.y, v.z);
       const t0 = bal ? __T.pt(b.x + 0.3, b.y + 0.15, b.z + 0.21) : __T.pt(b.x - 0.3, b.y + 0.15, b.z + 0.21), t1 = bal ? __T.pt(b.x + 0.3, b.y + 0.15, b.z - 0.21) : __T.pt(b.x + 0.3, b.y + 0.15, b.z + 0.21);
-      const x = Math.max(Math.min(t0.x, t1.x) + 6, Math.min(Math.max(t0.x, t1.x) - 6, s.x)), u = (x - t0.x) / ((t1.x - t0.x) || 1); best = { x, y: t0.y + (t1.y - t0.y) * u + 9, fish: true, centre: [v.x, v.y, v.z] }; }
-    return best; }, id);
-  const clothTo = async (id, x, y, o = {}) => { const g = await grabPoint(id); if (!g) throw new Error('no grab point: ' + id); await T.drag([[g.x, g.y], [x, y]], o.ms || 850, o.hold || 280); };
+      const x = Math.max(Math.min(t0.x, t1.x) + 6, Math.min(Math.max(t0.x, t1.x) - 6, s.x)), u = (x - t0.x) / ((t1.x - t0.x) || 1); pick.push({ x, y: t0.y + (t1.y - t0.y) * u + 9, fish: true }); }
+    return pick; }, id);
+  const grabPoint = async (id) => (await grabPoints(id))[0] || null;
+  // put the finger down on the piece; if something else answered (e.g. the basket wall), lift off and try the next point
+  const grabDown = async (id) => { const pts = await grabPoints(id); for (const g of pts) { await T.down(g.x, g.y); await T.wait(130); const hit = await T.ev(() => __G.drag && __G.drag.kind === 'cloth' ? __G.drag.c.id : (__G.drag ? __G.drag.kind : null)); if (hit === id) return g; await T.cancel(); await T.wait(500); R.notes.retouch = (R.notes.retouch || []).concat([{ id, hit, zone: g.zone || (g.fish ? 'fish' : null) }]); } const diag = await T.ev((id) => { const G = __G, c = G.cl[id], v = c.center(new (G.cam.pos.constructor)()), b = G.basket, scr = []; for (let k = 0; k < c.n; k += 4) { const s = __T.part(id, k); scr.push([Math.round(s.x), Math.round(s.y)]); } return { loc: c.loc, site: c.site, station: G.station, grab: c.grab, homing: c.homing, frame: !!c.frame, cen: v.toArray().map((x) => +x.toFixed(3)), basket: [b.x, b.y, b.z, b.station], finite: Array.from(c.p).every(isFinite), scr, others: G.list.map((o) => [o.id, o.loc, o.site, o.center(new (G.cam.pos.constructor)()).toArray().map((x) => +x.toFixed(2))]) }; }, id);
+    throw new Error('could not take hold of ' + id + ' (' + pts.length + ' points tried) ' + JSON.stringify(diag)); };
+  const clothTo = async (id, x, y, o = {}) => { const g = await grabDown(id), ms = o.ms || 850, steps = Math.max(8, Math.round(ms / 45)); for (let i = 1; i <= steps; i++) { await T.move(g.x + (x - g.x) * i / steps, g.y + (y - g.y) * i / steps); await T.wait(ms / steps); } await T.wait(o.hold || 280); await T.up(); };
   const portPt = () => T.pt(0, 0.45, 0.27);
   const toPort = async (id) => { const p = await portPt(); await clothTo(id, p.x, p.y); await T.until((id) => { const c = __G.cl[id]; return c.loc === 'drum' && c.insert <= 0 && c.settle <= 0; }, id, 25000); await T.wait(500); };
   const basketTop = () => T.ev(() => { const b = __G.basket; return __T.pt(b.x, b.y + 0.3, b.z); });
@@ -32,9 +37,13 @@ function check(name, ok, detail) { R.checks.push({ name, ok: !!ok, detail }); co
   const tapHandle = async () => { const h = await handlePt(); await T.tap(h.x, h.y); };
   const knobTo = async (target) => { for (let n = 0; n < 14; n++) { const v = (await S()).m.knob; if (Math.abs(v - target) < 0.02) return v; const c = await T.pt(0.14, 0.785, 0.313), e = await T.pt(0.19, 0.785, 0.313), r = Math.abs(e.x - c.x) * 0.9; const ang = (u) => 2.44 - u * 4.88, P = (u) => [c.x - Math.sin(ang(u)) * r, c.y - Math.cos(ang(u)) * r]; const to = Math.max(0, Math.min(1, v + Math.max(-0.3, Math.min(0.3, target - v)))), pts = []; for (let i = 0; i <= 8; i++) pts.push(P(v + (to - v) * i / 8)); await T.drag(pts, 450, 70); } return (await S()).m.knob; };
   const settled = () => T.until(() => !__T.state().transit && !__G.basket.tween, null, 90000);
-  // a point low on the basket's visible wall with no laundry hanging over it
-  const bFront = () => T.ev(() => { const G = __G, b = G.basket, bal = G.station === 'bal', R = G.pickR(); let best = null; for (const u of [0, -0.3, 0.3, -0.6, 0.6, -0.8, 0.8]) { const p = bal ? __T.pt(b.x + 0.3, b.y + 0.04, b.z + u * 0.21) : __T.pt(b.x + u * 0.3, b.y + 0.04, b.z + 0.21); let near = 1e9; for (const c of G.list) { if (c.loc !== 'basket') continue; for (let k = 0; k < c.n; k++) { if (!c.active[k]) continue; if (Math.abs(c.p[k * 3] - b.x) < 0.3 && Math.abs(c.p[k * 3 + 2] - b.z) < 0.21) continue; const s = __T.part(c.id, k); near = Math.min(near, Math.hypot(s.x - p.x, s.y - p.y)); } } if (near > R * 1.2) return p; if (!best || near > best.near) best = Object.assign(p, { near }); } return best; });
-  const carry = async (toPtFn) => { const a = await bFront(); await T.down(a.x, a.y); await T.wait(700); const st0 = (await S()).station; for (let i = 0; i < 40; i++) { const to = await toPtFn(); const cur = await bFront(); if ((await S()).station !== st0) break; const dx = to.x - cur.x, dy = to.y - cur.y, d = Math.hypot(dx, dy) || 1, stp = Math.min(d, 46); a.x += dx / d * stp; a.y += dy / d * stp; await T.move(a.x, a.y); await T.wait(90); } await T.up(); await settled(); await T.wait(1200); };
+  // where to take hold of the basket: its leather grip facing the viewer, else low on the visible wall
+  const bPoints = () => T.ev(() => { const G = __G, b = G.basket, bal = G.station === 'bal', cam = G.cam.pos, out = [];
+    const g = [[b.x, b.y + 0.12, b.z + 0.222], [b.x, b.y + 0.12, b.z - 0.222]].sort((p, q) => Math.hypot(p[0] - cam.x, p[2] - cam.z) - Math.hypot(q[0] - cam.x, q[2] - cam.z))[0]; out.push(__T.pt(g[0], g[1], g[2]));
+    for (const u of [0, -0.5, 0.5, -0.8, 0.8]) out.push(bal ? __T.pt(b.x + 0.3, b.y + 0.035, b.z + u * 0.21) : __T.pt(b.x + u * 0.3, b.y + 0.035, b.z + 0.21)); return out; });
+  const bDown = async () => { for (const p of await bPoints()) { await T.down(p.x, p.y); await T.wait(130); const k = await T.ev(() => __G.drag && __G.drag.kind); if (k === 'basket') return p; await T.cancel(); await T.wait(500); } throw new Error('could not take hold of the basket'); };
+  const bFront = async () => (await bPoints())[0];
+  const carry = async (toPtFn) => { const a = await bDown(), ref0 = await bFront(); const off = { x: a.x - ref0.x, y: a.y - ref0.y }; await T.wait(600); const st0 = (await S()).station; for (let i = 0; i < 90; i++) { const to = await toPtFn(); const c0 = await bFront(), cur = { x: c0.x + off.x, y: c0.y + off.y }; if ((await S()).station !== st0) break; const dx = to.x - cur.x, dy = to.y - cur.y, d = Math.hypot(dx, dy) || 1, stp = Math.min(d, 46); a.x = Math.max(4, Math.min(W - 4, a.x + dx / d * stp)); a.y = Math.max(4, Math.min(H - 4, a.y + dy / d * stp)); await T.move(a.x, a.y); await T.wait(90); } await T.wait(400); await T.up(); await settled(); await T.wait(1200); };
   const rodPt = (r, dz) => T.ev(([r, dz]) => { const L = [{ x: 2.45, y: 1.30 }, { x: 2.85, y: 1.02 }][r]; return __T.pt(L.x, L.y, __G.dry.stand.z + dz); }, [r, dz]);
   const pinTo = async (id, col) => { const n = await T.ev(() => __G.dry.pins.findIndex((p) => p.state === 'tray')); const a = await T.ev((n) => { const D = __G.dry, v = D.pinWorld(D.pins[n], new (__G.cam.pos.constructor)()); return __T.pt(v.x, v.y, v.z); }, n); const b = await T.ev(([id, col]) => { const D = __G.dry, c = __G.cl[id], r = [{ x: 2.45, y: 1.30 }, { x: 2.85, y: 1.02 }][c.rod.id]; return __T.pt(r.x, r.y, D.rodZ0(c) - col * c.cell); }, [id, col]); await T.drag([[a.x, a.y], [b.x, b.y]], 800, 250); await T.wait(700); };
   const sample = async (id, pts, n = 20, ms = 300) => { const acc = []; for (let q = 0; q < n; q++) { acc.push(await T.ev(([id, pts]) => { const c = __G.cl[id], o = []; for (const [i, j] of pts) { const k = c.idx(i, j) * 3; o.push(c.p[k], c.p[k + 2]); } return o; }, [id, pts])); await T.wait(ms); } const out = []; for (let i = 0; i < pts.length; i++) out.push(r3(sd(acc.map((a) => a[i * 2])) + sd(acc.map((a) => a[i * 2 + 1])))); return out; };
@@ -64,7 +73,7 @@ function check(name, ok, detail) { R.checks.push({ name, ok: !!ok, detail }); co
     // door to the balcony just rattles before it has been visited
     { const d = await T.pt(0.9, 0.9, -0.36); await T.tap(d.x, d.y); await T.wait(500); check('balcony door only rattles before the laundry is washed', (await S()).station === 'wash'); }
     // first touch: sleeve lifts at once
-    await T.ev(() => { const c = __G.cl.shirt, k = c.idx(0, 1), y0 = c.p[k * 3 + 1]; window.__lift = null; window.addEventListener('pointerdown', () => { const t = performance.now(); let n = 0; const f = () => { n++; if (c.p[k * 3 + 1] > y0 + 0.004) window.__lift = { ms: performance.now() - t, frames: n }; else if (n < 60) requestAnimationFrame(f); }; requestAnimationFrame(f); }, { once: true, capture: true }); });
+    await T.ev(() => { const c = __G.cl.shirt; window.__lift = null; const pre = Array.from(c.p); window.addEventListener('pointerdown', () => { const t = performance.now(); let n = 0, k = -1, y0 = 0; const f = () => { n++; if (k < 0) { k = c.grab; if (k >= 0) y0 = pre[k * 3 + 1]; } if (k >= 0 && c.p[k * 3 + 1] > y0 + 0.004) window.__lift = { ms: Math.round(performance.now() - t), frames: n, liftedBy: +(c.p[k * 3 + 1] - y0).toFixed(3) }; else if (n < 60) requestAnimationFrame(f); }; requestAnimationFrame(f); }, { once: true, capture: true }); });
     await T.down(sleeve.x, sleeve.y); await T.wait(450);
     const lift = await T.ev(() => window.__lift); st = await S();
     check('touching the sleeve grabs it and lifts that point (frames until visibly lifted)', st.cloths.shirt.grab >= 0 && lift && lift.frames <= 2, lift); R.notes.sleeveLift = lift;
@@ -99,12 +108,15 @@ function check(name, ok, detail) { R.checks.push({ name, ok: !!ok, detail }); co
     const drops = await T.ev(() => __G.drops.n); st = await S(); await shot('s3_spin');
     check('fast spin presses the laundry onto the drum wall, drops run on the window', st.cloths.towel.onWall && st.cloths.shirt.onWall && drops > 0, { onWall: Object.fromEntries(Object.entries(st.cloths).map(([k, c]) => [k, c.onWall])), windowDrops: drops });
     // discovery 1: back off -> pieces peel off one at a time; forward -> they stick again
-    await knobTo(0.63); const peel = {}; const t0 = Date.now();
-    for (let i = 0; i < 80; i++) { const s = await S(); for (const [k, c] of Object.entries(s.cloths)) if (!c.onWall && peel[k] === undefined) peel[k] = r3((Date.now() - t0) / 1000); if (!s.cloths.towel.onWall && !s.cloths.shirt.onWall) break; await T.wait(180); }
+    // step the knob down a little at a time and note when each piece lets go of the wall
+    const peel = {}, t0 = Date.now(); let polling = true, knobNow = 1;
+    const poll = (async () => { while (polling && Date.now() - t0 < 240000) { const s = await S(); for (const [k, c] of Object.entries(s.cloths)) if (!c.onWall && peel[k] === undefined) peel[k] = { s: r3((Date.now() - t0) / 1000), knob: r3(s.m.knob), omega: r3(s.m.omega) }; if (Object.values(s.cloths).every((c) => !c.onWall)) break; await T.wait(150); } })();
+    for (const kv of [0.66, 0.635, 0.615, 0.595, 0.578, 0.562]) { await knobTo(kv); knobNow = kv; await Promise.race([poll, T.wait(5000)]); if (Object.keys(peel).length >= 4) break; }
+    polling = false; await poll;
     st = await S(); await shot('s3_peel');
-    check('D1 slowing down: clothes peel off the wall one after another', peel.towel !== undefined && peel.shirt !== undefined && peel.towel !== peel.shirt, { peelSeconds: peel, omega: r3(st.m.omega) });
+    check('D1 slowing down: clothes peel off the wall one after another', Object.keys(peel).length >= 3 && new Set(Object.values(peel).map((p) => p.s)).size >= 2, { peelSeconds: peel, omega: r3(st.m.omega) });
     await knobTo(0.85); await T.until(() => __G.cl.towel.onWall && __G.cl.shirt.onWall, null, 30000); st = await S();
-    check('D1 speeding up again: they stick to the wall again (both states reachable around mid speed)', st.cloths.towel.onWall && st.cloths.shirt.onWall, { omega: r3(st.m.omega) });
+    check('D1 speeding up again: they stick to the wall again (both states reachable around mid speed)', st.cloths.towel.onWall && st.cloths.shirt.onWall, { omega: r3(st.m.omega), onWall: Object.fromEntries(Object.entries(st.cloths).map(([k, c]) => [k, c.onWall])) });
     await knobTo(1.0); await T.until(() => __G.list.every((c) => c.wetMean < 0.34), null, 40000); st = await S();
     wetSpun = st.cloths.towel.wet;
     check('spinning lowers the remaining water', wetSpun < 0.34, { towelWet: r3(wetSpun) });
@@ -258,7 +270,7 @@ function check(name, ok, detail) { R.checks.push({ name, ok: !!ok, detail }); co
     check('shirt folds (sleeves, hem) and goes into the drawer', shirtF.folds === 3 && (await dims('shirt')).where === 'drawer', { folded: shirtF, stored: await dims('shirt') });
     // towel back out for the hand-over; basket onto the shelf
     { const a = await bbPt('towel', 0.5, 0.5), b = await top(-2.2, -0.05); await T.drag([[a.x, a.y], [b.x, b.y]], 900, 250); await T.wait(900); }
-    { const bk = await T.ev(() => { const b = __G.basket; return [__T.pt(b.x, b.y + 0.04, b.z + 0.21), __T.pt(-1.56, 0.18, 0.05)]; }); await T.drag([[bk[0].x, bk[0].y], [bk[1].x, bk[1].y]], 900, 250); await T.wait(1500); }
+    { const bk = await T.ev(() => { const b = __G.basket; return [__T.pt(b.x, b.y + 0.035, b.z + 0.21), __T.pt(-1.56, 0.18, 0.05)]; }); await T.drag([[bk[0].x, bk[0].y], [bk[1].x, bk[1].y]], 900, 250); await T.wait(1500); }
     st = await S(); check('empty basket slides onto the shelf; pins are in their saucer', st.basket.shelf === true && st.dry.pins.every((p) => p.state === 'tray'));
     await shot('s5_tidy');
     await T.until(() => __G.fold.P.state === 'wait' && __G.fold.P.k > 0.95, null, 30000);

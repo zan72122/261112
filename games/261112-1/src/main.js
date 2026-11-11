@@ -183,7 +183,7 @@ function boot() {
         if (m.zone === 'spin' || (m.zone === 'stop' && m.knob > 0.3)) { G.viewName = 'wash-spin'; return fit(0.03, 0.535, 0.28, 0.6, 0.72, 0, -5); }
         G.viewName = 'wash-run'; return fit(0, 0.5, 0.28, 0.92, 0.9, 0, -9);
       }
-      G.viewName = 'wash-load'; return port ? fit(-0.3, 0.4, 0.44, 1.12, 1.5, 33, -29) : fit(-0.2, 0.36, 0.46, 1.96, 0.98, 4, -22);
+      G.viewName = 'wash-load'; return port ? fit(-0.26, 0.4, 0.48, 1.42, 1.5, 33, -29) : fit(-0.2, 0.36, 0.46, 1.96, 0.98, 4, -22);
     }
     if (st === 'bal') {
       const zc = G.dry.stand.z * 0.55 + L.stBal.z * 0.45;
@@ -192,7 +192,7 @@ function boot() {
     }
     if (carrying) { G.viewName = 'fold-wide'; return fit(-1.35, 0.55, 0.4, 3.2, 1.3, 0, -24); }
     if (G.fold.finaleView()) { G.viewName = 'fold-finale'; return fit(-2.86, 1.16, 0.0, 1.15, 1.2, -12, -10); }
-    G.viewName = 'fold'; return port ? fit(-2.0, 0.5, 0.42, 1.95, 1.6, 0, -42) : fit(-2.08, 0.5, 0.5, 2.36, 1.75, 0, -34);
+    G.viewName = 'fold'; return port ? fit(-2.1, 0.62, 0.22, 2.1, 1.6, 0, -40) : fit(-2.08, 0.5, 0.5, 2.36, 1.75, 0, -34);
   }
   const stationFocus = { wash: [0.2, 0.6, 0.3, 2.7], bal: [2.7, 0.8, -2.0, 3.1], fold: [-1.9, 0.6, 0.3, 2.6] };
   function applyStationLook(st) {
@@ -252,15 +252,16 @@ function boot() {
     if (c.stuck) { c.stuck = 0; G.audio.play('peel'); }
     if (c.loc === 'basket') c.loc = 'held';
     c.wpos(k, wp); c.gt = c.gt || V(0, 0, 0); c.gt.copy(wp); c.gt.y += 0.035;   // lifts at once
+    c.gz0 = clamp(wp.z, 0.4, 0.95);                                              // stays at its own depth until the finger nears the port
     G.audio.play('grab');
   };
   G.endGrab = (c) => { if (c.grab >= 0) { c.lastGrab = c.grab; c.kin[c.grab] = 0; c.grab = -1; } };
-  G.toBasket = (c) => { c.loc = 'basket'; c.site = G.basket.station; c.homing = 3.2; c.rod = null; c.flat = null; c.frame = null; G.markDirty(); };
+  G.toBasket = (c) => { c.stuck = 0; c.loc = 'basket'; c.site = G.basket.station; c.homing = 3.2; c.rod = null; c.flat = null; c.frame = null; G.markDirty(); };
   const portScreen = { x: 0, y: 0, r: 1 };
   function portInfo() { const a = G.project(L.port.x, L.port.y, L.port.z), b = G.project(L.port.x + L.port.r, L.port.y, L.port.z, {}); portScreen.x = a.x; portScreen.y = a.y; portScreen.r = Math.abs(b.x - a.x); return portScreen; }
   function washDragTarget(c, sx, sy) {
     const ps = portInfo(), d = Math.hypot(sx - ps.x, sy - ps.y) / ps.r, k = smooth(1.3, 0.75, d), open = G.washer.door > 0.9 ? 1 : 0;
-    const z = lerp(0.44, 0.03, k * open), p = G.hitZ(sx, sy, z, c.gt);
+    const z = lerp(c.gz0 === undefined ? 0.44 : c.gz0, 0.03, k * open), p = G.hitZ(sx, sy, z, c.gt);
     if (z < L.port.z + 0.03) { const dx = p.x - L.port.x, dy = p.y - L.port.y, r = Math.hypot(dx, dy), m = 0.125; if (r > m) { p.x = L.port.x + dx / r * m; p.y = L.port.y + dy / r * m; } }
     p.y = Math.max(p.y + 0.03 * (1 - k * open), 0.04); return d;    // held a little above the pile
   }
@@ -290,7 +291,7 @@ function boot() {
     if (c.wrap) { c.wrap = null; }
   }
   function popSock(s, flip) {
-    const w = s.wrap; s.wrap = null; if (s.loc !== 'drum') return;
+    const w = s.wrap; s.wrap = null; if (s.loc !== 'drum') return; s.stuck = 0;
     if (flip) { s.inverted = !s.inverted; G.setSockLook(s); G.audio.play('koron'); G.koron = (G.koron || 0) + 1; } else G.audio.play('pop');
     const cx = L.port.x + (Math.random() - 0.5) * 0.06, cy = L.port.y - 0.02, cz = L.port.z + 0.06;
     for (let j = 0; j < s.ny; j++) for (let i = 0; i < s.nx; i++) { const k = s.idx(i, j), a = k * 3; s.p[a] = cx + (i - 1) * 0.03; s.p[a + 1] = cy + Math.sin(j * 1.1) * 0.03; s.p[a + 2] = cz + j * 0.012; s.q[a] = s.p[a] + 0.006; s.q[a + 1] = s.p[a + 1] - (flip ? 0.022 : 0.008); s.q[a + 2] = s.p[a + 2] - 0.012; }
@@ -298,6 +299,15 @@ function boot() {
   }
   G.popSock = popSock;
 
+  // which part of the basket's visible wall a screen point is on: 'upper' (near the rim), 'lower', or null
+  G.basketZone = (sx, sy) => {
+    const b = G.basket, B = L.basket, bal = G.station === 'bal', c0 = bal ? [b.x + B.w / 2, b.z + B.d / 2] : [b.x - B.w / 2, b.z + B.d / 2], c1 = bal ? [b.x + B.w / 2, b.z - B.d / 2] : [b.x + B.w / 2, b.z + B.d / 2];
+    const t0 = G.project(c0[0], b.y + B.h, c0[1], {}), t1 = G.project(c1[0], b.y + B.h, c1[1], {}), f0 = G.project(c0[0], b.y, c0[1], {}), f1 = G.project(c1[0], b.y, c1[1], {});
+    const rimY = (x) => t0.y + (t1.y - t0.y) * clamp((x - t0.x) / ((t1.x - t0.x) || 1), 0, 1), bot = Math.max(f0.y, f1.y);
+    let zone = null;
+    if (b.station === G.station && sx > Math.min(t0.x, t1.x) && sx < Math.max(t0.x, t1.x) && sy > rimY(sx) + 4 && sy < bot) zone = sy < rimY(sx) + 0.5 * (bot - rimY(sx)) ? 'upper' : 'lower';
+    return { zone, rimY };
+  };
   // ---------- picking ----------
   function pick(sx, sy) {
     const st = G.station, R = G.pickR(), m = G.washer; let best = null, bd = 1e9;
@@ -308,6 +318,9 @@ function boot() {
       if (np) cand(np.d, 0, () => clothDrag(np.c, np.k, sx, sy));
       cand(G.sdist(sx, sy, L.knob.x, L.knob.y, L.knob.z + 0.03), 12, () => knobDrag(sx, sy));
       W.handle.getWorldPosition(tmp2); cand(G.sdist(sx, sy, tmp2.x, tmp2.y, tmp2.z), 10, () => tapDrag(sx, sy, () => { m.pressHandle(); m.handleWig = 1; }, null));
+      if (m.door > 0.9 && m.doorTarget === 1) {      // the open door itself can be pushed shut, not only its small handle
+        const dv = V(0, 0, 0); for (const [lx, ly] of [[-0.245, 0], [-0.245, 0.16], [-0.245, -0.16], [-0.4, 0.08], [-0.4, -0.08], [-0.1, 0.08], [-0.1, -0.08]]) { dv.set(lx, ly, 0.03); W.door.localToWorld(dv); cand(G.sdist(sx, sy, dv.x, dv.y, dv.z), 2, () => tapDrag(sx, sy, () => { m.pressHandle(); m.handleWig = 1; }, null)); }
+      }
       if (m.door < 0.1) { const ps = portInfo(); const dd = Math.hypot(sx - ps.x, sy - ps.y); if (dd < ps.r * 1.3) cand(Math.min(dd, R), -R * 0.5, () => tapDrag(sx, sy, () => { m.handleWig = 1; G.audio.play('wiggle'); }, null)); }
     }
     if (st === 'bal') G.dry.pick(sx, sy, cand, clothDrag);
@@ -319,10 +332,11 @@ function boot() {
       if (st === 'bal') d = Math.min(d, G.sdist(sx, sy, b.x + B.w / 2, b.y + 0.12, b.z), G.sdist(sx, sy, b.x + B.w / 2, b.y + 0.12, b.z - 0.12), G.sdist(sx, sy, b.x + B.w / 2, b.y + 0.12, b.z + 0.12));
       // a touch on the visible wall (below the rim) means the basket itself, not the laundry heaped above it —
       // unless a piece hangs out over that wall there, or a piece lies completely hidden behind it (then it is fished out)
-      const bal = st === 'bal', c0 = bal ? [b.x + B.w / 2, b.z + B.d / 2] : [b.x - B.w / 2, b.z + B.d / 2], c1 = bal ? [b.x + B.w / 2, b.z - B.d / 2] : [b.x + B.w / 2, b.z + B.d / 2];
-      const t0 = G.project(c0[0], b.y + B.h, c0[1], {}), t1 = G.project(c1[0], b.y + B.h, c1[1], {}), f0 = G.project(c0[0], b.y, c0[1], {}), f1 = G.project(c1[0], b.y, c1[1], {});
-      const rimY = (x) => t0.y + (t1.y - t0.y) * clamp((x - t0.x) / ((t1.x - t0.x) || 1), 0, 1);
-      if (sx > Math.min(t0.x, t1.x) && sx < Math.max(t0.x, t1.x) && sy > rimY(sx) + 4 && sy < Math.max(f0.y, f1.y)) {
+      // the leather grips always mean the basket
+      const hd = Math.min(G.sdist(sx, sy, b.x, b.y + B.h - 0.03, b.z + B.d / 2 + 0.012), G.sdist(sx, sy, b.x, b.y + B.h - 0.03, b.z - B.d / 2 - 0.012));
+      if (hd < R * 0.75) { best = () => basketDrag(sx, sy); bd = -2e6; }
+      const zone = hd < R * 0.75 ? { zone: null } : G.basketZone(sx, sy), rimY = zone.rimY;
+      if (zone.zone) {
         let hangs = false, fish = null, fd = R * 1.6;
         for (const c of G.list) {
           if (c.loc !== 'basket' || c.site !== st) continue; let hidden = true, near = -1, nd = fd;
@@ -334,8 +348,9 @@ function boot() {
           }
           if (hidden && near >= 0) { fd = nd; fish = { c, k: near }; }
         }
-        const upper = sy < rimY(sx) + 0.5 * (Math.max(f0.y, f1.y) - rimY(sx));    // near the rim: reach for the laundry; lower down: the basket
-        if (fish && !hangs && upper) { best = () => clothDrag(fish.c, fish.k, sx, sy); bd = -1e6; }
+        const upper = zone.zone === 'upper';
+        // near the rim: reach for the laundry lying there (seen or hidden); lower down: the basket itself
+        if (upper && !hangs) { const np2 = fish || G.nearParticle(sx, sy, (c) => c.loc === 'basket' && c.site === st); if (np2) { best = () => clothDrag(np2.c, np2.k, sx, sy); bd = -1e6; } else { best = () => basketDrag(sx, sy); bd = -1e6; } }
         else if (!hangs) { best = () => basketDrag(sx, sy); bd = -1e6; }
       }
       cand(d, -6, () => basketDrag(sx, sy));
@@ -387,22 +402,25 @@ function boot() {
         nx = clamp(nx, -1.75, 1.3); nz = clamp(nz, nx > 0.42 ? 0.0 : 0.56, 1.5); if (nx > -0.38 && nx < 0.42) nz = Math.max(nz, 0.62);
         if (!canFold && !P.fold) nx = Math.max(nx, -1.0);
         G.moveBasket(nx, ny, nz);
-        if ((canBal || P.bal) && nx > 0.6 && nz < 0.45) { d.done = true; G.goStation('bal', true); }
-        else if ((canFold || P.fold) && nx < -1.25) { d.done = true; G.goStation('fold', true); }
+        d.zone = (canBal || P.bal) && nx > 0.6 && nz < 0.45 ? 'bal' : (canFold || P.fold) && nx < -1.25 ? 'fold' : null;
       } else if (st === 'bal') {
         nx = clamp(nx, 1.2, 4.6); nz = clamp(nz, -3.3, -0.9);
         G.moveBasket(nx, ny, nz);
-        if (nx < 2.15 && nz > -1.5) { d.done = true; G.goStation('wash', true); }
+        d.zone = nx < 2.15 && nz > -1.5 ? 'wash' : null;
       } else {
         nx = clamp(nx, -2.5, -0.55); nz = clamp(nz, -0.05, 1.5);
         const inCub = nx > -1.9 && nx < -1.22; if (nz < 0.5 && !inCub) nz = 0.5;
         if (nz < 0.3) { nx = clamp(nx, -1.66, -1.46); ny = L.stShelf.y; nz = Math.max(nz, L.stShelf.z); }
         G.moveBasket(nx, ny, nz); b.shelf = false;
-        if (nx > -0.9) { d.done = true; G.goStation('wash', true); }
+        d.zone = nx > -0.9 ? 'wash' : null;
       }
+      if (!d.zone) d.dwell = 0;
     };
-    d.up = () => {
+    // the basket has to be brought to the doorway and kept there a moment (or put down there): passing by is not enough
+    d.tick = (dt) => { if (d.done || !d.zone) return; d.dwell = (d.dwell || 0) + (dt || 0); if (d.dwell > 0.45) { d.done = true; G.goStation(d.zone, true); } };
+    d.up = (x, y, cancel) => {
       if (d.done) return;
+      if (d.zone && !cancel) { d.done = true; G.goStation(d.zone, true); return; }
       if (st === 'fold' && b.z < 0.42 && b.x > -1.9 && b.x < -1.22) { b.shelf = true; G.audio.play('slide'); }
       const hm = home(); b.tween = { t: 0, dur: 0.35, curve: new THREE.LineCurve3(V(b.x, b.y, b.z), V(hm.x, hm.y, hm.z)) };
       if (d.moved < 8) { b.wig = 1; G.audio.play('wiggle'); }
@@ -461,6 +479,9 @@ function boot() {
       if (c.loc === 'flat' || c.loc === 'person' || c.frame) continue;
       world.push(c);
       let damp = 0.992;
+      if ((G.frames + c.n) % 40 === 0 && c.grab < 0 && c.center(tmp2).y < -0.25) {      // safety net: nothing may ever be lost under the floor
+        const a0 = c.p[0], a1 = c.p[1], a2 = c.p[2]; c.translate(b.x - a0, b.y + 0.45 - a1, b.z - a2); c.stop(); c.rod = null; c.loc = 'basket'; c.site = b.station; c.stuck = 0; c.homing = 2;
+      }
       if (c.loc === 'basket' && c.homing <= 0 && c.grab < 0 && (G.frames + c.n) % 150 === 0 && c.snag < 0) { const cc = c.center(tmp2); if (Math.abs(cc.x - b.x) > L.basket.w / 2 + 0.03 || Math.abs(cc.z - b.z) > L.basket.d / 2 + 0.03) c.homing = 3.2; }   // a piece that slid off beside the basket hops back in
       if (c.homing > 0) { c.homing -= SIM.H; const out = SIM.homeForces(c, b, 1); damp = 0.97; if (out === 0 && c.homing < 2.6) c.homing = 0; }
       if (c.loc === 'drum') {
@@ -470,7 +491,7 @@ function boot() {
           if (out === 0 || c.insert <= 0) { if (out > 0) for (let i = 0; i < c.n; i++) if (c.active[i] && c.p[i * 3 + 2] > L.drum.zf - 0.03) c.setPos(i, (Math.random() - 0.5) * 0.16, L.drum.cy - 0.1, 0.02 + Math.random() * 0.1); c.insert = 0; c.settle = 0.5; G.audio.play('thud', 0.6); }
         }
         if (c.settle > 0) { c.settle -= SIM.H; if (c.settle <= 0 && c.kind === 'sock') tryWrap(c); }
-        if (c.stuck) { const p = c.p, s = c.stuckPos; for (let a = 0; a < c.n * 3; a++) { p[a] += (s[a] - p[a]) * 0.5; } c.q.set(p); continue; }
+        if (c.stuck && c.grab < 0) { const p = c.p, s = c.stuckPos; for (let a = 0; a < c.n * 3; a++) { p[a] += (s[a] - p[a]) * 0.5; } c.q.set(p); continue; }
       }
       if (c.site === 'bal') G.dry.forces(c);
       if (c.tumble > 0) { c.tumble -= SIM.H * 0.8; }
@@ -478,7 +499,7 @@ function boot() {
     }
     for (let it = 0; it < SIM.ITER; it++) {
       for (const c of world) {
-        if (c.stuck) continue;
+        if (c.stuck && c.loc === 'drum') continue;
         if (c.grab >= 0) SIM.driveGrab(c, c.gt.x, c.gt.y, c.gt.z, 0.05 / SIM.ITER * 2.2);
         c.solve();
         if (c.wrap && !c.wrap.towel.frame) tether(c, c.wrap);
@@ -489,7 +510,7 @@ function boot() {
         SIM.collideFloor(c, c.site === 'bal' ? -0.012 : 0);
       }
     }
-    const pile = world.filter((c) => !c.rod && !c.stuck);
+    const pile = world.filter((c) => !c.rod && !(c.stuck && c.loc === 'drum'));
     if (pile.length) SIM.repel(pile, 0.03, 0.05);
   }
   function tryWrap(sock) {
@@ -541,6 +562,7 @@ function boot() {
   // test hooks: read-only state for locating things on screen; all actions still go through pointer events
   window.__T = {
     pt: (x, y, z) => G.project(x, y, z, {}),
+    zone: (x, y) => G.basketZone(x, y).zone,
     zoom: (x, y, w, h) => { if (w) camera.setViewOffset(G.vw, G.vh, x, y, w, h); else camera.clearViewOffset(); },
     part: (id, k) => { const c = G.cl[id]; c.wpos(k, wp); return G.project(wp.x, wp.y, wp.z, {}); },
     wpart: (id, k) => { const c = G.cl[id]; c.wpos(k, wp); return [wp.x, wp.y, wp.z]; },
