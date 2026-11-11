@@ -16,6 +16,9 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#
 #fb{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;display:none;background:#d8d2c6}
 #sa{position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;
 padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+
+#contact{position:fixed;left:0;top:0;width:76px;height:76px;box-sizing:border-box;border:4px solid #fff2cf;border-radius:50%;background:rgba(255,203,112,.3);box-shadow:0 0 18px rgba(255,190,85,.65);transform:translate(-50%,-50%);pointer-events:none;opacity:0;z-index:2}
+#contact[data-held]{width:90px;height:90px;background:rgba(255,203,112,.48)}
 </style>
 </head>
 <body>
@@ -23,8 +26,35 @@ padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-are
 <div id="fade"></div>
 <img id="fb" alt="" src="__FALLBACK__">
 <div id="sa"></div>
+<div id="contact" aria-hidden="true"></div>
 <script>
 __BUNDLE__
+</script>
+
+<script>
+// Contact feedback also works when the embedded WebGL fallback is displayed.
+(() => {
+  const mark = document.getElementById('contact');
+  let finger = null, timer;
+  const place = e => { mark.style.left = e.clientX + 'px'; mark.style.top = e.clientY + 'px'; };
+  const release = e => {
+    if (e.pointerId !== finger) return;
+    finger = null; mark.removeAttribute('data-held');
+    clearTimeout(timer); timer = setTimeout(() => { mark.style.opacity = '0'; }, 3000);
+  };
+  document.addEventListener('pointerdown', e => {
+    if (finger !== null) return;
+    finger = e.pointerId; clearTimeout(timer); place(e);
+    mark.setAttribute('data-held', ''); mark.style.opacity = '1';
+  }, true);
+  document.addEventListener('pointermove', e => { if (e.pointerId === finger) place(e); }, true);
+  document.addEventListener('pointerup', release, true);
+  document.addEventListener('pointercancel', release, true);
+  const reset = () => { finger = null; clearTimeout(timer); mark.removeAttribute('data-held'); mark.style.opacity = '0'; };
+  window.addEventListener('blur', reset);
+  window.addEventListener('resize', reset);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) reset(); });
+})();
 </script>
 </body>
 </html>
