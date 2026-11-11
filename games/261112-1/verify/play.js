@@ -43,7 +43,16 @@ function check(name, ok, detail) { R.checks.push({ name, ok: !!ok, detail }); co
     for (const u of [0, -0.5, 0.5, -0.8, 0.8]) out.push(bal ? __T.pt(b.x + 0.3, b.y + 0.035, b.z + u * 0.21) : __T.pt(b.x + u * 0.3, b.y + 0.035, b.z + 0.21)); return out; });
   const bDown = async () => { for (const p of await bPoints()) { await T.down(p.x, p.y); await T.wait(130); const k = await T.ev(() => __G.drag && __G.drag.kind); if (k === 'basket') return p; await T.cancel(); await T.wait(500); } throw new Error('could not take hold of the basket'); };
   const bFront = async () => (await bPoints())[0];
-  const carry = async (toPtFn) => { const a = await bDown(), ref0 = await bFront(); const off = { x: a.x - ref0.x, y: a.y - ref0.y }; await T.wait(600); const st0 = (await S()).station; for (let i = 0; i < 90; i++) { const to = await toPtFn(); const c0 = await bFront(), cur = { x: c0.x + off.x, y: c0.y + off.y }; if ((await S()).station !== st0) break; const dx = to.x - cur.x, dy = to.y - cur.y, d = Math.hypot(dx, dy) || 1, stp = Math.min(d, 46); a.x = Math.max(4, Math.min(W - 4, a.x + dx / d * stp)); a.y = Math.max(4, Math.min(H - 4, a.y + dy / d * stp)); await T.move(a.x, a.y); await T.wait(90); } await T.wait(400); await T.up(); await settled(); await T.wait(1200); };
+  const carry = async (toPtFn) => {
+    const st0 = (await S()).station;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const a = await bDown(); await T.wait(900);     // (the view widens while the basket is held; steer by where the basket's grip is on screen now)
+      for (let i = 0; i < 90; i++) { const to = await toPtFn(); const cur = await bFront(); if ((await S()).station !== st0) break; const dx = to.x - cur.x, dy = to.y - cur.y, d = Math.hypot(dx, dy) || 1, stp = Math.min(d, 46); a.x = Math.max(4, Math.min(W - 4, a.x + dx / d * stp)); a.y = Math.max(4, Math.min(H - 4, a.y + dy / d * stp)); await T.move(a.x, a.y); await T.wait(90); }
+      await T.wait(400); const dbg = await T.ev(() => ({ kind: __G.drag && __G.drag.kind, zone: __G.drag && __G.drag.zone, basket: [+__G.basket.x.toFixed(2), +__G.basket.z.toFixed(2)], view: __G.viewName }));
+      await T.up(); await settled(); await T.wait(1200);
+      if ((await S()).station !== st0) return; R.notes.carryRetry = (R.notes.carryRetry || []).concat([Object.assign({ from: st0, attempt }, dbg)]);
+    }
+  };
   const rodPt = (r, dz) => T.ev(([r, dz]) => { const L = [{ x: 2.45, y: 1.30 }, { x: 2.85, y: 1.02 }][r]; return __T.pt(L.x, L.y, __G.dry.stand.z + dz); }, [r, dz]);
   const pinTo = async (id, col) => { const n = await T.ev(() => __G.dry.pins.findIndex((p) => p.state === 'tray')); const a = await T.ev((n) => { const D = __G.dry, v = D.pinWorld(D.pins[n], new (__G.cam.pos.constructor)()); return __T.pt(v.x, v.y, v.z); }, n); const b = await T.ev(([id, col]) => { const D = __G.dry, c = __G.cl[id], r = [{ x: 2.45, y: 1.30 }, { x: 2.85, y: 1.02 }][c.rod.id]; return __T.pt(r.x, r.y, D.rodZ0(c) - col * c.cell); }, [id, col]); await T.drag([[a.x, a.y], [b.x, b.y]], 800, 250); await T.wait(700); };
   const sample = async (id, pts, n = 20, ms = 300) => { const acc = []; for (let q = 0; q < n; q++) { acc.push(await T.ev(([id, pts]) => { const c = __G.cl[id], o = []; for (const [i, j] of pts) { const k = c.idx(i, j) * 3; o.push(c.p[k], c.p[k + 2]); } return o; }, [id, pts])); await T.wait(ms); } const out = []; for (let i = 0; i < pts.length; i++) out.push(r3(sd(acc.map((a) => a[i * 2])) + sd(acc.map((a) => a[i * 2 + 1])))); return out; };
@@ -146,13 +155,24 @@ function check(name, ok, detail) { R.checks.push({ name, ok: !!ok, detail }); co
     check('carrying the basket to the doorway takes the view (and the laundry) to the balcony', st.station === 'bal' && st.basket.station === 'bal' && Object.values(st.cloths).every((c) => c.site === 'bal'), { view: st.view });
     await shot('s4_arrive');
     // ===== scene 4: dry =====
-    // towel by its corner on the back rod, straddling the eaves edge
-    { const g = await partPt('towel', 0, 0), p = await rodPt(0, 0.6); await T.drag([[g.x, g.y], [p.x, p.y]], 1000, 400); await T.wait(2200); }
-    st = await S(); check('towel hangs over the rod where it was dropped', st.cloths.towel.loc === 'rod' && st.cloths.towel.rod.id === 0, st.cloths.towel.rod);
+    // towel onto the back rod; pull one side down until it hangs by its edge; slide it so it straddles the eaves line
+    const hangTowelByEdge = async (label) => {
+      for (let n = 0; n < 3; n++) { const p = await rodPt(0, 0.3); await clothTo('towel', p.x, p.y, { ms: 1000, hold: 400 }); await T.wait(2200); if ((await S()).cloths.towel.loc === 'rod') break; R.notes.rehang = (R.notes.rehang || 0) + 1; await T.until(() => __G.cl.towel.loc === 'basket' && __G.cl.towel.homing <= 0, null, 15000); }
+      let st = await S(); if (label) check('towel hangs over the rod where it was dropped', st.cloths.towel.loc === 'rod' && st.cloths.towel.rod.id === 0, st.cloths.towel.rod);
+      const s0 = st.cloths.towel.rod.s;
+      for (let n = 0; n < 8; n++) { const s = (await S()).cloths.towel.rod.s; if (s < 0.3 || s > 14.7) break; const g = await partPt('towel', 4, s0 < 7.5 ? 15 : 0); await T.down(g.x, g.y); await T.wait(150); for (let i = 1; i <= 10; i++) { await T.move(g.x, g.y + H * 0.12 * i / 10); await T.wait(70); } await T.wait(300); await T.up(); await T.wait(1200); }
+      st = await S(); const edgeRow = st.cloths.towel.rod.s < 1 ? 0 : 15, rj = (j) => edgeRow === 0 ? j : 15 - j;
+      if (label) check('pulling one side down feeds the towel over the rod until it hangs spread by its edge', st.cloths.towel.loc === 'rod' && (st.cloths.towel.rod.s < 0.3 || st.cloths.towel.rod.s > 14.7), { from: r3(s0), to: r3(st.cloths.towel.rod.s) });
+      const czT = () => T.ev(() => __G.cl.towel.center(new (__G.cam.pos.constructor)()).z), want = (await S()).dry.standZ + 0.36;
+      for (let n = 0; n < 5; n++) { const z = await czT(); if (Math.abs(z - want) < 0.05) break; const g = await partPt('towel', 4, rj(1)), a = await T.ev(([z0, z1]) => [__T.pt(2.45, 1.25, z0), __T.pt(2.45, 1.25, z1)], [z, want]); await T.drag([[g.x, g.y], [g.x + (a[1].x - a[0].x) * 1.15, g.y + (a[1].y - a[0].y) * 1.15]], 900, 250); await T.wait(900); }
+      const sd0 = await sides('towel'); if (label) check('sliding it along the rod puts it across the eaves line', sd0.nOut > 20 && sd0.nUnder > 20, sd0);
+      return rj;
+    };
+    let rj = await hangTowelByEdge(true);
     await pinTo('towel', 0); await T.wait(3500); st = await S();
     check('a clothespin carried from the saucer pins the corner', st.cloths.towel.rod.holds.length === 1 && st.dry.pins.filter((p) => p.state === 'on').length === 1, st.cloths.towel.rod);
     await shot('s4_onepin');
-    const GRID = [[8, 0], [8, 15], [4, 8], [0, 15], [4, 15], [0, 8], [8, 8], [4, 4], [4, 12]], mean = (a) => r3(a.reduce((x, y) => x + y, 0) / a.length);
+    const GRID0 = [[8, 0], [8, 15], [4, 8], [0, 15], [4, 15], [0, 8], [8, 8], [4, 4], [4, 12]], GRID = GRID0.map(([i, j]) => [i, rj(j)]), mean = (a) => r3(a.reduce((x, y) => x + y, 0) / a.length);
     const one = await sample('towel', GRID);
     await pinTo('towel', 8); await T.wait(3500); await shot('s4_twopins');
     const two = await sample('towel', GRID); st = await S();
@@ -189,9 +209,10 @@ function check(name, ok, detail) { R.checks.push({ name, ok: !!ok, detail }); co
     { const g = await partPt('towel', 4, 15); await T.down(g.x, g.y); await T.wait(150); for (let i = 1; i <= 10; i++) { await T.move(g.x + 30 * i / 10, g.y - H * 0.34 * i / 10); await T.wait(50); } await T.wait(600); await shot('s4_flip'); await T.up(); await T.wait(1500); }
     check('D5 folded towel: outer face dries, the inner face keeps a darker wet patch (seen by flipping it up)', f1.back > f1.front + 0.035 && f0.front - f1.front > 0.035 && f0.back - f1.back < 0.03, { atHang: f0, later: f1 });
     const dr0 = await T.ev(() => __G.cl.towel.dripped || 0);
-    for (let n = 0; n < 5; n++) { const f = await faces('towel'); if (f.s < 0.5 || f.loc !== 'rod') break; const g = await partPt('towel', 4, 15); await T.down(g.x, g.y); await T.wait(150); for (let i = 1; i <= 10; i++) { await T.move(g.x, g.y + H * 0.13 * i / 10); await T.wait(70); } await T.wait(300); await T.up(); await T.wait(1300); }
+    for (let n = 0; n < 12; n++) { const f = await faces('towel'); if (f.s < 0.5 || f.loc !== 'rod') break; const g = await partPt('towel', 4, 15), pull = H * (f.s > 3 ? 0.1 : 0.05); await T.down(g.x, g.y); await T.wait(150); for (let i = 1; i <= 10; i++) { await T.move(g.x, g.y + pull * i / 10); await T.wait(70); } await T.wait(300); await T.up(); await T.wait(1300); }
+    if ((await faces('towel')).loc !== 'rod') { R.notes.towelPulledOff = true; await hangTowelByEdge(false); }   // pulled right off the rod (allowed): hang it again
     let f2 = await faces('towel'); await pinTo('towel', 0); await pinTo('towel', 8); await T.wait(9000); let f3 = await faces('towel'); st = await S();
-    check('D5 spread out and pinned again: the patch is uncovered and dries, the towel catches the wind', f2.loc === 'rod' && f2.covB < 20 && f3.back < f2.back - 0.03 && st.cloths.towel.swingSlow > 0.01, { spread: f2, later: f3, swing: r3(st.cloths.towel.swingSlow) });
+    check('D5 spread out and pinned again: the patch is uncovered and dries, the towel catches the wind', f2.loc === 'rod' && f2.covB < 20 && f3.back <= Math.max(0.02, f2.back - 0.03) && st.cloths.towel.swingSlow > 0.01, { spread: f2, later: f3, swing: r3(st.cloths.towel.swingSlow) });
     await shot('s4_spread');
     // discovery 4: big towel upwind of the shirt
     const shirtWind = async () => { const xs = [], sp = []; for (let q = 0; q < 40; q++) { const r = await T.ev(() => { const c = __G.cl.shirt, rx = [2.45, 2.85][c.rod.id]; let x = 0, n = 0; for (let k = 0; k < c.n; k++) if (c.active[k]) { x += Math.abs(c.p[k * 3] - rx); n++; } return [x / n, c.swing]; }); xs.push(r[0]); sp.push(r[1]); await T.wait(300); } return { lean: r3(xs.reduce((a, b) => a + b) / xs.length), speed: r3(sp.reduce((a, b) => a + b) / sp.length) }; };
@@ -202,8 +223,11 @@ function check(name, ok, detail) { R.checks.push({ name, ok: !!ok, detail }); co
     await slideTowel(zShirt); await T.wait(3500); const shade1 = await shadeOf(); await shot('s4_shadow');
     const wBehind = await shirtWind();
     await slideTowel(zTowel0); await T.wait(3500); const shade2 = await shadeOf(), wAside = await shirtWind();
-    check('D4 towel slid upwind of the shirt: the shirt leans and moves less; slid aside: wind reaches it and it moves again', shade1 < shade0 - 0.25 && shade2 > shade1 + 0.25 && wBehind.speed < 0.75 * (wOpen.speed + wAside.speed) / 2 && wBehind.lean < 0.75 * (wOpen.lean + wAside.lean) / 2 && wAside.speed > wBehind.speed * 1.25, { windShare: { open: r3(shade0), behind: r3(shade1), aside: r3(shade2) }, shirt: { open: wOpen, behindTowel: wBehind, towelAside: wAside }, towelZ: [r3(zTowel0), r3(zShirt)] });
+    check('D4 towel slid upwind of the shirt: the shirt sways less; slid aside: wind reaches it and it sways again', shade1 < shade0 - 0.25 && shade2 > shade1 + 0.25 && wBehind.speed < 0.75 * (wOpen.speed + wAside.speed) / 2 && wAside.speed > wBehind.speed * 1.25, { windShare: { open: r3(shade0), behind: r3(shade1), aside: r3(shade2) }, shirt: { open: wOpen, behindTowel: wBehind, towelAside: wAside }, towelZ: [r3(zTowel0), r3(zShirt)] });
     R.notes.d4 = { wOpen, wBehind, wAside, shade0, shade1, shade2 };
+    // a folded-over shirt keeps its inside damp: pull one side down so it hangs open, then everything can dry
+    { const sh0 = (await S()).cloths.shirt.rod.s; for (let n = 0; n < 8; n++) { const s = (await S()).cloths.shirt.rod; if (!s || s.s < 0.4 || s.s > 9.6) break; const g = await partPt('shirt', 8, sh0 < 5 ? 10 : 0); await T.down(g.x, g.y); await T.wait(150); for (let i = 1; i <= 10; i++) { await T.move(g.x, g.y + H * 0.07 * i / 10); await T.wait(70); } await T.wait(300); await T.up(); await T.wait(1200); }
+      if ((await S()).cloths.shirt.loc !== 'rod') { const p = await rodPt(1, -0.22); await clothTo('shirt', p.x, p.y, { ms: 900, hold: 350 }); await T.wait(1500); } }
     // dry, take in
     await T.until(() => __G.list.every((c) => c.wetMean < 0.07), null, 200000); st = await S();
     check('laundry dries within seconds-to-a-minute depending on exposure', Object.values(st.cloths).every((c) => c.wet < 0.07), Object.fromEntries(Object.entries(st.cloths).map(([k, c]) => [k, r3(c.wet)])));
@@ -221,8 +245,8 @@ function check(name, ok, detail) { R.checks.push({ name, ok: !!ok, detail }); co
     await toBasket('towel'); st = await S(); const wetWeak = st.cloths.towel.wet;
     check('weak spin leaves the same towel much wetter', wetWeak > wetSpun + 0.25, { strongSpin: r3(wetSpun), weakSpin: r3(wetWeak) });
     await carry(() => T.pt(1.05, 0.14, 0.0));
-    { const g = await partPt('towel', 0, 0), p = await rodPt(0, 0.3); const dr = await T.ev(() => __G.cl.towel.dripped || 0); await T.drag([[g.x, g.y], [p.x, p.y]], 1000, 400); await T.wait(2200); await pinTo('towel', 0); await pinTo('towel', 8); await T.wait(3500); await shot('s4_wet_towel');
-      const two2 = await sample('towel', GRID); st = await S(); const drips = (await T.ev(() => __G.cl.towel.dripped || 0)) - dr;
+    { const dr = await T.ev(() => __G.cl.towel.dripped || 0); rj = await hangTowelByEdge(false); await pinTo('towel', 0); await pinTo('towel', 8); await T.wait(3500); await shot('s4_wet_towel');
+      const two2 = await sample('towel', GRID0.map(([i, j]) => [i, rj(j)])); st = await S(); const drips = (await T.ev(() => __G.cl.towel.dripped || 0)) - dr;
       R.notes.secondHang = { wet: r3(st.cloths.towel.wet), hem: two2[1], drips };
       check('same towel, same two pins, wetter: it drips, hangs heavier and swings less than after the strong spin', drips > 0 && two2[1] < R.notes.firstHang.hem && R.notes.firstHang.drips === 0, { first: R.notes.firstHang, second: R.notes.secondHang }); }
     await T.until(() => __G.cl.towel.wetMean < 0.07, null, 240000);

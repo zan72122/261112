@@ -6,7 +6,7 @@ const OUT = path.join(__dirname, 'out'); fs.mkdirSync(OUT, { recursive: true });
 const R = { checks: [], notes: {}, started: new Date().toISOString() };
 function check(name, ok, detail) { R.checks.push({ name, ok: !!ok, detail }); console.log((ok ? 'PASS ' : 'FAIL ') + name + (detail !== undefined ? '  ' + JSON.stringify(detail) : '')); }
 const Q = 'steps=20&dtmax=0.15', KEY = 'gf-261112-1-sentaku';
-const sleevePull = async (T) => { const s = await T.part('shirt', 17), p = await T.pt(0, 0.45, 0.27); await T.drag([[s.x, s.y], [p.x, p.y]], 700, 250); return T.until(() => { const c = __G.cl.shirt; return c.loc === 'drum' && c.insert <= 0; }, null, 25000); };
+const sleevePull = async (T, timeout = 25000) => { const s = await T.part('shirt', 17), p = await T.pt(0, 0.45, 0.27); await T.drag([[s.x, s.y], [p.x, p.y]], 700, 250); return T.until(() => { const c = __G.cl.shirt; return c.loc === 'drum' && c.insert <= 0; }, null, timeout); };
 const sane = (st) => Object.values(st.cloths).every((c) => ['basket', 'drum', 'rod', 'flat', 'held', 'person'].includes(c.loc) && c.grab === -1 && isFinite(c.cen[0]) && isFinite(c.cen[1]) && isFinite(c.cen[2]));
 
 (async () => {
@@ -109,8 +109,9 @@ const sane = (st) => Object.values(st.cloths).every((c) => ['basket', 'drum', 'r
   }
   {
     const T = await open({ w: 1180, h: 820 }); await T.wait(20000); const st = await T.state();
-    check('dynamic resolution reacts to slow frames (software GL at 1180x820): scale drops, low-load mode engages by itself', st.res < 1 || st.low, { fps: +st.fps.toFixed(1), resScale: st.res, low: st.low }); R.notes.auto = { fps: +st.fps.toFixed(1), resScale: st.res, low: st.low };
-    const ok = await sleevePull(T); check('and the game is still playable in that state', !!ok && T.errors.length === 0); await T.close();
+    check('dynamic resolution reacts to slow frames (software GL at 1180x820, first 20 s): the render scale drops (or low-load mode engages)', st.res < 1 || st.low, { fps: +st.fps.toFixed(1), resScale: st.res, low: st.low }); R.notes.auto = { fps: +st.fps.toFixed(1), resScale: st.res, low: st.low };
+    // (no time-step flags here: at ~2 fps the game runs in slow motion, so allow it plenty of real time)
+    const ok = await sleevePull(T, 180000); const st2 = await T.state(); check('and the game is still playable in that state', !!ok && T.errors.length === 0, { shirt: st2.cloths.shirt.loc, fps: +st2.fps.toFixed(1), low: st2.low }); await T.close();
   }
   // ---------- 6. served from a Pages-style sub folder ----------
   {

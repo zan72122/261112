@@ -83,7 +83,7 @@ export class Dry {
     const rod = c.rod, r = L.rods[rod.id], a = k * 3, near = Math.hypot(c.p[a] - r.x, c.p[a + 1] - r.y) < 0.1, jg = (k / c.nx) | 0, ig = k % c.nx;
     if (!near) return;
     if (rod.s < 0) { if (!rod.holds.some((h) => h.k === k)) rod.holds.push({ k, dz: clamp(c.p[a + 2], this.stand.z - L.rodHalf, this.stand.z + L.rodHalf) - this.rodZ0(c), pinned: false, pin: null }); }
-    else if (!rod.holds.length && Math.abs(jg - rod.s) >= 1) { rod.s = jg; rod.row = jg; rod.zr = c.p[a + 2] + ig * c.cell - this.stand.z; this.clampSpan(c); }
+    else if (!rod.holds.length && Math.abs(jg - rod.s) >= 2) { rod.s = jg; rod.row = jg; rod.zr = c.p[a + 2] + ig * c.cell - this.stand.z; this.clampSpan(c); }
   }
 
   // ---------- pins ----------
@@ -231,8 +231,9 @@ export class Dry {
       if (pin.state === 'tray') m.rotation.set(Math.PI / 2, 0, pin.i * 1.9); else m.rotation.set(0, Math.PI / 2, Math.sin(G.time * 40) * pin.wig * 0.3 + (pin.state === 'on' ? 0.12 : 0));
     }
     // rain: passes once per wash while laundry is out
-    const R = this.rainS, anyRod = G.list.some((c) => c.rod);
-    if (R.state === 'idle') { if (onBal && anyRod && G.progress.rainFor !== G.progress.washCount) { R.t += dt; if (R.t > 55) { R.state = 'rain'; R.t = 0; } } }
+    // the shower comes once per wash, a little while after at least two pieces are out on the rods
+    const R = this.rainS, anyRod = G.list.filter((c) => c.rod).length >= 2;
+    if (R.state === 'idle') { if (onBal && anyRod && G.progress.rainFor !== G.progress.washCount) { R.t += dt; if (R.t > 35) { R.state = 'rain'; R.t = 0; } } }
     else if (R.state === 'rain') { R.t += dt; R.k = Math.min(1, R.t / 2.5) * clamp((21 - R.t) / 3.5, 0, 1); if (R.t >= 21) { R.state = 'idle'; R.t = 0; R.k = 0; G.progress.rainFor = G.progress.washCount; G.markDirty(); } }
     G.sunK = 1 - 0.42 * R.k;
     this.wetFloor = R.k > 0.05 ? Math.min(1, this.wetFloor + dt * 0.35 * R.k) : Math.max(0, this.wetFloor - dt * 0.03);
@@ -271,8 +272,8 @@ export class Dry {
           if (!c.active[k]) continue; const z = c.p[k * 3 + 2];
           if (wetK > 0.15 && z < L.eaveZ - 0.01) { const add = 0.5 * wetK * dt; c.wetF[k] = Math.min(1, c.wetF[k] + add * (c.covF[k] ? 0.35 : 1)); c.wetB[k] = Math.min(1, c.wetB[k] + add * (c.covB[k] ? 0.35 : 1)); c.rained = (c.rained || 0) + add; continue; }
           const sh = 0.3 + 0.7 * c.shade[k], d = DRY * vent * sh * (0.75 + 0.25 * G.sunK) * dt;
-          if (c.wetF[k] > 0) c.wetF[k] = Math.max(0, c.wetF[k] - d * (c.covF[k] ? 0.06 : 1));
-          if (c.wetB[k] > 0) c.wetB[k] = Math.max(0, c.wetB[k] - d * (c.covB[k] ? 0.06 : 1));
+          if (c.wetF[k] > 0) c.wetF[k] = Math.max(0, c.wetF[k] - d * (c.covF[k] ? 0.1 : 1));
+          if (c.wetB[k] > 0) c.wetB[k] = Math.max(0, c.wetB[k] - d * (c.covB[k] ? 0.1 : 1));
         }
       }
       c.updateWetMean();

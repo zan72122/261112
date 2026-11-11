@@ -14,6 +14,8 @@ for (const p of play) {
   if (p.final) out += `- 終了時: ゲーム内時間 ${p.final.gameSeconds} 秒, fps(移動平均) ${p.final.fps}, 低負荷モード ${p.final.low}, 解像度倍率 ${p.final.res}, 音 ${p.final.audio}\n`;
   out += `- コンソールエラー ${p.consoleErrors.length} 件／外部リクエスト ${p.externalRequests.length} 件／出た指のお手本: ${(p.hints || []).join(', ')}\n`;
   if (p.notes && p.notes.sleeveLift) out += `- 袖に触れてから持ち上がりが見えるまで: ${p.notes.sleeveLift.frames} フレーム（このヘッドレス環境で ${p.notes.sleeveLift.ms} ms、${p.notes.sleeveLift.liftedBy} m 上昇）\n`;
+  if (p.notes && p.notes.retouch) out += `- テストが指を置き直した回数: ${p.notes.retouch.length} 回（最初に触れた点で別の物＝かご・ばさみ等が応じたため離して別の点を触った。内訳: ${p.notes.retouch.map((r) => r.id + '→' + r.hit).join(', ')}）\n`;
+  if (p.notes && (p.notes.rehang || p.notes.carryRetry || p.notes.towelPulledOff)) out += `- やり直し: 掛け直し ${p.notes.rehang || 0} 回, かご運び直し ${(p.notes.carryRetry || []).length} 回, タオルを引き抜いてしまい掛け直し ${p.notes.towelPulledOff ? 1 : 0} 回\n`;
   if (p.notes && p.notes.devJump) out += `- **注意: 途中開始のデバッグ実行（${p.notes.devJump}）**\n`;
   out += `\n| # | 確認内容 | 結果 | 実測 |\n|---|---|---|---|\n`;
   p.checks.forEach((c, i) => { out += `| ${i + 1} | ${esc(c.name)} | ${c.ok ? '✅' : '❌'} | ${short(c.detail)} |\n`; });
@@ -25,7 +27,7 @@ if (robust) {
   robust.checks.forEach((c, i) => { out += `| ${i + 1} | ${esc(c.name)} | ${c.ok ? '✅' : '❌'} | ${short(c.detail)} |\n`; });
 }
 if (shots) {
-  out += `\n## 4サイズ×5場面のスクリーンショットと fps\n\n画像は \`verify/shots/<場面>_<幅>x<高さ>.png\`。fps はその場面を表示して約3.5秒後の移動平均（下記の実行環境での値で、iPad 実機の値ではありません）。\n\n`;
+  out += `\n## 4サイズ×5場面のスクリーンショットと fps\n\n画像は \`verify/shots/<場面>_<幅>x<高さ>.jpg\`（撮影したPNGを容量のためJPEG化）。fps はその場面を表示して約3.5秒後の移動平均（下記の実行環境での値で、iPad 実機の値ではありません）。\n\n`;
   out += `| サイズ | 場面 | 構図 | fps | 解像度倍率 | 低負荷 | エラー | 外部通信 |\n|---|---|---|---|---|---|---|---|\n`;
   for (const r of shots.rows) out += `| ${r.size} | ${r.scene} | ${r.view} | ${r.fps} | ${r.resScale} | ${r.low} | ${r.errors} | ${r.external} |\n`;
   out += `\n- WebGL レンダラ: \`${esc(shots.rows[0] ? shots.rows[0].renderer : '')}\`\n`;

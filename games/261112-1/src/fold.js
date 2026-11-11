@@ -120,10 +120,10 @@ export class Fold {
     const np = G.nearParticle(sx, sy, (c) => c.site === 'fold' && c.loc === 'basket');
     if (np) cand(np.d, 0, () => clothDrag(np.c, np.k, sx, sy));
     const fp = G.nearParticle(sx, sy, (c) => c.loc === 'flat' && c.flat.anim >= 1 && (c.flat.where !== 'drawer' || this.drawer.open > 0.4), true);
-    if (fp) cand(fp.d, 7, () => this.flatDrag(fp.c, sx, sy));
+    if (fp) cand(fp.dn, 12, () => this.flatDrag(fp.c, sx, sy));       // a touch right on a piece means the piece, even next to the handle
     const t = G.cl.towel;
     if (t.loc === 'person' && (this.P.state === 'hold')) { const h = this.handMid(this._v); cand(G.sdist(sx, sy, h.x, h.y, h.z) * 0.6, 0, () => { this.takeBack(t); return this.flatDrag(t, sx, sy, true); }); }
-    G.W.drawerHandle.getWorldPosition(this._v); cand(G.sdist(sx, sy, this._v.x, this._v.y, this._v.z), 4, () => this.drawerDrag(sx, sy));
+    G.W.drawerHandle.getWorldPosition(this._v); for (const dx of [0, -0.08, 0.08]) cand(G.sdist(sx, sy, this._v.x + dx, this._v.y, this._v.z + 0.02), 3, () => this.drawerDrag(sx, sy));
   }
 
   // ---------- the family member ----------

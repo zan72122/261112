@@ -112,8 +112,8 @@ function boot() {
           if (!c.active[k]) continue; c.wpos(k, wp);
           const o = G.project(wp.x, wp.y, wp.z, _po); if (o.z > 1) continue;
           const d = Math.hypot(o.x - sx, o.y - sy); if (d > lim) continue;
-          if (!pass) { if (d < bd) { bd = d; best = { c, k, d }; } }
-          else if (wp.y > by + 0.002) { by = wp.y; best = { c, k, d }; }
+          if (!pass) { if (d < bd) { bd = d; best = { c, k, d, dn: d }; } }
+          else if (wp.y > by + 0.002) { by = wp.y; best = { c, k, d, dn: bd }; }
         }
       }
       if (!best) break;
@@ -192,7 +192,7 @@ function boot() {
     }
     if (carrying) { G.viewName = 'fold-wide'; return fit(-1.35, 0.55, 0.4, 3.2, 1.3, 0, -24); }
     if (G.fold.finaleView()) { G.viewName = 'fold-finale'; return fit(-2.86, 1.16, 0.0, 1.15, 1.2, -12, -10); }
-    G.viewName = 'fold'; return port ? fit(-2.1, 0.62, 0.22, 2.1, 1.6, 0, -40) : fit(-2.08, 0.5, 0.5, 2.36, 1.75, 0, -34);
+    G.viewName = 'fold'; return port ? fit(-2.1, 0.62, 0.22, 2.1, 1.6, 0, -40) : fit(-2.1, 0.72, 0.42, 2.36, 2.12, 0, -30);
   }
   const stationFocus = { wash: [0.2, 0.6, 0.3, 2.7], bal: [2.7, 0.8, -2.0, 3.1], fold: [-1.9, 0.6, 0.3, 2.6] };
   function applyStationLook(st) {
