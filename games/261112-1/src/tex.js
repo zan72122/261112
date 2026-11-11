@@ -169,7 +169,7 @@ function strawberryField(g, W, H, base, seed, tone, alpha = 1) {
 }
 
 // shirt layout: grid 16x10 cells (0.72m x 0.45m). top 3 rows = sleeves+shoulders, body cols 4..12
-export const SHIRT = { nx: 17, ny: 11, cell: 0.045, b0: 4, b1: 12, sleeveRows: 3 };
+export const SHIRT = { nx: 17, ny: 11, cell: 0.04, b0: 4, b1: 12, sleeveRows: 3 };
 function shirtOutline(g, W, H, neck = true) {
   const cx = W / SHIRT.nx * 0, u = W / 16, v = H / 10;
   g.beginPath();
@@ -436,4 +436,16 @@ export function fingerCanvas() {
   g.fillStyle = 'rgba(255,240,232,0.85)'; g.beginPath(); g.roundRect(34, 14, 28, 30, 12); g.fill();
   g.strokeStyle = 'rgba(190,140,110,0.5)'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(34, 78); g.quadraticCurveTo(48, 83, 62, 78); g.moveTo(35, 86); g.quadraticCurveTo(48, 90, 61, 86); g.stroke();
   return c;
+}
+
+// soft reflection of a bright window on curved glass
+export function glintTex() {
+  const S = 256, c = cv(S, S), g = c.getContext('2d');
+  g.save(); g.beginPath(); g.arc(S / 2, S / 2, S * 0.5, 0, TAU); g.clip();
+  const gr = g.createLinearGradient(S * 0.15, S * 0.1, S * 0.6, S * 0.7); gr.addColorStop(0, 'rgba(255,255,255,0.85)'); gr.addColorStop(0.35, 'rgba(255,255,255,0.22)'); gr.addColorStop(0.6, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.beginPath(); g.ellipse(S * 0.34, S * 0.33, S * 0.2, S * 0.3, 0.7, 0, TAU); g.fill();
+  g.globalCompositeOperation = 'destination-out'; g.beginPath(); g.ellipse(S * 0.43, S * 0.43, S * 0.2, S * 0.3, 0.7, 0, TAU); g.fill();
+  g.globalCompositeOperation = 'source-over'; g.strokeStyle = 'rgba(255,255,255,0.28)'; g.lineWidth = 5; g.beginPath(); g.arc(S / 2, S / 2, S * 0.44, Math.PI * 0.15, Math.PI * 0.42); g.stroke();
+  g.restore();
+  return mkTex(c, { clampEdge: true });
 }

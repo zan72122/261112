@@ -13,11 +13,12 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#
 #safe{position:fixed;left:0;top:0;right:0;bottom:0;visibility:hidden;pointer-events:none;
 padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 #hint{position:fixed;left:0;top:0;opacity:0;pointer-events:none;transform-origin:0 0;will-change:transform,opacity}
+#vig{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 56%,rgba(24,16,8,0.2) 100%)}
 #fb{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:#e9e4da url(__FALLBACK__) center/cover no-repeat}
 </style>
 </head>
 <body>
-<canvas id="c"></canvas><canvas id="hint"></canvas><div id="safe"></div><div id="fb"></div>
+<canvas id="c"></canvas><div id="vig"></div><canvas id="hint"></canvas><div id="safe"></div><div id="fb"></div>
 <script>
 /*__JS__*/
 </script>

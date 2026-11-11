@@ -232,8 +232,8 @@ export class Dry {
     }
     // rain: passes once per wash while laundry is out
     const R = this.rainS, anyRod = G.list.some((c) => c.rod);
-    if (R.state === 'idle') { if (onBal && anyRod && G.progress.rainFor !== G.progress.washCount) { R.t += dt; if (R.t > 15) { R.state = 'rain'; R.t = 0; } } }
-    else if (R.state === 'rain') { R.t += dt; R.k = Math.min(1, R.t / 2.5) * clamp((17 - R.t) / 3.5, 0, 1); if (R.t >= 17) { R.state = 'idle'; R.t = 0; R.k = 0; G.progress.rainFor = G.progress.washCount; G.markDirty(); } }
+    if (R.state === 'idle') { if (onBal && anyRod && G.progress.rainFor !== G.progress.washCount) { R.t += dt; if (R.t > 48) { R.state = 'rain'; R.t = 0; } } }
+    else if (R.state === 'rain') { R.t += dt; R.k = Math.min(1, R.t / 2.5) * clamp((21 - R.t) / 3.5, 0, 1); if (R.t >= 21) { R.state = 'idle'; R.t = 0; R.k = 0; G.progress.rainFor = G.progress.washCount; G.markDirty(); } }
     G.sunK = 1 - 0.42 * R.k;
     this.wetFloor = R.k > 0.05 ? Math.min(1, this.wetFloor + dt * 0.35 * R.k) : Math.max(0, this.wetFloor - dt * 0.03);
     W.wetFloor.opacity = this.wetFloor * 0.5;

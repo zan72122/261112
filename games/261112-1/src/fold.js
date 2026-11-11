@@ -66,7 +66,7 @@ export class Fold {
 
   // ---------- fold / carry gesture on a flat piece ----------
   toFold(c, X, Z, out) { const fl = c.flat, xr = X - fl.ox, zr = Z - fl.oz - this.zoff(c); if (fl.rot) { out[0] = -zr; out[1] = xr; } else { out[0] = xr; out[1] = zr; } return out; }
-  flatDrag(c, sx, sy) {
+  flatDrag(c, sx, sy, carryOnly) {
     const G = this.G, fl = c.flat, py = fl.y + fl.h, h0 = G.hitY(sx, sy, py).clone(), f0 = this.toFold(c, h0.x, h0.z, [0, 0]);
     const d = { kind: 'flat', c, sx, sy, mode: null, moved: 0 }, ox0 = fl.ox, oz0 = fl.oz;
     this.toTopOrder(c);
@@ -78,7 +78,7 @@ export class Fold {
         const ax = Math.abs(f[0] - f0[0]) >= Math.abs(f[1] - f0[1]) ? 0 : 1, ds = Math.sign(f[ax] - f0[ax]) || 1;
         const [lo, hi] = c.foldExtent(ax), e0 = clamp(f0[ax], lo, hi), fromBorder = ds > 0 ? e0 - lo : hi - e0;
         d.mode = 'carry';
-        if (fromBorder < 0.36 * (hi - lo) + 0.015 && hi - lo > 0.07) {
+        if (!carryOnly && fromBorder < clamp(0.3 * (hi - lo), 0.05, 0.14) && hi - lo > 0.1) {
           const F = fl.folds, last = F[F.length - 1]; let edit = false;
           if (last && last.ax === ax && ds === last.side) { const [plo, phi] = c.foldExtent(ax, F.length - 1), free = last.side > 0 ? 2 * last.c - phi : 2 * last.c - plo; if (Math.abs(free - (ds > 0 ? lo : hi)) < 0.04) edit = true; }
           if (edit) { d.mode = 'edit'; d.fold = last; d.e0 = 2 * last.c - e0; d.g0 = e0; }
@@ -120,10 +120,10 @@ export class Fold {
     const np = G.nearParticle(sx, sy, (c) => c.site === 'fold' && c.loc === 'basket');
     if (np) cand(np.d, 0, () => clothDrag(np.c, np.k, sx, sy));
     const fp = G.nearParticle(sx, sy, (c) => c.loc === 'flat' && c.flat.anim >= 1 && (c.flat.where !== 'drawer' || this.drawer.open > 0.4), true);
-    if (fp) cand(fp.d, 3, () => this.flatDrag(fp.c, sx, sy));
+    if (fp) cand(fp.d, 7, () => this.flatDrag(fp.c, sx, sy));
     const t = G.cl.towel;
-    if (t.loc === 'person' && (this.P.state === 'hold')) { const h = this.handMid(this._v); cand(G.sdist(sx, sy, h.x, h.y, h.z) * 0.6, 0, () => { this.takeBack(t); return this.flatDrag(t, sx, sy); }); }
-    G.W.drawerHandle.getWorldPosition(this._v); cand(G.sdist(sx, sy, this._v.x, this._v.y, this._v.z), 9, () => this.drawerDrag(sx, sy));
+    if (t.loc === 'person' && (this.P.state === 'hold')) { const h = this.handMid(this._v); cand(G.sdist(sx, sy, h.x, h.y, h.z) * 0.6, 0, () => { this.takeBack(t); return this.flatDrag(t, sx, sy, true); }); }
+    G.W.drawerHandle.getWorldPosition(this._v); cand(G.sdist(sx, sy, this._v.x, this._v.y, this._v.z), 4, () => this.drawerDrag(sx, sy));
   }
 
   // ---------- the family member ----------

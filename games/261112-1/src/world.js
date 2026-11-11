@@ -10,9 +10,9 @@ export const L = {
   drum: { cx: 0, cy: 0.45, R: 0.225, zb: -0.25, zf: 0.19 },
   knob: { x: 0.14, y: 0.785, z: 0.283, r: 0.05 },
   hinge: { x: 0.245, y: 0.45, z: 0.275 },
-  basket: { w: 0.50, d: 0.38, h: 0.21, floor: 0.03 },
-  stWash: { x: -0.66, y: 0, z: 0.58 },
-  stBal: { x: 3.55, y: 0, z: -2.0 },
+  basket: { w: 0.60, d: 0.42, h: 0.15, floor: 0.05 },
+  stWash: { x: -0.7, y: 0, z: 0.6 },
+  stBal: { x: 3.32, y: 0, z: -2.0 },
   stFold: { x: -1.56, y: 0, z: 0.78 },
   stShelf: { x: -1.56, y: 0.065, z: -0.02 },
   door: { x0: 0.55, x1: 1.85, h: 2.05 },
@@ -104,7 +104,7 @@ export function buildWorld(scene, low) {
   const hole = new THREE.Path(); hole.absarc(0, L.port.y, 0.17, 0, TAU, true); sh.holes.push(hole);
   const front = mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.024, bevelEnabled: false, curveSegments: 64 }), M.enamel, 0, 0, 0.246, ws);
   front.name = 'front';
-  box(0.012, 0.8, 0.585, M.enamel, -0.294, 0.445, -0.04, ws); box(0.012, 0.8, 0.585, M.enamel, 0.294, 0.445, -0.04, ws);
+  box(0.012, 0.8, 0.572, M.enamel, -0.294, 0.445, -0.044, ws); box(0.012, 0.8, 0.572, M.enamel, 0.294, 0.445, -0.044, ws);
   box(0.6, 0.012, 0.585, M.enamel, 0, 0.051, -0.04, ws); box(0.6, 0.8, 0.012, M.enamel, 0, 0.445, -0.327, ws);
   rbox(0.604, 0.03, 0.62, 0.012, M.enamel, 0, 0.838, -0.03, ws);
   box(0.56, 0.05, 0.5, M.rubber, 0, 0.025, -0.05, ws);
@@ -152,6 +152,10 @@ export function buildWorld(scene, low) {
   const hd = rbox(0.03, 0.15, 0.03, 0.012, M.chrome, dcx - 0.232, 0, 0.045, door); W.handle = hd;
   box(0.03, 0.1, 0.02, M.chrome, -0.012, 0, 0.012, door);
   shadowBlob(0, 0.02, 1.25, 1.15, 1.0);
+  // soft occlusion on the wall behind things, and a window glint on the door glass
+  const wallBlob = (x, y, w, h, op) => { const o = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: blob, transparent: true, opacity: op, depthWrite: false })); o.position.set(x, y, L.wallZ + 0.004); o.renderOrder = 1; scene.add(o); return o; };
+  wallBlob(0, 0.42, 1.5, 1.7, 0.55); wallBlob(-1.95, 0.36, 2.6, 1.5, 0.5); wallBlob(0, 1.24, 1.5, 0.5, 0.35);
+  const glint = new THREE.Mesh(new THREE.PlaneGeometry(0.33, 0.33), new THREE.MeshBasicMaterial({ map: TX.glintTex(), transparent: true, opacity: 0.5, depthWrite: false })); glint.position.set(dcx, 0, 0.016); glint.renderOrder = 8; door.add(glint);
 
   // ---------- basket (felt, leather grips) ----------
   const bk = new THREE.Group(); scene.add(bk); W.basket = bk;
@@ -166,7 +170,7 @@ export function buildWorld(scene, low) {
     hg.scale.set(1, 0.75, 1);
     for (const e of [-1, 1]) mesh(new THREE.CylinderGeometry(0.0055, 0.0055, 0.012, 8), M.chrome, e * 0.055, B.h - 0.04, s * (B.d / 2 + 0.006), bk).rotation.x = Math.PI / 2;
   }
-  W.basketBlob = shadowBlob(0, 0, 0.92, 0.78, 0.95, 0.005, bk);
+  W.basketBlob = shadowBlob(0, 0, 1.02, 0.82, 0.95, 0.005, bk);
 
   // ---------- counter with drawer and cubby ----------
   const C = L.counter, cw = C.x1 - C.x0, cd = C.z1 - C.z0, cxm = (C.x0 + C.x1) / 2, czm = (C.z0 + C.z1) / 2;

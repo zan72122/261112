@@ -21,12 +21,12 @@ export class Hint {
       if (!m.latched && m.door > 0.9) {
         if (inD.length && P.washed && inD.some((c) => c.wetMean > 0.1)) { cen(inD[0], a); t.set(b.x, b.y + 0.36, b.z); return drag('takeout'); }
         if (inB.length && !P.washed) {
-          const s = G.cl.shirt; if (s.loc === 'basket' && s.snag >= 0) s.wpos(s.idx(15, 1), a); else cen(inB[0], a).y += 0.03;
+          const s = G.cl.shirt; if (s.loc === 'basket' && s.snag >= 0) s.wpos(s.idx(1, 1), a); else cen(inB[0], a).y += 0.03;
           t.set(L.port.x, L.port.y, L.port.z); return drag(inD.length ? 'load' + inB.length : 'load');
         }
         if (inD.length && !P.washed) { W.handle.getWorldPosition(a); return tap('close'); }
-        if (P.washed && !inD.length && inB.some((c) => c.wetMean > 0.15)) { a.set(b.x, b.y + 0.14, b.z + 0.19); t.set(0.95, 0.14, 0.2); return drag('carrybal'); }
-        if (P.hung && inB.length && inB.every((c) => c.wetMean < 0.1)) { a.set(b.x, b.y + 0.14, b.z + 0.19); t.set(b.x - 0.75, 0.14, b.z + 0.19); return drag('carryfold'); }
+        if (P.washed && !inD.length && inB.some((c) => c.wetMean > 0.15)) { a.set(b.x, b.y + 0.05, b.z + 0.21); t.set(0.95, 0.05, 0.2); return drag('carrybal'); }
+        if (P.hung && inB.length && inB.every((c) => c.wetMean < 0.1)) { a.set(b.x, b.y + 0.05, b.z + 0.21); t.set(b.x - 0.75, 0.05, b.z + 0.21); return drag('carryfold'); }
       } else if (m.latched && !m.reqOpen) {
         if (m.zone === 'off') { if (inD.some((c) => c.wetMean < 0.05) || !inD.length) return { key: 'knob1', kind: 'arc', v0: m.knob, v1: 0.26 }; W.handle.getWorldPosition(a); return tap('open'); }
         if ((m.zone === 'wash' && m.water > 0.95 && inD.every((c) => c.dirtMean < 0.03)) || m.zone === 'rinse') return { key: 'knob2', kind: 'arc', v0: m.knob, v1: 0.82 };
@@ -39,7 +39,7 @@ export class Hint {
       if (rods.length && !D.pins.some((p) => p.state === 'on')) { const c = rods[0], r = L.rods[c.rod.id]; D.pinWorld(D.pins[0], a); t.set(r.x, r.y, D.rodZ0(c) - (c.nx > 10 ? 6 : 1) * c.cell); return drag('pin'); }
       if (inB.length) { cen(inB[0], a).y += 0.04; t.set(L.rods[1].x, L.rods[1].y, z - 0.25); return drag('hang2'); }
       if (rods.length && P.dried) { cen(rods[0], a); t.set(b.x, b.y + 0.36, b.z); return drag('takein'); }
-      if (!rods.length && inB.length && P.hung) { a.set(b.x + 0.25, b.y + 0.14, b.z); t.set(1.7, 0.14, -1.0); return drag('carryroom'); }
+      if (!rods.length && inB.length && P.hung) { a.set(b.x + 0.3, b.y + 0.05, b.z); t.set(1.7, 0.05, -1.0); return drag('carryroom'); }
     } else {
       const F = G.fold, flats = G.list.filter((c) => c.loc === 'flat'), tw = G.cl.towel;
       if (inB.length) { cen(inB[0], a).y += 0.04; t.set(-1.95, L.counter.top + 0.05, -0.05); return drag('tocounter'); }
@@ -49,7 +49,7 @@ export class Hint {
       const other = flats.find((c) => c !== tw && c.flat.where === 'top');
       if (other && F.drawer.open < 0.5) { W.drawerHandle.getWorldPosition(a); t.copy(a); t.z += 0.32; return drag('drawer'); }
       if (other) { const w = other.flat.wbb; a.set((w.x0 + w.x1) / 2, other.flat.y + 0.03, (w.z0 + w.z1) / 2); t.set((L.drawer.x0 + L.drawer.x1) / 2, L.drawer.y0 + 0.04, 0.45); return drag('store'); }
-      if (!b.shelf && !inB.length && P.card) { a.set(b.x, b.y + 0.14, b.z + 0.19); t.set(L.stShelf.x, 0.2, 0.15); return drag('shelf'); }
+      if (!b.shelf && !inB.length && P.card) { a.set(b.x, b.y + 0.05, b.z + 0.21); t.set(L.stShelf.x, 0.16, 0.15); return drag('shelf'); }
     }
     return null;
   }

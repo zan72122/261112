@@ -7,7 +7,7 @@ export class Drops {
     this.d = new Float32Array(max * 9); // x y z vx vy vz life size mode
     this.floor = new Float32Array(max);
     const g = new THREE.SphereGeometry(1, 7, 5);
-    const m = new THREE.MeshStandardMaterial({ color: 0xeaf5fb, roughness: 0.05, transparent: true, opacity: 0.72, depthWrite: false, envMapIntensity: 2 });
+    const m = new THREE.MeshStandardMaterial({ color: 0xeaf5fb, roughness: 0.05, transparent: true, opacity: 0.55, depthWrite: false, envMapIntensity: 2 });
     this.mesh = new THREE.InstancedMesh(g, m, max); this.mesh.frustumCulled = false; this.mesh.count = 0; this.mesh.renderOrder = 7;
     scene.add(this.mesh); this.onHit = null; this.cx = 0; this.cy = 0.45; this.rmax = 0.15; this._vy = 0; this._m = new THREE.Matrix4(); this._q = new THREE.Quaternion(); this._s = new THREE.Vector3(); this._p = new THREE.Vector3(); this._v = new THREE.Vector3(); this._up = new THREE.Vector3(0, 1, 0);
   }

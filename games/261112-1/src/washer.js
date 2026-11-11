@@ -89,8 +89,8 @@ export class Washer {
     if (zone !== this.zone) { if (zone === 'rinse' && this.zone === 'wash') this.rinseT = 0; if (zone === 'wash') G.onProgress('washing'); if (zone === 'spin') G.onProgress('spin'); this.zone = zone; }
     let omT = 0; this.fillRate = 0; this.drainRate = 0; let spray = false;
     if (zone === 'wash') { this.rinsed = false; if (this.water < 1) { this.fillRate = 0.26; } omT = 4.6; }
-    else if (zone === 'rinse') { omT = 3.4; if (!this.rinsed) { if (this.water > 0.02) { this.rinseT += dt; if (this.rinseT < 1.7) spray = true; else this.drainRate = 0.5; } else this.rinsed = true; } }
-    else if (zone === 'spin') { if (this.water > 0.02) { this.drainRate = 0.6; omT = 3.4; } else { this.rinsed = true; omT = lerp(5.3, 14, (k - ZONES.rinse) / (1 - ZONES.rinse)); } }
+    else if (zone === 'rinse') { omT = 3.4; if (!this.rinsed) { if (this.water > 0.0005) { this.rinseT += dt; if (this.rinseT < 1.7) spray = true; else this.drainRate = 0.5; } else { this.rinsed = true; this.water = 0; } } }
+    else if (zone === 'spin') { if (this.water > 0.0005) { this.drainRate = 0.6; omT = 3.4; } else { this.rinsed = true; this.water = 0; omT = lerp(5.3, 14, (k - ZONES.rinse) / (1 - ZONES.rinse)); } }
     else if (zone === 'stop') {
       omT = 0; if (this.water > 0) this.drainRate = 0.8;
       this.knob = Math.max(0, this.knob - dt * 0.9);

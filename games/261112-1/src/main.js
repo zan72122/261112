@@ -24,6 +24,10 @@ const canvas = document.getElementById('c');
 function fallback() { document.getElementById('fb').style.display = 'block'; canvas.style.display = 'none'; G.dead = true; }
 let renderer;
 try {
+  // probe first so that a missing WebGL shows the still picture quietly
+  const probe = document.createElement('canvas'), gl = probe.getContext('webgl2') || probe.getContext('webgl');
+  if (!gl) throw new Error('no gl');
+  const ext = gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext();
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
   if (!renderer.getContext()) throw new Error('no gl');
 } catch (e) { fallback(); }
@@ -100,15 +104,19 @@ function boot() {
   const wp = V(0, 0, 0);
   G.nearParticle = (sx, sy, filter, preferHigh) => {
     let best = null, bd = 1e9; const R = G.pickR() * 1.25;
-    for (const c of G.list) {
-      if (!filter(c)) continue;
-      for (let k = 0; k < c.n; k++) {
-        if (!c.active[k]) continue; c.wpos(k, wp);
-        const o = G.project(wp.x, wp.y, wp.z, _po); if (o.z > 1) continue;
-        let d = Math.hypot(o.x - sx, o.y - sy); if (d > R) continue;
-        if (preferHigh) d = d * 0.25 - wp.y * 400;
-        if (d < bd) { bd = d; best = { c, k, d: Math.hypot(o.x - sx, o.y - sy) }; }
+    for (let pass = 0; pass < (preferHigh ? 2 : 1); pass++) {
+      const lim = pass ? bd + 10 : R; let by = -1e9;       // second pass: the topmost piece right under the finger
+      for (const c of G.list) {
+        if (!filter(c)) continue;
+        for (let k = 0; k < c.n; k++) {
+          if (!c.active[k]) continue; c.wpos(k, wp);
+          const o = G.project(wp.x, wp.y, wp.z, _po); if (o.z > 1) continue;
+          const d = Math.hypot(o.x - sx, o.y - sy); if (d > lim) continue;
+          if (!pass) { if (d < bd) { bd = d; best = { c, k, d }; } }
+          else if (wp.y > by + 0.002) { by = wp.y; best = { c, k, d }; }
+        }
       }
+      if (!best) break;
     }
     return best;
   };
@@ -128,19 +136,27 @@ function boot() {
     const b = G.basket, B = L.basket, bot = b.y + B.floor, rim = b.y + B.h;
     const t = G.cl.towel, s = G.cl.shirt, r = (a) => (Math.sin(a * 12.9898) * 43758.5453) % 1;
     for (const c of G.list) { c.loc = 'basket'; c.site = b.station; c.frame = null; c.rod = null; c.flat = null; c.wrap = null; c.kin.fill(0); c.grab = -1; c.stuck = 0; c.homing = 0; c.insert = 0; c.setWet(0); c.dirt.fill(0); }
-    for (let j = 0; j < t.ny; j++) for (let i = 0; i < t.nx; i++) { const f = j / (t.ny - 1) * 3, tri = Math.abs(((f + 1) % 2) - 1), lay = Math.floor(f + 0.5); t.setPos(t.idx(i, j), b.x - 0.19 + i * 0.044, bot + 0.04 + lay * 0.034 + Math.sin(i * 1.7 + j) * 0.006, b.z - 0.12 + tri * 0.24); }
-    const top = rim + 0.03;
+    // towel folded in three along its length at the bottom
+    for (let j = 0; j < t.ny; j++) for (let i = 0; i < t.nx; i++) {
+      const fz = j * t.cell / 0.34, tz = Math.abs(((fz + 1) % 2) - 1), lz = Math.floor(fz + 0.5);
+      t.setPos(t.idx(i, j), b.x - 0.24 + i * t.cell, bot + 0.03 + lz * 0.024 + Math.sin(i * 1.7 + j) * 0.003, b.z - 0.17 + tz * 0.34);
+    }
+    const top = rim + 0.02;
+    // shirt on top, along the front of the basket; its right sleeve drops over the front rim next to the washer
+    const fz = b.z + B.d / 2, xs = b.x + B.w / 2 - 0.1;
     for (let j = 0; j < s.ny; j++) for (let i = 0; i < s.nx; i++) {
-      if (!s.on(i, j)) continue; const d = (16 - i) * s.cell;       // distance from right cuff
-      const jj = j <= 5 ? j : 10 - j, zBody = b.z - 0.125 + jj * 0.045, zOut = b.z - 0.035 + j * 0.036; let x, y, z;
-      if (d < 0.135) { x = b.x + B.w / 2 + 0.028 + (0.135 - d) * 0.12; y = rim + 0.012 - (0.135 - d) * 0.98; z = zOut; }
-      else if (d < 0.2) { const u = (d - 0.135) / 0.065; x = b.x + B.w / 2 + 0.02 - u * 0.07; y = rim + 0.02 + Math.sin(u * 3.14) * 0.01; z = lerp(zOut, zBody, u); }
-      else { const dd = d - 0.2, xx = dd <= 0.36 ? dd : 0.72 - dd; x = b.x + 0.19 - xx; y = top + 0.02 + (dd > 0.36 ? 0.035 : 0) - (j > 5 ? 0.03 : 0) + Math.sin(i * 1.3 + j) * 0.006; z = zBody; }
+      if (!s.on(i, j)) continue; let x, y, z;
+      if (i <= 3) { const o = 3 - i; x = xs + (j - 1) * 0.036; z = fz + (o ? 0.028 : 0.012); y = o ? rim + 0.015 - o * 0.04 : rim + 0.02; }
+      else {
+        const jj = j <= 5 ? j : 10 - j; z = fz - 0.05 - jj * s.cell; x = i <= 12 ? xs - (i - 4) * s.cell * 0.96 : xs - 8 * s.cell * 0.96 + (i - 12) * s.cell;
+        if (i > 12) z -= 0.1 + (i - 12) * 0.012;
+        y = top + 0.02 + (i > 12 ? 0.03 : 0) - (j > 5 ? 0.03 : 0) + Math.sin(i * 1.3 + j) * 0.005; if (i === 4 && j < 3) { y = rim + 0.022; z = fz - 0.035; x = xs + (j - 1) * 0.036; }
+      }
       s.setPos(s.idx(i, j), x, y, z);
     }
-    s.snag = s.idx(13, 1); s.kin[s.snag] = 1; s.kin[s.idx(13, 0)] = 1; s.kin[s.idx(13, 2)] = 1; s.snag2 = [s.idx(13, 0), s.idx(13, 2)];
+    s.snag = s.idx(3, 1); s.kin[s.snag] = 1; s.kin[s.idx(3, 0)] = 1; s.kin[s.idx(3, 2)] = 1; s.snag2 = [s.idx(3, 0), s.idx(3, 2)];
     const a = G.cl.sockA, bb = G.cl.sockB;
-    for (let j = 0; j < a.ny; j++) for (let i = 0; i < a.nx; i++) { a.setPos(a.idx(i, j), b.x - 0.17 + i * 0.04, top + 0.09 + j * 0.004, b.z + 0.11 - j * 0.04); bb.setPos(bb.idx(i, j), b.x - 0.07 + j * 0.036, top + 0.11 + i * 0.004, b.z + 0.13 - i * 0.04 - j * 0.012); }
+    for (let j = 0; j < a.ny; j++) for (let i = 0; i < a.nx; i++) { a.setPos(a.idx(i, j), b.x - 0.22 + i * 0.04, top + 0.05 + j * 0.004, b.z + 0.06 - j * 0.04); bb.setPos(bb.idx(i, j), b.x - 0.12 + j * 0.036, top + 0.07 + i * 0.004, b.z - 0.02 - i * 0.04 - j * 0.012); }
     a.inverted = bb.inverted = false; G.setSockLook(a); G.setSockLook(bb);
     // everyday marks to wash away
     const dab = (c, list) => { for (const [i, j, v] of list) for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) if (c.on(i + di, j + dj)) c.dirt[c.idx(i + di, j + dj)] = Math.max(c.dirt[c.idx(i + di, j + dj)], v * (di || dj ? 0.45 : 1)); };
@@ -152,7 +168,7 @@ function boot() {
   const cam = G.cam = { pos: V(0, 1.4, 3), tgt: V(0, 0.5, 0), fov: 38, transit: null, first: true };
   const view = { pos: V(0, 0, 0), tgt: V(0, 0, 0), fov: 38 };
   function fit(cx, cy, cz, w, h, yaw, pitch) {
-    const asp = G.vw / G.vh, fov = asp >= 1 ? 36 : lerp(36, 52, clamp((1 - asp) / 0.42, 0, 1));
+    const asp = G.vw / G.vh, fov = asp >= 1 ? 36 : lerp(36, 48, clamp((1 - asp) / 0.42, 0, 1));
     const tv = Math.tan(fov * Math.PI / 360), th = tv * asp, d = Math.max(h / 2 / tv, w / 2 / th) * 1.04 * (G.safeScale || 1);
     const y = yaw * Math.PI / 180, p = pitch * Math.PI / 180, fx = Math.sin(y) * Math.cos(p), fy = Math.sin(p), fz = -Math.cos(y) * Math.cos(p);
     view.tgt.set(cx, cy, cz); view.pos.set(cx - fx * d, cy - fy * d, cz - fz * d); view.fov = fov; return view;
@@ -167,12 +183,12 @@ function boot() {
         if (m.zone === 'spin' || (m.zone === 'stop' && m.knob > 0.3)) { G.viewName = 'wash-spin'; return fit(0.03, 0.535, 0.28, 0.6, 0.72, 0, -5); }
         G.viewName = 'wash-run'; return fit(0, 0.5, 0.28, 0.92, 0.9, 0, -9);
       }
-      G.viewName = 'wash-load'; return port ? fit(-0.3, 0.42, 0.44, 1.04, 1.5, 38, -30) : fit(-0.16, 0.36, 0.46, 1.9, 0.98, 4, -22);
+      G.viewName = 'wash-load'; return port ? fit(-0.3, 0.4, 0.44, 1.12, 1.5, 33, -29) : fit(-0.2, 0.36, 0.46, 1.96, 0.98, 4, -22);
     }
     if (st === 'bal') {
       const zc = G.dry.stand.z * 0.55 + L.stBal.z * 0.45;
-      if (carrying) { G.viewName = 'bal-wide'; return fit(2.5, 0.85, -1.75, 3.1, 1.75, -101, -9); }
-      G.viewName = 'bal'; const bv = port ? fit(2.66, 1.0, zc - 0.05, 2.05, 1.68, -73, -7) : fit(2.66, 0.6, zc - 0.05, 2.3, 1.95, -73, -9); if (bv.pos.z > -0.85) bv.pos.z = -0.85; return bv;
+      if (carrying) { G.viewName = 'bal-wide'; const wv = fit(2.5, 0.85, -1.75, 3.1, 1.75, -110, -9); if (wv.pos.z < -3.5) wv.pos.z = -3.5; return wv; }
+      G.viewName = 'bal'; const bv = port ? fit(2.72, 0.9, zc + 0.05, 2.05, 1.7, -107, -19) : fit(2.82, 0.52, zc + 0.05, 2.3, 2.1, -107, -21); if (bv.pos.z < -3.5) bv.pos.z = -3.5; return bv;
     }
     if (carrying) { G.viewName = 'fold-wide'; return fit(-1.35, 0.55, 0.4, 3.2, 1.3, 0, -24); }
     if (G.fold.finaleView()) { G.viewName = 'fold-finale'; return fit(-2.86, 1.16, 0.0, 1.15, 1.2, -12, -10); }
@@ -231,7 +247,7 @@ function boot() {
 
   // ---------- grabbing cloth (physics mode) ----------
   G.startGrab = (c, k, sx, sy) => {
-    c.grab = k; c.kin[k] = 1; c.homing = 0; c.insert = 0; c.sleepT = 0;
+    c.grab = k; c.kin[k] = 1; c.homing = 0; c.insert = 0; c.sleepT = 0; c.grabSeq = (G.grabSeq = (G.grabSeq || 0) + 1);
     if (c.snag >= 0) { c.kin[c.snag] = 0; for (const s of c.snag2) c.kin[s] = 0; c.kin[k] = 1; c.snag = -1; }
     if (c.stuck) { c.stuck = 0; G.audio.play('peel'); }
     if (c.loc === 'basket') c.loc = 'held';
@@ -246,14 +262,14 @@ function boot() {
     const ps = portInfo(), d = Math.hypot(sx - ps.x, sy - ps.y) / ps.r, k = smooth(1.3, 0.75, d), open = G.washer.door > 0.9 ? 1 : 0;
     const z = lerp(0.44, 0.03, k * open), p = G.hitZ(sx, sy, z, c.gt);
     if (z < L.port.z + 0.03) { const dx = p.x - L.port.x, dy = p.y - L.port.y, r = Math.hypot(dx, dy), m = 0.125; if (r > m) { p.x = L.port.x + dx / r * m; p.y = L.port.y + dy / r * m; } }
-    p.y = Math.max(p.y, 0.04); return d;
+    p.y = Math.max(p.y + 0.03 * (1 - k * open), 0.04); return d;    // held a little above the pile
   }
   function clothDrag(c, k, sx, sy) {
     G.startGrab(c, k, sx, sy);
     const st = G.station, d = { kind: 'cloth', c, sx, sy };
     d.move = (x, y) => { d.sx = x; d.sy = y; };
     d.tick = () => {
-      if (st === 'wash') d.pd = washDragTarget(c, d.sx, d.sy);
+      if (st === 'wash') { d.pd = washDragTarget(c, d.sx, d.sy); if (c.kind === 'towel') for (const s of G.list) if (s.wrap && s.wrap.towel === c && s.loc === 'drum' && c.p[s.wrap.k * 3 + 2] > L.port.z + 0.03) popSock(s, s.wrap.spun && !G.list.some((o) => o !== s && o.kind === 'sock' && o.poppedWith === c.grabSeq)), s.poppedWith = c.grabSeq; }
       else if (st === 'bal') G.dry.dragTarget(c, d.sx, d.sy);
       else G.fold.dragTarget(c, d.sx, d.sy);
     };
@@ -299,8 +315,29 @@ function boot() {
     // basket
     const b = G.basket, B = L.basket;
     if (b.station === st && !b.tween) {
-      let d = Math.min(G.sdist(sx, sy, b.x, b.y + 0.11, b.z + B.d / 2), G.sdist(sx, sy, b.x - 0.17, b.y + 0.12, b.z + B.d / 2), G.sdist(sx, sy, b.x + 0.17, b.y + 0.12, b.z + B.d / 2), G.sdist(sx, sy, b.x, b.y + 0.27, b.z + B.d / 2));
+      let d = Math.min(G.sdist(sx, sy, b.x, b.y + 0.11, b.z + B.d / 2), G.sdist(sx, sy, b.x - 0.17, b.y + 0.12, b.z + B.d / 2), G.sdist(sx, sy, b.x + 0.17, b.y + 0.12, b.z + B.d / 2), G.sdist(sx, sy, b.x, b.y + 0.2, b.z + B.d / 2));
       if (st === 'bal') d = Math.min(d, G.sdist(sx, sy, b.x + B.w / 2, b.y + 0.12, b.z), G.sdist(sx, sy, b.x + B.w / 2, b.y + 0.12, b.z - 0.12), G.sdist(sx, sy, b.x + B.w / 2, b.y + 0.12, b.z + 0.12));
+      // a touch on the visible wall (below the rim) means the basket itself, not the laundry heaped above it —
+      // unless a piece hangs out over that wall there, or a piece lies completely hidden behind it (then it is fished out)
+      const bal = st === 'bal', c0 = bal ? [b.x + B.w / 2, b.z + B.d / 2] : [b.x - B.w / 2, b.z + B.d / 2], c1 = bal ? [b.x + B.w / 2, b.z - B.d / 2] : [b.x + B.w / 2, b.z + B.d / 2];
+      const t0 = G.project(c0[0], b.y + B.h, c0[1], {}), t1 = G.project(c1[0], b.y + B.h, c1[1], {}), f0 = G.project(c0[0], b.y, c0[1], {}), f1 = G.project(c1[0], b.y, c1[1], {});
+      const rimY = (x) => t0.y + (t1.y - t0.y) * clamp((x - t0.x) / ((t1.x - t0.x) || 1), 0, 1);
+      if (sx > Math.min(t0.x, t1.x) && sx < Math.max(t0.x, t1.x) && sy > rimY(sx) + 4 && sy < Math.max(f0.y, f1.y)) {
+        let hangs = false, fish = null, fd = R * 1.6;
+        for (const c of G.list) {
+          if (c.loc !== 'basket' || c.site !== st) continue; let hidden = true, near = -1, nd = fd;
+          for (let k = 0; k < c.n; k++) {
+            if (!c.active[k]) continue; const a = k * 3, o = G.project(c.p[a], c.p[a + 1], c.p[a + 2], _po), ds = Math.hypot(o.x - sx, o.y - sy);
+            const inside = Math.abs(c.p[a] - b.x) < B.w / 2 && Math.abs(c.p[a + 2] - b.z) < B.d / 2;
+            if (!inside) { hidden = false; if (ds < R) hangs = true; } else if (o.y < rimY(o.x) - 2) hidden = false;
+            if (ds < nd) { nd = ds; near = k; }
+          }
+          if (hidden && near >= 0) { fd = nd; fish = { c, k: near }; }
+        }
+        const upper = sy < rimY(sx) + 0.5 * (Math.max(f0.y, f1.y) - rimY(sx));    // near the rim: reach for the laundry; lower down: the basket
+        if (fish && !hangs && upper) { best = () => clothDrag(fish.c, fish.k, sx, sy); bd = -1e6; }
+        else if (!hangs) { best = () => basketDrag(sx, sy); bd = -1e6; }
+      }
       cand(d, -6, () => basketDrag(sx, sy));
     }
     if (best) return best();
@@ -308,8 +345,8 @@ function boot() {
     const inRect = (x0, y0, z0, x1, y1, z1) => { const a = G.project(x0, y0, z0, {}), c = G.project(x1, y1, z1, {}); return a.z < 1 && c.z < 1 && sx > Math.min(a.x, c.x) - 8 && sx < Math.max(a.x, c.x) + 8 && sy > Math.min(a.y, c.y) - 8 && sy < Math.max(a.y, c.y) + 8; };
     if (st !== 'bal' && inRect(L.door.x0, 0.05, L.wallZ, L.door.x1, 2.0, L.wallZ)) return tapDrag(sx, sy, () => { if (G.progress.bal) G.goStation('bal', false); else { G.doorWig = 1; G.audio.play('wiggle'); } }, null);
     if (st === 'bal' && inRect(L.door.x0, 0.0, L.extZ, L.door.x1, 2.0, L.extZ)) return tapDrag(sx, sy, () => G.goStation('wash', false), null);
-    if (st === 'wash' && inRect(L.counter.x0, 0.05, L.counter.z1, L.counter.x1, 0.75, L.counter.z1)) return tapDrag(sx, sy, () => { if (G.progress.fold) G.goStation('fold', false); else { G.fold.drawerWig = 1; G.audio.play('wiggle'); } }, null);
-    if (st === 'fold' && inRect(-0.32, 0.05, 0.27, 0.32, 0.85, 0.27)) return tapDrag(sx, sy, () => G.goStation('wash', false), null);
+    // the counter seen from the washer only answers with a small rattle: the basket is what takes you there (and back)
+    if (st === 'wash' && inRect(L.counter.x0, 0.05, L.counter.z1, L.counter.x1, 0.75, L.counter.z1)) return tapDrag(sx, sy, () => { G.fold.drawerWig = 1; G.audio.play('wiggle'); }, null);
     return null;
   }
   function tapDrag(sx, sy, onTap, onDrag) {
@@ -391,8 +428,8 @@ function boot() {
   };
   canvas.addEventListener('pointerup', (e) => end(e, false)); canvas.addEventListener('pointercancel', (e) => end(e, true));
   canvas.addEventListener('lostpointercapture', (e) => { if (e.pointerId === activeId) end(e, true); });
-  for (const ev of ['contextmenu', 'gesturestart', 'gesturechange', 'dblclick', 'selectstart', 'dragstart']) document.addEventListener(ev, (e) => e.preventDefault(), { passive: false });
-  document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+  for (const ev of ['contextmenu', 'gesturestart', 'gesturechange', 'dblclick', 'selectstart', 'dragstart']) document.addEventListener(ev, (e) => { if (e.cancelable) e.preventDefault(); }, { passive: false });
+  for (const ev of ['touchstart', 'touchmove']) document.addEventListener(ev, (e) => { if (e.cancelable) e.preventDefault(); }, { passive: false });
   G.releaseAll = () => { if (G.drag) { const d = G.drag; G.drag = null; d.up(d.sx || 0, d.sy || 0, true); } activeId = null; };
 
   // ---------- size / quality ----------
@@ -424,6 +461,7 @@ function boot() {
       if (c.loc === 'flat' || c.loc === 'person' || c.frame) continue;
       world.push(c);
       let damp = 0.992;
+      if (c.loc === 'basket' && c.homing <= 0 && c.grab < 0 && (G.frames + c.n) % 150 === 0 && c.snag < 0) { const cc = c.center(tmp2); if (Math.abs(cc.x - b.x) > L.basket.w / 2 + 0.03 || Math.abs(cc.z - b.z) > L.basket.d / 2 + 0.03) c.homing = 3.2; }   // a piece that slid off beside the basket hops back in
       if (c.homing > 0) { c.homing -= SIM.H; const out = SIM.homeForces(c, b, 1); damp = 0.97; if (out === 0 && c.homing < 2.6) c.homing = 0; }
       if (c.loc === 'drum') {
         if (c.insert > 0) {       // slips over the lip into the drum
