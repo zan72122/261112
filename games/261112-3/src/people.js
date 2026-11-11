@@ -46,7 +46,7 @@ export function makeSleeveArm(skin, cloth, cuff, len = 0.6, right = true) {
   const g = new THREE.Group(), hand = makeHand(skin, right);
   const wrist = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.028, 0.04, 14), skin); wrist.position.y = -0.012; wrist.scale.z = 0.8;
   const cf = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.038, 0.05, 18), cuff); cf.position.y = -0.05; cf.scale.z = 0.86; cf.castShadow = true;
-  const sl = new THREE.Mesh(new THREE.CylinderGeometry(0.039, 0.058, len, 18, 4), cloth); sl.position.y = -0.075 - len / 2; sl.scale.z = 0.9; sl.castShadow = true;
+  const sl = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04 + len * 0.045, len, 18, 4), cloth); sl.position.y = -0.075 - len / 2; sl.scale.z = 0.9; sl.castShadow = true;
   g.add(hand, wrist, cf, sl); g.userData.hand = hand; g.userData.pose = hand.userData.pose;
   // 手のひら中心が target に来るよう配置し、腕を from 方向へ伸ばす
   const m = new THREE.Matrix4(), yv = V(), zv = V(), xv = V();

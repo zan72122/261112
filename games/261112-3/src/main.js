@@ -25,9 +25,10 @@ function boot() {
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.localClippingEnabled = true;
   const scene = new THREE.Scene(); scene.background = new THREE.Color(0xdfe7ee);
   const camera = new THREE.PerspectiveCamera(45, 1, 0.08, 120); scene.add(camera);
-  const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(buildEnvScene(), 0.03).texture; pm.dispose(); scene.environmentIntensity = 0.32;
+  const makeEnv = () => { const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(buildEnvScene(), 0.03).texture; pm.dispose(); };
+  makeEnv(); scene.environmentIntensity = 0.32;
   // 朝の日ざし (通り側から差し込む)
-  const sun = new THREE.DirectionalLight(0xfff0d8, 7.5); const sdir = new THREE.Vector3(-0.2, -0.46, 0.865).normalize();
+  const sun = new THREE.DirectionalLight(0xfff0d8, 7.5); const sdir = new THREE.Vector3(0.09, -0.46, 0.865).normalize();
   sun.castShadow = !low; sun.shadow.mapSize.set(2048, 2048); if (low) sun.intensity = 3.0;
   const sc = sun.shadow.camera; sc.left = -4.2; sc.right = 4.2; sc.top = 4.2; sc.bottom = -4.2; sc.near = 1; sc.far = 30; sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.02; sc.updateProjectionMatrix();
   scene.add(sun, sun.target);
@@ -76,7 +77,7 @@ function boot() {
   let raf = 0, last = 0, ema = 16.7, perfT = 0, slowT = 0, frames = 0, lost = false, lostT = 0, shadowTick = 0, expo = 1;
   sun.shadow.autoUpdate = false; key.shadow.autoUpdate = false;
   const stats = (dbg.perf = { fps: 0, ms: 0, frames: 0, scale: 1, low, samples: [] });
-  const setLow = (v) => { if (low === v) return; low = v; stats.low = v; capDpr = v ? 1.5 : 2; game.low = v; game.bagView.mesh.castShadow = !v; game.bagView.hmesh.castShadow = !v; sun.castShadow = !v; sun.intensity = v ? 3.0 : 7.5; applyRes(); };
+  const setLow = (v) => { if (low === v) return; low = v; stats.low = v; capDpr = v ? 1.5 : 2; game.low = v; sun.castShadow = !v; sun.intensity = v ? 3.0 : 7.5; applyRes(); };
   const frame = (t) => {
     raf = requestAnimationFrame(frame);
     if (lost) { if (performance.now() - lostT > 4000) { cancelAnimationFrame(raf); fail(); } return; }
@@ -98,6 +99,7 @@ function boot() {
     pg.attributes.position.needsUpdate = true; dust.visible = !outside;
     shadowTick++; if (shadowTick % (low ? 2 : 1) === 0) key.shadow.needsUpdate = true; if (shadowTick % (low ? 8 : 2) === 0) sun.shadow.needsUpdate = true;
     renderer.render(scene, camera);
+    if (game.moveT) { const l = performance.now() - game.moveT; game.moveT = 0; stats.inputMs = +l.toFixed(1); stats.inputMax = Math.max(stats.inputMax || 0, stats.inputMs); stats.inputN = (stats.inputN || 0) + 1; stats.inputSum = +((stats.inputSum || 0) + l).toFixed(1); }
     // 動的解像度
     frames++; stats.frames = frames; ema += (raw - ema) * 0.08; perfT += raw;
     if (perfT > 600) {
@@ -117,7 +119,7 @@ function boot() {
   window.addEventListener('pagehide', () => game.flush());
   window.addEventListener('blur', () => { if (active !== null) { active = null; game.cancelDrag(); } });
   canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); lost = true; lostT = performance.now(); game.cancelDrag(); });
-  canvas.addEventListener('webglcontextrestored', () => { lost = false; });
+  canvas.addEventListener('webglcontextrestored', () => { lost = false; try { makeEnv(); } catch (e) { /* 次の描画で再試行 */ } sun.shadow.needsUpdate = true; key.shadow.needsUpdate = true; last = performance.now(); });
   start();
 
   // ---------- 検証用の読み取り専用の窓 (状態は変更しない) ----------
@@ -127,7 +129,7 @@ function boot() {
   Object.assign(dbg, {
     ready: true,
     state: () => JSON.parse(JSON.stringify(game.S)),
-    info: () => ({ station: game.station, drag: game.drag ? game.drag.kind + (game.drag.mode ? ':' + game.drag.mode : '') : null, bagWhere: game.bagWhere, trayAt: game.trayAt, carryT: +game.carryT.toFixed(3), cust: game.cust.state, mgr: game.mgr.state, saveOK: game.saveOK, loadRejected: !!game.loadRejected, audio: sound.ok, audioState: sound.ctx ? sound.ctx.state : 'none', sounds: sound.count, reads: game.readCount || 0, pays: game.payCount || 0, presses: game.presses || 0, hints: game.hintCount || 0, hint: !!game.hint, hands: game.handCount || 0, returns: game.returnCount || 0, blocked: game.blockedCount || 0, cards: game.cardCount || 0, fade: game.fade, idle: +game.idle.toFixed(2), assist: game.assistBusy(), flash: game.lastFlash || null, time: +game.time.toFixed(2), via: game.cam.via.length, low, lanes: game.lanes.map((l) => l.map((i) => i.id)) }),
+    info: () => ({ station: game.station, drag: game.drag ? game.drag.kind + (game.drag.mode ? ':' + game.drag.mode : '') : null, bagWhere: game.bagWhere, trayAt: game.trayAt, carryT: +game.carryT.toFixed(3), cust: game.cust.state, mgr: game.mgr.state, saveOK: game.saveOK, loadRejected: !!game.loadRejected, audio: sound.ok, audioState: sound.ctx ? sound.ctx.state : 'none', sounds: sound.count, reads: game.readCount || 0, pays: game.payCount || 0, presses: game.presses || 0, hints: game.hintCount || 0, hint: !!game.hint, hands: game.handCount || 0, returns: game.returnCount || 0, blocked: game.blockedCount || 0, cards: game.cardCount || 0, fade: game.fade, idle: +game.idle.toFixed(2), assist: game.assistBusy(), flash: game.lastFlash || null, strong: game.strongFlashes || 0, weak: game.weakFlashes || 0, autos: game.autoCount || 0, spills: game.spills || 0, time: +game.time.toFixed(2), via: game.cam.via.length, low, lanes: game.lanes.map((l) => l.map((i) => i.id)) }),
     item: (id) => { const it = game.items[id]; return Object.assign(scr(it.pos), { mode: it.mode, loc: it.st.loc, w: [+it.pos.x.toFixed(3), +it.pos.y.toFixed(3), +it.pos.z.toFixed(3)], lanePos: +it.lanePos.toFixed(3) }); },
     pt: (x, y, z) => scr(new THREE.Vector3(x, y, z)),
     basket: () => scr(game.basketPos.clone().add(new THREE.Vector3(0, 0.28, 0.02))), basketGrip: () => scr(game.basketPos.clone().add(new THREE.Vector3(0, 0.09, 0.13))),
@@ -137,7 +139,7 @@ function boot() {
     bag: (x, y) => scr(bagW(x, y)),
     handle: (side) => { const s = game.sim, h = side ? s.hR : s.hL; return scr(bagW(s.px[h[2]], s.py[h[2]] - 0.012)); },
     peg: (k) => scr(bagW(PEG_X[k], PEG_Y)),
-    sim: () => { const s = game.sim; return { bottoms: Array.from({ length: NC }, (_, c) => +(s.py[s.idx(c, NR - 1)] * 100).toFixed(2)), strainL: +s.strainL.toFixed(4), strainR: +s.strainR.toFixed(4), mouth: [+s.px[s.cornerL].toFixed(3), +s.px[s.cornerR].toFixed(3), +s.py[s.cornerL].toFixed(3)], pins: [+s.pinL.x.toFixed(3), +s.pinL.y.toFixed(3), +s.pinR.x.toFixed(3), +s.pinR.y.toFixed(3)], rustle: +s.rustle.toFixed(3), bodies: s.bodies.map((b) => ({ id: b.id, x: +b.x.toFixed(3), y: +b.y.toFixed(3), a: +b.a.toFixed(3), in: s.anyInside(b), all: s.allInside(b), held: b.held, reach: game.reachable(b) })) }; },
+    sim: () => { const s = game.sim; return { bottoms: Array.from({ length: NC }, (_, c) => +(s.py[s.idx(c, NR - 1)] * 100).toFixed(2)), strainL: +s.strainL.toFixed(4), strainR: +s.strainR.toFixed(4), mouth: [+s.px[s.cornerL].toFixed(3), +s.px[s.cornerR].toFixed(3), +s.py[s.cornerL].toFixed(3)], pins: [+s.pinL.x.toFixed(3), +s.pinL.y.toFixed(3), +s.pinR.x.toFixed(3), +s.pinR.y.toFixed(3)], band: [+(s.pinL.x + 0.01).toFixed(3), +(s.pinR.x - 0.01).toFixed(3)], rustle: +s.rustle.toFixed(3), com: (() => { const c = s.contents(); return [+c.x.toFixed(3), +c.y.toFixed(3), +c.mass.toFixed(2)]; })(), bodies: s.bodies.map((b) => ({ id: b.id, x: +b.x.toFixed(3), y: +b.y.toFixed(3), a: +b.a.toFixed(3), in: s.anyInside(b), all: s.allInside(b), held: b.held, reach: game.reachable(b) })) }; },
     shutterBar: () => scr(new THREE.Vector3(1.55, (1 - game.S.shutter) * (L.openH - 0.06) + 0.05, L.frontZ - 0.12)),
     custHand: () => { const v = new THREE.Vector3(); game.grip(game.cust.P, 0, v); return { x: +(v.x - L.rack.x).toFixed(3), y: +(v.y - L.counterY).toFixed(3), z: +v.z.toFixed(3), bow: +game.cust.P.bow.toFixed(3), lean: +game.cust.P.lean.toFixed(3), support: !!game.cust.support, arm1: !!game.cust.P.armT[1] }; },
     cardScreen: () => { const v = new THREE.Vector3(); game.card.getWorldPosition(v); return Object.assign(scr(v), { visible: game.card.visible }); },

@@ -47,7 +47,7 @@ export class BagView {
     };
     const mk = (op) => { const m = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: op, roughness: 0.3, metalness: 0, side: THREE.DoubleSide, depthWrite: false, bumpMap: crinkle, bumpScale: 1.6, envMapIntensity: 2.2 }); m.onBeforeCompile = frag; return m; };
     const mat = (this.mat = mk(0.2)), matRim = mk(0.7), matBack = mk(0.42);
-    this.mesh = new THREE.Mesh(geo, [matRim, mat, matBack]); this.mesh.renderOrder = 5; this.mesh.frustumCulled = false; this.mesh.castShadow = !low;
+    this.mesh = new THREE.Mesh(geo, [matRim, mat, matBack]); this.mesh.renderOrder = 5; this.mesh.frustumCulled = false; this.mesh.castShadow = false;
     // 影は薄く: 影用マテリアルは別 (半透明の膜なので弱い影)
     this.mesh.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, alphaTest: 0.5 });
     this.group = new THREE.Group(); this.group.add(this.mesh);
@@ -60,7 +60,7 @@ export class BagView {
     }
     const hg = (this.hgeo = new THREE.BufferGeometry()); hg.setAttribute('position', new THREE.BufferAttribute(this.hpos, 3)); hg.setAttribute('uv', new THREE.BufferAttribute(huv, 2)); hg.setIndex(hidx);
     const hm = mk(0.6);
-    this.hmesh = new THREE.Mesh(hg, hm); this.hmesh.renderOrder = 6; this.hmesh.frustumCulled = false; this.hmesh.castShadow = !low;
+    this.hmesh = new THREE.Mesh(hg, hm); this.hmesh.renderOrder = 6; this.hmesh.frustumCulled = false; this.hmesh.castShadow = false;
     this.group.add(this.hmesh);
     this.t = 0;
   }

@@ -1,0 +1,482 @@
+{
+ "size": "820x1180",
+ "mode": "full",
+ "url": "file:// (index.html?low=1&rs=0.25&fixed=1 で操作 / ?fixed=1 で撮影)",
+ "wallSec": 336,
+ "gameSec": 245.79,
+ "sounds": 203,
+ "pass": 31,
+ "fail": 3,
+ "checks": [
+  {
+   "name": "最初の一画面: 納品箱の牛乳・棚の空き・隣の牛乳が画面内",
+   "pass": true,
+   "detail": {
+    "milk1": [
+     119,
+     935
+    ],
+    "slot0": [
+     206,
+     296
+    ],
+    "milk2": [
+     278,
+     298
+    ]
+   }
+  },
+  {
+   "name": "当たり判定は 64 CSS px 以上 (最小でも直径68px)",
+   "pass": true,
+   "detail": {
+    "apple": 68,
+    "milk": 70
+   }
+  },
+  {
+   "name": "最初のタッチ前は音が始まっていない",
+   "pass": true,
+   "detail": "none"
+  },
+  {
+   "name": "約4秒の放置でお手本の手が出る",
+   "pass": true,
+   "detail": {
+    "hints": 1,
+    "idle": 5.75
+   }
+  },
+  {
+   "name": "お手本は一度だけ (くり返さない)",
+   "pass": true,
+   "detail": {
+    "hints": 1
+   }
+  },
+  {
+   "name": "牛乳を置く前は別工程の品は小さく応答するだけ (動かせない)",
+   "pass": true,
+   "detail": {
+    "before": [
+     291,
+     556
+    ],
+    "after": [
+     291,
+     556
+    ]
+   }
+  },
+  {
+   "name": "最初のタッチで Web Audio が始まる",
+   "pass": true,
+   "detail": {
+    "state": "running",
+    "sounds": 2
+   }
+  },
+  {
+   "name": "牛乳は触って動かすとすぐ本体が動く (次の描画フレーム)",
+   "pass": false,
+   "detail": {
+    "ms": 440,
+    "note": "ヘッドレス低負荷モードでの壁時計時間。処理は同フレーム内"
+   }
+  },
+  {
+   "name": "牛乳が棚の空きへ「ことん」と収まる",
+   "pass": true,
+   "detail": {
+    "loc": "shelf",
+    "slot": 0,
+    "sounds": 7
+   }
+  },
+  {
+   "name": "発見1: 手前のりんごを取ると奥のりんごが前へ転がる",
+   "pass": true,
+   "detail": {
+    "before": 0.088,
+    "after": 0
+   }
+  },
+  {
+   "name": "発見1: 同じ列へ戻すと奥に入り、次に出る品が変わる",
+   "pass": true,
+   "detail": [
+    [
+     "apple2",
+     "apple1"
+    ],
+    [],
+    []
+   ]
+  },
+  {
+   "name": "発見1: 列を変えると元の列は次の品が前へ出る",
+   "pass": true,
+   "detail": [
+    [
+     "apple1"
+    ],
+    [
+     "apple2"
+    ],
+    []
+   ]
+  },
+  {
+   "name": "いちごパックも納品箱から傾斜トレーへ並べられる",
+   "pass": true,
+   "detail": [
+    [
+     "apple1"
+    ],
+    [
+     "apple2"
+    ],
+    [
+     "berry"
+    ]
+   ]
+  },
+  {
+   "name": "棚の牛乳を別の空きへ並べ替えられる",
+   "pass": true,
+   "detail": {
+    "loc": "shelf",
+    "slot": 2,
+    "ord": 0,
+    "sc": 0,
+    "paid": 0,
+    "bx": 0,
+    "by": 0.2,
+    "ba": 0,
+    "tidy": 1
+   }
+  },
+  {
+   "name": "撮影 scene1",
+   "pass": true,
+   "detail": {
+    "ms": 61621,
+    "station": 0,
+    "pixelRatio": 1,
+    "errors": []
+   }
+  },
+  {
+   "name": "好きな品をかごへ集められる",
+   "pass": true,
+   "detail": {
+    "milk1": "basket",
+    "apple1": "basket",
+    "berry": "basket",
+    "bread": "basket"
+   }
+  },
+  {
+   "name": "かごの品を棚へ戻せる (逆戻り)",
+   "pass": true
+  },
+  {
+   "name": "かごをレジ側へ運ぶと同じ品のままレジ場面へ",
+   "pass": true,
+   "detail": {
+    "basket": "reg"
+   }
+  },
+  {
+   "name": "未読が残るうちの丸ボタンは会計にならない (未読品が寄るだけ)",
+   "pass": true,
+   "detail": {
+    "presses": 1,
+    "pays": 0
+   }
+  },
+  {
+   "name": "スキャナーをかざすと光と「ピッ」が同時に出て一品だけ読む",
+   "pass": false,
+   "detail": {
+    "reads": 2,
+    "strongFlashes": 2
+   }
+  },
+  {
+   "name": "撮影 scene2",
+   "pass": true,
+   "detail": {
+    "ms": 37634,
+    "station": 1,
+    "pixelRatio": 1,
+    "errors": []
+   }
+  },
+  {
+   "name": "読んだ品は補助店員の手が右の受け台へ移す (全品)",
+   "pass": true,
+   "detail": {
+    "reads": 4,
+    "locs": [
+     "tray",
+     "tray",
+     "tray",
+     "tray"
+    ]
+   }
+  },
+  {
+   "name": "再読取は短い確認光だけで登録は増えない",
+   "pass": true,
+   "detail": {
+    "reads": 4,
+    "flash": {
+     "id": "milk1",
+     "strong": false,
+     "t": 162.0445000000035
+    },
+    "weak": 1
+   }
+  },
+  {
+   "name": "丸ボタン連打でも会計確定は一度だけ",
+   "pass": true,
+   "detail": {
+    "presses": 3,
+    "pays": 1
+   }
+  },
+  {
+   "name": "会計後は同じ受け台が袋の隣へ滑る (品もそのまま)",
+   "pass": true
+  },
+  {
+   "name": "発見2: 左へ牛乳 → 左の底が深く垂れ、左の持ち手が張る",
+   "pass": true,
+   "detail": {
+    "x": -0.044,
+    "bottoms": [
+     1.91,
+     0.3,
+     0.3,
+     0.71,
+     1.54,
+     2.3
+    ],
+    "strainL": 0.0258,
+    "strainR": 0.0135
+   }
+  },
+  {
+   "name": "袋から出して受け台へ戻せる",
+   "pass": true
+  },
+  {
+   "name": "発見2: 同じ位置のりんごより牛乳のほうが持ち手が張る",
+   "pass": true,
+   "detail": {
+    "milk": 0.0258,
+    "apple": 0.0133
+   }
+  },
+  {
+   "name": "発見2: 中央・右へ移すとたわむ場所と張る持ち手も移る",
+   "pass": true,
+   "detail": {
+    "center": {
+     "x": 0.01,
+     "bottoms": [
+      2.26,
+      1.44,
+      0.3,
+      0.3,
+      1.36,
+      2.22
+     ],
+     "strainL": 0.0136,
+     "strainR": 0.0139
+    },
+    "right": {
+     "x": 0.066,
+     "bottoms": [
+      6.77,
+      4.84,
+      2.9,
+      1.48,
+      0.3,
+      0.3
+     ],
+     "strainL": 0.0111,
+     "strainR": 0.0269
+    }
+   }
+  },
+  {
+   "name": "発見3: 支えの牛乳を引き抜くとりんごが空いた底へ転がる",
+   "pass": true,
+   "detail": {
+    "before": [
+     -0.017,
+     -0.492
+    ],
+    "after": [
+     0.007,
+     2.547
+    ]
+   }
+  },
+  {
+   "name": "発見3: 別方向から差し戻すと収まり方が変わる",
+   "pass": true,
+   "detail": {
+    "milkBefore": 0.06,
+    "milkAfter": -0.047,
+    "appleBefore": -0.017,
+    "appleAfter": 0.059
+   }
+  },
+  {
+   "name": "例外なく最後まで遊べる",
+   "pass": false,
+   "detail": "Cannot read properties of undefined (reading 'x')"
+  },
+  {
+   "name": "コンソールエラー 0",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "name": "外部リクエスト 0 (自分自身の HTML のみ)",
+   "pass": true,
+   "detail": [
+    "file:///home/user/261112/games/261112-3/index.html?low=1&rs=0.25&fixed=1"
+   ]
+  }
+ ],
+ "notes": {
+  "pxPer10cm_shelf": 67,
+  "hitDiameterPx": {
+   "apple": 68,
+   "milk": 70
+  },
+  "milkResponseMs": 440,
+  "bagEmpty": {
+   "bottoms": [
+    2.98,
+    2.83,
+    2.74,
+    2.74,
+    2.82,
+    2.96
+   ],
+   "strainL": -0.0002,
+   "strainR": -0.0003
+  },
+  "milkLeft": {
+   "x": -0.044,
+   "bottoms": [
+    1.91,
+    0.3,
+    0.3,
+    0.71,
+    1.54,
+    2.3
+   ],
+   "strainL": 0.0258,
+   "strainR": 0.0135
+  },
+  "appleLeft": {
+   "x": -0.019,
+   "bottoms": [
+    2.23,
+    1.46,
+    0.3,
+    0.72,
+    1.59,
+    2.37
+   ],
+   "strainL": 0.0133,
+   "strainR": 0.0112
+  },
+  "milkCenter": {
+   "x": 0.01,
+   "bottoms": [
+    2.26,
+    1.44,
+    0.3,
+    0.3,
+    1.36,
+    2.22
+   ],
+   "strainL": 0.0136,
+   "strainR": 0.0139
+  },
+  "milkRight": {
+   "x": 0.066,
+   "bottoms": [
+    6.77,
+    4.84,
+    2.9,
+    1.48,
+    0.3,
+    0.3
+   ],
+   "strainL": 0.0111,
+   "strainR": 0.0269
+  },
+  "d3": {
+   "before": {
+    "id": "apple1",
+    "x": -0.017,
+    "y": 0.041,
+    "a": -0.492,
+    "in": true,
+    "all": true,
+    "held": false,
+    "reach": true
+   },
+   "milk": {
+    "id": "milk1",
+    "x": 0.06,
+    "y": 0.109,
+    "a": -0.025,
+    "in": true,
+    "all": true,
+    "held": false,
+    "reach": true
+   },
+   "after": {
+    "id": "apple1",
+    "x": 0.007,
+    "y": 0.046,
+    "a": 2.547,
+    "in": true,
+    "all": true,
+    "held": false,
+    "reach": true
+   }
+  },
+  "d4": {
+   "milk": {
+    "id": "milk1",
+    "x": 0.009,
+    "y": 0.11,
+    "a": -0.069,
+    "in": true,
+    "all": true,
+    "held": false,
+    "reach": true
+   },
+   "mouth0": [
+    -0.045,
+    0.039,
+    0.384
+   ],
+   "band0": [
+    -0.07,
+    0.07
+   ]
+  }
+ }
+}

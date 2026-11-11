@@ -7,8 +7,8 @@ import { PEG_X, PEG_Y } from './bagsim.js';
 const P = Game.prototype;
 const dist = (a, x, y) => Math.hypot(a.x - x, a.y - y);
 const NAV = [
-  new THREE.Box3(V(-1.65, 0.0, -0.5), V(-0.65, 1.75, 0.6)), new THREE.Box3(V(-0.15, 0.6, -0.35), V(1.1, 1.3, 0.35)),
-  new THREE.Box3(V(1.25, 0.6, -0.3), V(2.15, 1.5, 0.3)), new THREE.Box3(V(0.1, 0, L.frontZ - 0.3), V(3.0, 2.7, L.frontZ + 0.1)),
+  new THREE.Box3(V(-1.3, 0.0, -0.5), V(-0.33, 1.75, 0.6)), new THREE.Box3(V(-0.1, 0.6, -0.35), V(1.02, 1.3, 0.35)),
+  new THREE.Box3(V(1.04, 0.6, -0.3), V(1.9, 1.5, 0.3)), new THREE.Box3(V(0.1, 0, L.frontZ - 0.3), V(3.0, 2.7, L.frontZ + 0.1)),
 ];
 
 P.pickItem = function (x, y, filter) {
@@ -24,8 +24,8 @@ P.pickItem = function (x, y, filter) {
   return best;
 };
 P.hitBox = function (x, y, c, hx, hy, hz, pad) {
-  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; const s = {};
-  for (let i = 0; i < 8; i++) { this.screen(this.tmp2.set(c.x + (i & 1 ? hx : -hx), c.y + (i & 2 ? hy : -hy), c.z + (i & 4 ? hz : -hz)), s); x0 = Math.min(x0, s.x); x1 = Math.max(x1, s.x); y0 = Math.min(y0, s.y); y1 = Math.max(y1, s.y); }
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; const s = {}, cx = c.x, cy = c.y, cz = c.z; // c は this.tmp のことがあるので先に写す
+  for (let i = 0; i < 8; i++) { this.screen(this.tmp2.set(cx + (i & 1 ? hx : -hx), cy + (i & 2 ? hy : -hy), cz + (i & 4 ? hz : -hz)), s); x0 = Math.min(x0, s.x); x1 = Math.max(x1, s.x); y0 = Math.min(y0, s.y); y1 = Math.max(y1, s.y); }
   return x > x0 - pad && x < x1 + pad && y > y0 - pad && y < y1 + pad;
 };
 P.hitBasket = function (x, y) { return this.hitBox(x, y, this.tmp.copy(this.basketPos).add(V(0, 0.16, 0)), 0.2, 0.17, 0.14, 12); };
@@ -50,7 +50,7 @@ P.onDown = function (x, y) {
 };
 P.onMove = function (x, y) {
   const d = this.drag; if (!d) return;
-  this.moved += Math.hypot(x - this.lx, y - this.ly); this.lx = x; this.ly = y; this.idle = 0;
+  this.moved += Math.hypot(x - this.lx, y - this.ly); this.lx = x; this.ly = y; this.idle = 0; if (!this.moveT) this.moveT = performance.now();
   if (d.kind === 'item') { this.onPlaneZ(x, y, d.z, d.goal); d.goal.y += 0.05; d.goal.y = Math.max(d.goal.y, 0.3); }
   else if (d.kind === 'basket') {
     const has = this.basketCount() > 0;
@@ -136,9 +136,11 @@ P.updateDrag = function (dt) {
     }
     this.scanAim = lerp(this.scanAim || 0, aim && ad < 0.36 ? 1 : 0.35, Math.min(1, dt * 10));
     if (aim && ad < 0.36) { this.tmp.copy(aim.pos).sub(this.scanPos); d.yaw = Math.atan2(this.tmp.x, this.tmp.z); d.pitch = -Math.asin(clamp(this.tmp.y / this.tmp.length(), -1, 1)); } else { d.yaw = Math.PI; d.pitch = 0.5; }
-    if (aim && ad < (aim.st.sc ? 0.12 : 0.13) && this.scanCool <= 0) {
-      if (!aim.st.sc) this.readItem(aim);
-      else if ((aim.confirmT || 0) < this.time) { aim.confirmT = this.time + 1.4; this.flashAt(aim, 0.45); this.scanCool = 0.2; }
+    // 一度読んだら、スキャナーを少し動かすまで次は読まない (かざし直して「次を読む」)
+    if (this.readAt && Math.hypot(d.s0.x - this.readAt.x, d.s0.y - this.readAt.y) > 0.05 * d.ppm) this.readAt = null;
+    if (aim && ad < (aim.st.sc ? 0.12 : 0.13) && this.scanCool <= 0 && !this.readAt) {
+      if (!aim.st.sc) { this.readItem(aim); this.readAt = { x: d.s0.x, y: d.s0.y }; }
+      else if (aim.st.loc === 'tray' && (aim.confirmT || 0) < this.time) { aim.confirmT = this.time + 1.4; this.flashAt(aim, 0.45); this.scanCool = 0.2; }
     }
     sc.rotation.y = d.yaw; sc.rotation.x = lerp(0.5, d.pitch, this.scanAim);
   } else if (!this.scanHeld) { const a = this.scanAim || 0; sc.rotation.y = lerp(Math.PI * 0.93, sc.rotation.y, a * 0.9); sc.rotation.x = lerp(0.95, sc.rotation.x, a * 0.9); }
@@ -219,7 +221,7 @@ P.downReg = function (x, y) {
 P.flashAt = function (it, k) {
   const c = it.obj.localToWorld(it.obj.userData.code.clone()); this.tmp.copy(this.camera.position).sub(c).normalize();
   this.glow.position.copy(c).addScaledVector(this.tmp, 0.01); this.glow.quaternion.copy(this.camera.quaternion); this.glow.visible = true; this.glow.material.color.setHex(k < 1 ? 0xffb090 : 0xff3020);
-  this.beamT = 0.28 * k; this.lastFlash = { id: it.id, strong: k >= 1, t: this.time };
+  this.beamT = 0.28 * k; this.lastFlash = { id: it.id, strong: k >= 1, t: this.time }; if (k >= 1) this.strongFlashes = (this.strongFlashes || 0) + 1; else this.weakFlashes = (this.weakFlashes || 0) + 1;
 };
 P.readItem = function (it) {
   it.st.sc = 1; this.scanCool = 0.42; this.readCount = (this.readCount || 0) + 1;
@@ -256,7 +258,7 @@ P.downBag = function (x, y) {
   if (hd < Math.max(38, 0.05 * ppm) && (!b || hd < 24 || sim.sdfWorld(b, p.x, p.y) > 0.004)) return { kind: 'handle', side: hs, mode: 'side' };
   if (b) {
     const it = this.items[b.id];
-    if (sim.allInside(b) && !this.reachable(b)) { b.va += (Math.random() - 0.5) * 6; b.vy += 0.25; it.wig = 0.5; this.simAwake = 1; this.sound.tap(0.6); this.blockedT = this.time; this.blockedCount = (this.blockedCount || 0) + 1; return { kind: 'none' }; }
+    if (sim.allInside(b) && !this.reachable(b)) { b.va += (Math.random() - 0.5) * 6; b.vy += 0.25; it.wig = 0.5; this.simAwake = 1; this.sound.tap(0.6); this.blockedT = this.time; this.blockedSide = b.x > (sim.pinL.x + sim.pinR.x) / 2 ? 1 : 0; this.blockedCount = (this.blockedCount || 0) + 1; return { kind: 'none' }; }
     it.auto = false; sim.grab(b, p.x, p.y); it.mode = 'body'; this.simAwake = 2; this.sound.tap(0.4);
     return { kind: 'body', it, b };
   }
@@ -273,20 +275,7 @@ P.overMouth = function (b) {
   const sim = this.sim, lx = sim.px[sim.cornerL], rx = sim.px[sim.cornerR], my = Math.min(sim.py[sim.cornerL], sim.py[sim.cornerR]);
   return b.x > lx - 0.03 && b.x < rx + 0.03 && b.y > my - 0.02;
 };
-P.reachable = function (b) {
-  const sim = this.sim; if (!sim.allInside(b)) return true;
-  const lx = sim.px[sim.cornerL], ly = sim.py[sim.cornerL], rx = sim.px[sim.cornerR], ry = sim.py[sim.cornerR];
-  for (let k = 0; k <= 8; k++) {
-    const t = 0.05 + (0.9 * k) / 8, mx = lerp(lx, rx, t), my = lerp(ly, ry, t); let clear = true;
-    for (let s = 1; s <= 12 && clear; s++) {
-      const u = s / 13, x = lerp(mx, b.x, u), y = lerp(my, b.y, u);
-      if (sim.sdfWorld(b, x, y) < 0) break;
-      for (const o of sim.bodies) if (o !== b && sim.sdfWorld(o, x, y) < 0.004) { clear = false; break; }
-    }
-    if (clear) return true;
-  }
-  return false;
-};
+P.reachable = function (b) { return this.sim.reachable(b); };
 P.releaseBody = function (it) {
   const b = it.body; if (!b) return; this.sim.release(b); this.simAwake = 2;
   const sim = this.sim;

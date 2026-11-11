@@ -14,8 +14,8 @@ P.buildActors = function () {
   const skin = std({ color: 0xe6b596, roughness: 0.6 }), skin2 = std({ color: 0xd9a583, roughness: 0.6 });
   const white = std({ color: 0xf3f1ea, roughness: 0.85, bumpMap: M.fab, bumpScale: 0.5 }), blue = std({ color: 0x7fa6c9, roughness: 0.85, bumpMap: M.fab, bumpScale: 0.5 });
   const green = std({ color: 0x3f7f5d, roughness: 0.8, bumpMap: M.fab, bumpScale: 0.6 });
-  this.hintArm = makeSleeveArm(skin, white, white, 0.75, true); this.hintArm.visible = false; sc.add(this.hintArm); this.hint = null;
-  this.assistArm = makeSleeveArm(skin2, blue, blue, 0.8, true); this.assistArm.visible = false; sc.add(this.assistArm); this.assist = { q: [], cur: null, home: V(1.75, 1.55, 0.5) };
+  this.hintArm = makeSleeveArm(skin, white, white, 1.5, true); this.hintArm.visible = false; sc.add(this.hintArm); this.hint = null;
+  this.assistArm = makeSleeveArm(skin2, blue, blue, 1.4, true); this.assistArm.visible = false; sc.add(this.assistArm); this.assist = { q: [], cur: null, home: V(1.75, 1.55, 0.5) };
   const mkActor = (o, x, z) => { const Pn = makePerson(o); Pn.group.visible = false; sc.add(Pn.group); return { P: Pn, x, z, rot: 0, path: [], state: 'away', seq: 0, speed: 1.25 }; };
   this.cust = mkActor({ height: 1.64, skin, top: std({ color: 0xc9a35e, roughness: 0.9, bumpMap: M.fab, bumpScale: 0.8 }), bottom: std({ color: 0x4a6384, roughness: 0.85, bumpMap: M.fab, bumpScale: 0.6 }), hair: std({ color: 0x3a2a20, roughness: 0.55 }), bob: true, hairLen: 0.6, shoe: 0xe9e6df }, 3.4, -5.4);
   this.mgr = mkActor({ height: 1.72, skin: skin2, top: white, bottom: std({ color: 0x2f3338, roughness: 0.85 }), hair: std({ color: 0x1f1b19, roughness: 0.5 }), apron: green, hairLen: 0.5 }, 4.8, -4.8);
@@ -25,7 +25,7 @@ P.buildActors = function () {
   this.card = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.11, 0.0015), [0, 0, 0, 0, 1, 0].map((f) => std({ color: f ? 0xffffff : 0xf4f1e8, map: f ? this.cardTex : null, roughness: 0.6 })));
   this.card.visible = false; this.card.castShadow = true; sc.add(this.card);
   this.stamp = new THREE.Group(); const sw = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.018, 0.06, 12), M.wood); sw.position.y = 0.04; const sr = new THREE.Mesh(new THREE.CylinderGeometry(0.021, 0.021, 0.014, 14), std({ color: 0xc9302a, roughness: 0.6 })); sr.position.y = 0.007; this.stamp.add(sw, sr); this.stamp.visible = false; sc.add(this.stamp);
-  this.playerArm = makeSleeveArm(skin, white, white, 0.6, true); this.playerArm.visible = false; this.camera.add(this.playerArm);
+  this.playerArm = makeSleeveArm(skin, white, white, 0.9, true); this.playerArm.visible = false; this.camera.add(this.playerArm);
   this.cardHome = new THREE.Group(); this.camera.add(this.cardHome);
 };
 P.restoreActors = function () {
@@ -63,7 +63,7 @@ P.handOver = function () {
   // 袋は指を離した場所にとどまり、客の手のほうが迎えに来る
   c.pin = V(L.rack.x + this.liftX, L.counterY + this.liftY, L.rack.z); c.ht = c.pin.clone(); c.attached = false; c.attT = 0; c.offv = V();
   c.gap = 0.026; c.dyL = 0; c.dyR = 0; c.local = null; c.support = false; sim.pinSpeed = 1.3;
-  walkTo(c, [[clamp(c.pin.x + 0.25, 2.3, 2.6), -0.5]], null, true);
+  walkTo(c, [[clamp(c.pin.x + 0.25, L.rack.x + 0.44, L.rack.x + 0.74), -0.5]], null, true);
   this.save();
 };
 P.holdSequence = function () {
@@ -87,7 +87,7 @@ P.returnBag = function () {
   const a0 = c.local.clone(), b0 = V(-0.14, 1.47, 0.36);
   this.tween(0.5, (k) => { if (ok()) c.local.lerpVectors(a0, b0, k); }, () => {
     if (!ok()) return;
-    walkTo(c, [[2.12, -0.5]], () => {
+    walkTo(c, [[L.rack.x + 0.26, -0.5]], () => {
       if (!ok()) return; sim.groundY = 0; const a = c.P.group.localToWorld(c.local.clone()), b = V(L.rack.x + 0.02, L.counterY + PEG_Y + 0.035, L.rack.z + 0.01); c.local = null; c.ht.copy(a);
       this.tween(0.7, (k) => { if (ok()) { c.ht.lerpVectors(a, b, k); c.P.bow = 0.38 * k; } }, () => {
         if (!ok()) return; this.S.handed = 0; c.P.armT[0] = null; c.P.armT[1] = null; c.P.arms[0].hand.userData.pose(0.25); sim.support = null;
@@ -149,7 +149,7 @@ P.suggest = function () {
     if (!S.paid && this.trayItems().length && !this.assistBusy()) return { a: L.button.clone().add(V(0, 0.17, 0)), b: L.button.clone().add(V(0, 0.07, 0)), point: 1 };
   } else if (n === 2 && this.bagWhere === 'rack') {
     const sim = this.sim, tr = this.trayItems();
-    if (this.time - (this.blockedT || -99) < 8) { const side = S.pegs[1] === 2 ? 1 : 0, h = side ? sim.hR : sim.hL; const a = V(L.rack.x + sim.px[h[2]], L.counterY + sim.py[h[2]], L.rack.z + 0.03); return { a, b: a.clone().add(V(side ? 0.09 : -0.09, 0, 0)) }; }
+    if (this.time - (this.blockedT || -99) < 8 && S.pegs[this.blockedSide] === (this.blockedSide ? 2 : 1)) { const side = this.blockedSide, h = side ? sim.hR : sim.hL; const a = V(L.rack.x + sim.px[h[2]], L.counterY + sim.py[h[2]], L.rack.z + 0.03); return { a, b: a.clone().add(V(side ? 0.09 : -0.09, 0, 0)) }; }
     if (tr.length && this.trayAt === 'bag') { const it = tr[0]; return { a: it.pos.clone(), b: V(L.rack.x, L.counterY + PEG_Y - 0.1, L.rack.z + 0.05), it }; }
     if (this.bagItems().length && this.customerReady()) { const a = V(L.rack.x + sim.px[sim.hR[2]], L.counterY + PEG_Y, L.rack.z + 0.03); return { a, b: a.clone().add(V(0.2, 0.17, 0)) }; }
   } else if (n === 3) { const y = (1 - S.shutter) * (L.openH - 0.06) + 0.05; return { a: V(1.55, y, L.frontZ + 0.1), b: V(1.55, Math.max(0.3, y - 0.9), L.frontZ + 0.1) }; }

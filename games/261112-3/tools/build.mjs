@@ -19,5 +19,6 @@ let js = res.outputFiles[0].text.replace(/<\/script/gi, '<\\/script');
 const fbPath = path.join(root, 'tools/fallback.jpg');
 const fb = existsSync(fbPath) ? 'data:image/jpeg;base64,' + readFileSync(fbPath).toString('base64') : 'data:image/gif;base64,R0lGODlhAQABAIAAANjSxgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
 const html = readFileSync(path.join(root, 'tools/template.html'), 'utf8').replace('__FALLBACK__', () => fb).replace('__BUNDLE__', () => js);
-writeFileSync(path.join(root, 'index.html'), html);
-console.log('index.html', (html.length / 1024).toFixed(0) + ' KB (js ' + (js.length / 1024).toFixed(0) + ' KB)');
+const out = process.env.GF_OUT || 'index.html';
+writeFileSync(path.join(root, out), html);
+console.log(out, (html.length / 1024).toFixed(0) + ' KB (js ' + (js.length / 1024).toFixed(0) + ' KB)');

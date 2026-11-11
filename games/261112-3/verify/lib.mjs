@@ -6,7 +6,7 @@ import path from 'node:path';
 const require = createRequire('/opt/node-tools/node_modules/x.js');
 export const { chromium } = require('playwright');
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-export const FILE_URL = pathToFileURL(path.join(ROOT, 'index.html')).href;
+export const FILE_URL = pathToFileURL(path.join(ROOT, process.env.GF_FILE || 'index.html')).href;
 export const ARGS = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required'];
 
 export async function open(opts = {}) {

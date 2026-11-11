@@ -6,7 +6,7 @@
 export const NC = 6, NR = 7;
 export const BAG_W = 0.32, BAG_H = 0.36, HANDLE_H = 0.13;
 export const PEG_Y = 0.512;
-export const PEG_X = [-0.19, -0.105, 0.105, 0.19]; // 左外, 左内, 右内, 右外
+export const PEG_X = [-0.19, -0.08, 0.08, 0.19]; // 左外, 左内, 右内, 右外
 const G = 9.8;
 const H_SUB = 1 / 480;
 const FILM = 0.002, TUN = 0.05, RIM_R = 0.011;
@@ -396,6 +396,12 @@ export class BagSim {
     px[i] += nx * lam * wp; py[i] += ny * lam * wp;
     this._corr(b, rx, ry, -nx * lam, -ny * lam);
     b.contact = 1;
+    if (pr > 0.005) { // 口の縁(持ち手の付け根)は滑りにくい: 載せたパンが留まる
+      const da = tmpB; this._disp(b, rx, ry, da);
+      let tx = da[0] - (px[i] - this.qx[i]), ty = da[1] - (py[i] - this.qy[i]); const dn = tx * nx + ty * ny; tx -= dn * nx; ty -= dn * ny;
+      const tl = Math.hypot(tx, ty);
+      if (tl > 1e-10) { tx /= tl; ty /= tl; const wbt = b.invM + b.invI * (rx * ty - ry * tx) ** 2; const lt = Math.min(tl / (wbt + wp), 0.7 * lam); this._corr(b, rx, ry, -tx * lt, -ty * lt); px[i] += tx * lt * wp; py[i] += ty * lt * wp; }
+    }
   }
   _ground(b, cx, cy, rs, gy0) {
     const d = cy - rs - gy0;
@@ -425,6 +431,8 @@ export class BagSim {
         this.samplePos(b, k, p); this.mouthSide(p[0], p[1], m);
         const pin = this.pointInBag(p[0], p[1]);
         if (b.inside[k] && !pin && m[0] > 0.004) b.inside[k] = 0;
+        // すでに袋へ入っている品の一部が口の外を通って入り込んだとき: その部分も袋の中として扱う
+        else if (!b.inside[k] && pin && m[0] < -0.03 && !b.held && this.anyInside(b)) b.inside[k] = 1;
       }
       if (b.held) {
         const c = Math.cos(b.a), s = Math.sin(b.a);
@@ -439,6 +447,27 @@ export class BagSim {
       if (!isFinite(b.x) || !isFinite(b.y) || !isFinite(b.a)) { b.x = 0; b.y = 0.6; b.a = 0; b.vx = b.vy = b.va = 0; b.px = b.x; b.py = b.y; b.pa = 0; }
     }
     for (let i = 0; i < this.n; i++) if (!isFinite(this.px[i]) || !isFinite(this.py[i])) { this.resetShape(this.pinL.x - PEG_X[1], this.pinL.y - PEG_Y); break; }
+  }
+  // 手が届くか: 手は2つの持ち手のあいだから、ほぼ真上から入る。
+  // 持ち手に寄せられた「肩」の下や、ほかの品の真下は届かない → 持ち手を横へ引いて口を広げた側だけ届くようになる。
+  reachable(b) {
+    if (!this.allInside(b)) return true;
+    const lo = this.pinL.x + 0.03, hi = this.pinR.x - 0.03, ey = Math.min(this.py[this.cornerL], this.py[this.cornerR]) + 0.02;
+    if (hi < lo) return false;
+    const sh = b.shape, c = Math.cos(b.a), sn = Math.sin(b.a), pts = [[b.x, b.y]];
+    const ext = sh.type === 'box' ? (sh.hx > sh.hy ? [sh.hx * 0.7, 0] : [0, sh.hy * 0.7]) : sh.type === 'capsule' ? [0, sh.hl * 0.8] : null;
+    if (ext) for (const s of [1, -1]) pts.push([b.x + s * (c * ext[0] - sn * ext[1]), b.y + s * (sn * ext[0] + c * ext[1])]);
+    for (const t of pts) {
+      if (t[0] < lo - 0.02 || t[0] > hi + 0.02) continue;
+      const ex = Math.max(lo, Math.min(hi, t[0])); let clear = true;
+      for (let s = 1; s <= 20 && clear; s++) {
+        const u = s / 21, x = ex + (t[0] - ex) * u, y = ey + (t[1] - ey) * u;
+        if (this.sdfWorld(b, x, y) < 0) break;
+        for (const o of this.bodies) if (o !== b && this.sdfWorld(o, x, y) < 0.012) { clear = false; break; }
+      }
+      if (clear) return true;
+    }
+    return false;
   }
   // 袋の中身の重心・質量
   contents() {

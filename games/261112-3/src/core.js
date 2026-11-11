@@ -203,16 +203,16 @@ export class Game {
     const a = this.vw / this.vh, th = Math.tan((this.camera.fov * Math.PI) / 360);
     const ins = this.insets, sx = 1 - (ins[1] + ins[3]) / this.vw, sy = 1 - (ins[0] + ins[2]) / this.vh;
     const D = [
-      { c: [-1.15, 0.84, 0.12], hw: 0.5, hh: 0.84, el: 0.2, dmin: 1.9 },
-      { c: [0.4, 0.99, 0.02], hw: 0.53, hh: 0.36, el: 0.5, dmin: 1.55 },
-      { c: [1.68, 1.2, 0], hw: 0.44, hh: 0.47, el: 0.13, dmin: 1.5 },
+      { c: [-0.8, 0.84, 0.12], hw: 0.5, hh: 0.84, el: 0.2, dmin: 1.9 },
+      { c: [0.4, 0.99, 0.02], hw: 0.5, hh: 0.36, el: 0.5, dmin: a > 1 ? 1.78 : 1.55 },
+      { c: [1.44, 1.2, 0], hw: 0.44, hh: 0.47, el: 0.13, dmin: a > 1 ? 1.62 : 1.5 },
       { c: [1.55, 1.22, L.frontZ], hw: 1.32, hh: 1.3, el: 0.04, dmin: 3, dmax: 5.7 },
       { c: [1.55, 1.3, L.frontZ - 0.2], hw: 1.75, hh: 1.55, el: 0.03, dmin: 4.5, dmax: 7.5, out: 1 },
     ][n];
     let hw = D.hw, cx = D.c[0], cy = D.c[1];
     if (n === 2) { cx += 0.27 * this.cam.lift; hw += 0.13 * this.cam.lift; cy += 0.07 * this.cam.lift; }
     let d = Math.max(D.hh / (th * sy), hw / (th * a * sx), D.dmin); if (D.dmax) d = Math.min(d, D.dmax);
-    if (a < 0.8) cy += n === 1 ? 0.05 : n === 2 ? 0.03 : 0; // 縦長では少し上を見せる
+    if (a < 0.8) cy += n === 1 ? 0.1 : n === 2 ? 0.03 : 0; // 縦長では少し上を見せる
     tgt.set(cx, cy, D.c[2]);
     pos.set(cx, cy + d * Math.sin(D.el), D.c[2] + (D.out ? -1 : 1) * d * Math.cos(D.el));
   }
@@ -328,6 +328,6 @@ export class Game {
     this.bagGroup.visible = this.bagWhere !== 'gone';
   }
   hidden() { this.cancelDrag && this.cancelDrag(); this.flush(); this.sound.quiet(); }
-  resize(w, h, insets) { this.vw = w; this.vh = h; this.insets = insets; this.cancelDrag && this.cancelDrag(); }
+  resize(w, h, insets) { this.vw = w; this.vh = h; this.insets = insets; this.cancelDrag && this.cancelDrag(); if (this.S && this.S.carded && this.station === 4 && this.card && this.card.parent === this.camera) this.showCardHeld(true); }
 }
 export { QX, QY, QZ, SLOT, SHAPES };

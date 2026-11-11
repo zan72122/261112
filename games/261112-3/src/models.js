@@ -4,14 +4,15 @@ import * as T from './tex.js';
 import { PEG_X, PEG_Y } from './bagsim.js';
 
 export const L = {
-  counterY: 0.88, counterX0: -0.32, counterX1: 2.85, counterZ: 0.32,
-  shelfX: -1.15, shelfTopY: 1.14, milkX: [-1.46, -1.35, -1.24], milkZ: -0.1,
-  laneX: [-1.33, -1.15, -0.97], laneFront: new THREE.Vector3(0, 0.815, 0.03), laneDir: new THREE.Vector3(0, 0.298, -0.954), laneLen: 0.31,
-  bin: new THREE.Vector3(-0.93, 1.14, -0.13),
-  crate: new THREE.Vector3(-1.4, 0.27, 0.4), stand: new THREE.Vector3(-0.9, 0.4, 0.4), stack: new THREE.Vector3(-0.9, 0.075, 0.4),
-  regBasket: new THREE.Vector3(0.14, 0.88, 0.06), trayReg: new THREE.Vector3(0.67, 0.892, 0.04), trayBag: new THREE.Vector3(1.47, 0.892, 0.1),
+  counterY: 0.88, counterX0: -0.3, counterX1: 2.6, counterZ: 0.32,
+  shelfX: -0.8, shelfTopY: 1.14, milkX: [-1.11, -1.0, -0.89], milkZ: -0.1,
+  laneX: [-0.98, -0.8, -0.62], laneFront: new THREE.Vector3(0, 0.815, 0.03), laneDir: new THREE.Vector3(0, 0.298, -0.954), laneLen: 0.31,
+  bin: new THREE.Vector3(-0.58, 1.14, -0.13),
+  crate: new THREE.Vector3(-1.05, 0.27, 0.4), stand: new THREE.Vector3(-0.55, 0.4, 0.4), stack: new THREE.Vector3(-0.55, 0.075, 0.4),
+  regBasket: new THREE.Vector3(0.14, 0.88, 0.06), trayReg: new THREE.Vector3(0.67, 0.892, 0.04), trayBag: new THREE.Vector3(1.24, 0.892, 0.1),
   scanner: new THREE.Vector3(0.41, 1.0, -0.19), button: new THREE.Vector3(0.41, 0.88, 0.235),
-  rack: new THREE.Vector3(1.86, 0.88, 0), custReg: new THREE.Vector3(0.5, 0, -1.0), custBag: new THREE.Vector3(2.52, 0, -0.56),
+  rack: new THREE.Vector3(1.62, 0.88, 0), custReg: new THREE.Vector3(0.5, 0, -1.0), custBag: new THREE.Vector3(2.28, 0, -0.56),
+  winX0: -2.1, winX1: -0.3,
   frontZ: -3.4, openX0: 0.1, openX1: 3.0, openH: 2.4, wallH: 3.0,
 };
 
@@ -259,16 +260,17 @@ export function buildStore(M) {
   const wallM = std({ map: T.plasterTex([0.84, 0.8, 0.72]), roughness: 0.92 }), wallW = std({ map: T.plasterTex([0.8, 0.74, 0.62]), roughness: 0.92 });
   const fz = L.frontZ - 0.1, H = L.wallH;
   const seg = (x0, x1, y0, y1) => g.add(box(x1 - x0, y1 - y0, 0.2, wallM, (x0 + x1) / 2, (y0 + y1) / 2, fz));
-  seg(-3.3, -2.5, 0, H); seg(-2.5, -0.7, 0, 0.9); seg(-2.5, -0.7, 2.6, H); seg(-0.7, L.openX0, 0, H); seg(L.openX0, L.openX1, L.openH, H); seg(L.openX1, 3.7, 0, H);
+  const wx0 = L.winX0, wx1 = L.winX1, wc = (wx0 + wx1) / 2, ww = wx1 - wx0;
+  seg(-3.3, wx0, 0, H); seg(wx0, wx1, 0, 0.9); seg(wx0, wx1, 2.6, H); seg(wx1, L.openX0, 0, H); seg(L.openX0, L.openX1, L.openH, H); seg(L.openX1, 3.7, 0, H);
   g.add(box(0.2, H, 7, wallW, -3.4, H / 2, 0), box(0.2, H, 7, wallW, 3.8, H / 2, 0), box(7.4, H, 0.2, wallW, 0.2, H / 2, 3.5));
   const ceil = mesh(new THREE.PlaneGeometry(7.4, 7), std({ color: 0xf2f0ea, roughness: 0.95 }), 0.2, H, 0, 0); ceil.rotation.x = Math.PI / 2; g.add(ceil);
   const lampM = new THREE.MeshBasicMaterial({ color: 0xfff6e2, toneMapped: false });
   for (const [x, z] of [[-1.2, 0.6], [1.2, 0.6], [-1.2, -1.6], [1.2, -1.6], [3.0, 0.6]]) { const p = mesh(new THREE.PlaneGeometry(1.1, 0.32), lampM, x, H - 0.01, z, 0); p.rotation.x = Math.PI / 2; g.add(p); g.add(box(1.16, 0.03, 0.38, M.white, x, H - 0.012, z, 0)); }
   // 窓
   const frameM = std({ color: 0x6f5a45, roughness: 0.6 });
-  for (const [w, h, x, y] of [[1.9, 0.07, -1.6, 0.9], [1.9, 0.07, -1.6, 2.6], [0.07, 1.7, -2.5, 1.75], [0.07, 1.7, -0.7, 1.75], [0.05, 1.7, -1.6, 1.75], [1.8, 0.05, -1.6, 1.75]]) g.add(box(w, h, 0.24, frameM, x, y, fz));
-  const glass = mesh(new THREE.PlaneGeometry(1.8, 1.7), phys({ color: 0xffffff, transparent: true, opacity: 0.1, roughness: 0.03, depthWrite: false, envMapIntensity: 1.2 }), -1.6, 1.75, fz, 0); g.add(glass);
-  g.add(box(1.9, 0.04, 0.3, frameM, -1.6, 0.9, fz + 0.1));
+  for (const [w, h, x, y] of [[ww + 0.1, 0.07, wc, 0.9], [ww + 0.1, 0.07, wc, 2.6], [0.07, 1.7, wx0, 1.75], [0.07, 1.7, wx1, 1.75], [0.05, 1.7, wc, 1.75], [ww, 0.05, wc, 1.75]]) g.add(box(w, h, 0.24, frameM, x, y, fz));
+  const glass = mesh(new THREE.PlaneGeometry(ww, 1.7), phys({ color: 0xffffff, transparent: true, opacity: 0.1, roughness: 0.03, depthWrite: false, envMapIntensity: 1.2 }), wc, 1.75, fz, 0); g.add(glass);
+  g.add(box(ww + 0.1, 0.04, 0.3, frameM, wc, 0.9, fz + 0.1));
   // カウンター
   const cx = (L.counterX0 + L.counterX1) / 2, cw = L.counterX1 - L.counterX0;
   g.add(mesh(rbox(cw + 0.06, 0.045, 0.7, 0.012, 2), M.wood, cx, Y - 0.0225, 0));
@@ -346,8 +348,8 @@ export function buildStore(M) {
   const ck = T.canvas(128, 128), cg = ck.getContext('2d'); cg.fillStyle = '#f7f5ee'; cg.beginPath(); cg.arc(64, 64, 62, 0, 7); cg.fill();
   cg.strokeStyle = '#3a3835'; cg.lineCap = 'round'; for (let i = 0; i < 12; i++) { const a = (i / 12) * 6.283; cg.lineWidth = i % 3 ? 2 : 5; cg.beginPath(); cg.moveTo(64 + Math.cos(a) * 50, 64 + Math.sin(a) * 50); cg.lineTo(64 + Math.cos(a) * 57, 64 + Math.sin(a) * 57); cg.stroke(); }
   cg.lineWidth = 5; cg.beginPath(); cg.moveTo(64, 64); cg.lineTo(42, 44); cg.stroke(); cg.lineWidth = 3; cg.beginPath(); cg.moveTo(64, 64); cg.lineTo(64, 20); cg.stroke();
-  const clock = mesh(new THREE.CircleGeometry(0.15, 32), std({ map: T.tex(ck), roughness: 0.4 }), -0.3, 2.0, fz + 0.115, 0); g.add(clock);
-  const crim = mesh(new THREE.TorusGeometry(0.152, 0.012, 8, 32), M.dark, -0.3, 2.0, fz + 0.115, 0); g.add(crim);
+  const clock = mesh(new THREE.CircleGeometry(0.15, 32), std({ map: T.tex(ck), roughness: 0.4 }), -0.1, 2.0, fz + 0.115, 0); g.add(clock);
+  const crim = mesh(new THREE.TorusGeometry(0.152, 0.012, 8, 32), M.dark, -0.1, 2.0, fz + 0.115, 0); g.add(crim);
   // 納品箱 (段ボール) と台
   const cr = new THREE.Group(); cr.position.copy(L.crate);
   const cb = std({ map: T.cardboardTex(), roughness: 0.85, side: THREE.DoubleSide });
@@ -378,7 +380,7 @@ export function buildExterior(M) {
   const fz = L.frontZ - 0.2; // 外壁面
   const sm = std({ map: T.sidingTex(), roughness: 0.8 });
   const seg = (x0, x1, y0, y1) => g.add(box(x1 - x0, y1 - y0, 0.04, sm, (x0 + x1) / 2, (y0 + y1) / 2, fz - 0.02));
-  seg(-3.4, -2.5, 0, 3.4); seg(-2.5, -0.7, 0, 0.9); seg(-2.5, -0.7, 2.6, 3.4); seg(-0.7, L.openX0, 0, 3.4); seg(L.openX0, L.openX1, L.openH + 0.25, 3.4); seg(L.openX1, 3.9, 0, 3.4);
+  seg(-3.4, L.winX0, 0, 3.4); seg(L.winX0, L.winX1, 0, 0.9); seg(L.winX0, L.winX1, 2.6, 3.4); seg(L.winX1, L.openX0, 0, 3.4); seg(L.openX0, L.openX1, L.openH + 0.25, 3.4); seg(L.openX1, 3.9, 0, 3.4);
   g.add(box(7.6, 0.25, 0.5, std({ color: 0x5b4a3c, roughness: 0.7 }), 0.2, 3.5, fz + 0.15));
   // 日よけ (しま模様)
   const aw = mesh(new THREE.PlaneGeometry(3.5, 1.0, 12, 1), std({ map: T.stripeTex('#f6f1e4', '#3f8f6b', 12), roughness: 0.85, side: THREE.DoubleSide }), (L.openX0 + L.openX1) / 2, 2.9, fz - 0.46); aw.rotation.x = -Math.PI / 2 + 0.5; aw.rotation.z = Math.PI; g.add(aw);
@@ -416,10 +418,10 @@ export function buildExterior(M) {
   const leafM = std({ map: T.leafTex(), roughness: 0.85 }), trunkM = std({ color: 0x5a4433, roughness: 0.9 }), potM = std({ color: 0xb5633c, roughness: 0.8 });
   const blob = (x, y, z, s, n, seedN) => { const rr = T.rng(seedN), geo = new THREE.IcosahedronGeometry(1, 3); for (let i = 0; i < n; i++) { const m = mesh(geo, leafM, x + (rr() - 0.5) * s * 1.6, y + (rr() - 0.5) * s, z + (rr() - 0.5) * s * 1.6); m.scale.setScalar(s * (0.5 + rr() * 0.4)); g.add(m); } };
   for (const tx of [-2.6, 4.9]) { g.add(mesh(new THREE.CylinderGeometry(0.07, 0.1, 2.3, 8), trunkM, tx, 1.15, fz - 11.0)); blob(tx, 3.1, fz - 11.0, 1.05, 12, tx * 10 + 99); }
-  for (const [px, s] of [[-0.35, 0.3], [3.45, 0.36]]) { g.add(mesh(new THREE.CylinderGeometry(0.17, 0.12, 0.3, 14), potM, px, 0.15, fz - 0.42)); blob(px, 0.5 + s * 0.4, fz - 0.42, s, 6, px * 31 + 7); }
+  for (const [px, s] of [[-0.12, 0.28], [3.45, 0.36]]) { g.add(mesh(new THREE.CylinderGeometry(0.17, 0.12, 0.3, 14), potM, px, 0.15, fz - 0.42)); blob(px, 0.5 + s * 0.4, fz - 0.42, s, 6, px * 31 + 7); }
   // ベンチ
   const bw = std({ map: T.woodTex(), roughness: 0.6 });
-  g.add(box(1.2, 0.04, 0.3, bw, -1.6, 0.42, fz - 0.42), box(0.06, 0.42, 0.28, M.dark, -2.1, 0.21, fz - 0.42), box(0.06, 0.42, 0.28, M.dark, -1.1, 0.21, fz - 0.42));
+  g.add(box(1.2, 0.04, 0.3, bw, -1.2, 0.42, fz - 0.42), box(0.06, 0.42, 0.28, M.dark, -1.7, 0.21, fz - 0.42), box(0.06, 0.42, 0.28, M.dark, -0.7, 0.21, fz - 0.42));
   // 空
   const sky = new THREE.Mesh(new THREE.SphereGeometry(60, 24, 12), new THREE.MeshBasicMaterial({ map: T.skyTex(), side: THREE.BackSide, toneMapped: false, fog: false })); sky.position.y = -6; sky.userData.dynamic = true; g.add(sky);
   mergeStatic(g);
