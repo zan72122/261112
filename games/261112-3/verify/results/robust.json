@@ -1,0 +1,225 @@
+{
+ "pass": 22,
+ "fail": 0,
+ "checks": [
+  {
+   "name": "保存拒否(setItem が例外): メモリで継続して遊べる",
+   "pass": true,
+   "detail": {
+    "loc": "shelf",
+    "saveOK": false,
+    "errors": []
+   }
+  },
+  {
+   "name": "保存拒否(localStorage 自体が使えない): 標準配置で始まり遊べる",
+   "pass": true,
+   "detail": {
+    "loc": "shelf",
+    "saveOK": false,
+    "errors": []
+   }
+  },
+  {
+   "name": "保存破損(壊れたJSON): 拒否して標準配置で開始",
+   "pass": true,
+   "detail": {
+    "day": 1,
+    "milk1": "crate",
+    "rejected": true,
+    "errors": []
+   }
+  },
+  {
+   "name": "保存破損(空文字): 拒否して標準配置で開始",
+   "pass": true,
+   "detail": {
+    "day": 1,
+    "milk1": "crate",
+    "rejected": false,
+    "errors": []
+   }
+  },
+  {
+   "name": "保存破損(別バージョン): 拒否して標準配置で開始",
+   "pass": true,
+   "detail": {
+    "day": 1,
+    "milk1": "crate",
+    "rejected": true,
+    "errors": []
+   }
+  },
+  {
+   "name": "保存破損(値域外(day)): 拒否して標準配置で開始",
+   "pass": true,
+   "detail": {
+    "day": 1,
+    "milk1": "crate",
+    "rejected": true,
+    "errors": []
+   }
+  },
+  {
+   "name": "保存破損(値域外(shutter)): 拒否して標準配置で開始",
+   "pass": true,
+   "detail": {
+    "day": 1,
+    "milk1": "crate",
+    "rejected": true,
+    "errors": []
+   }
+  },
+  {
+   "name": "保存破損(不整合(同じ棚に牛乳2つ)): 拒否して標準配置で開始",
+   "pass": true,
+   "detail": {
+    "day": 1,
+    "milk1": "crate",
+    "rejected": true,
+    "errors": []
+   }
+  },
+  {
+   "name": "保存破損(不整合(未知の場所)): 拒否して標準配置で開始",
+   "pass": true,
+   "detail": {
+    "day": 1,
+    "milk1": "crate",
+    "rejected": true,
+    "errors": []
+   }
+  },
+  {
+   "name": "保存破損(不整合(未会計なのに袋の中)): 拒否して標準配置で開始",
+   "pass": true,
+   "detail": {
+    "day": 1,
+    "milk1": "crate",
+    "rejected": true,
+    "errors": []
+   }
+  },
+  {
+   "name": "保存破損(不整合(品が足りない)): 拒否して標準配置で開始",
+   "pass": true,
+   "detail": {
+    "day": 1,
+    "milk1": "crate",
+    "rejected": true,
+    "errors": []
+   }
+  },
+  {
+   "name": "保存破損(非有限値): 拒否して標準配置で開始",
+   "pass": true,
+   "detail": {
+    "day": 1,
+    "milk1": "crate",
+    "rejected": true,
+    "errors": []
+   }
+  },
+  {
+   "name": "保存破損(配列): 拒否して標準配置で開始",
+   "pass": true,
+   "detail": {
+    "day": 1,
+    "milk1": "crate",
+    "rejected": true,
+    "errors": []
+   }
+  },
+  {
+   "name": "検査に通る保存は復元される (日数・棚の並び)",
+   "pass": true,
+   "detail": {
+    "day": 3,
+    "lanes": [
+     [
+      "apple2"
+     ],
+     [
+      "apple1",
+      "berry"
+     ],
+     []
+    ]
+   }
+  },
+  {
+   "name": "遊びの途中で読み込み直しても同じ状態から続く (品の所在・読取済み・かご・場面・客)",
+   "pass": true,
+   "detail": {
+    "station": 1,
+    "cust": "atReg",
+    "tray": [
+     "apple1",
+     "bread"
+    ]
+   }
+  },
+  {
+   "name": "読み込み直しで品が複製・消失しない",
+   "pass": true
+  },
+  {
+   "name": "WebGL 生成失敗: 埋め込み静止画の代替画面を表示 (エラーなし)",
+   "pass": true,
+   "detail": {
+    "failed": true,
+    "fb": "block",
+    "canvas": "none",
+    "w": 560,
+    "h": 806,
+    "src": "data:image/jpeg;base64",
+    "errors": [],
+    "requests": 1
+   }
+  },
+  {
+   "name": "WebGL 喪失→復旧: 描画と遊びが続く",
+   "pass": true,
+   "detail": {
+    "frames": [
+     29,
+     32
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "WebGL 喪失→復旧不能 (約4秒): 代替画面へ切り替え",
+   "pass": true,
+   "detail": {
+    "failed": true,
+    "fb": "block"
+   }
+  },
+  {
+   "name": "音の拒否(AudioContext が作れない): 無音で遊べる",
+   "pass": true,
+   "detail": {
+    "audio": false,
+    "errors": []
+   }
+  },
+  {
+   "name": "音の拒否(resume が拒否される): 遊びは続く",
+   "pass": true,
+   "detail": {
+    "audioState": "running",
+    "errors": []
+   }
+  },
+  {
+   "name": "通常時: 最初のタッチで音が始まり「ことん」が鳴る",
+   "pass": true,
+   "detail": {
+    "before": "none",
+    "after": "running",
+    "sounds": 5
+   }
+  }
+ ]
+}
