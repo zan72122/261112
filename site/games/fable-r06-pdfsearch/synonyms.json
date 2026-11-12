@@ -1,0 +1,18 @@
+{
+  "_about": "Dictionary for PDF横断検索. Each group lists words that mean the same; searching one also finds the others (shown with a blue mark, ranked below exact matches). Edit this file, then drop it on the app window (or ＋ → 読み込む・復元 / 辞書を読み込む…). Keep it valid JSON.",
+  "groups": [
+    ["ac", "air conditioner", "aircon", "エアコン"],
+    ["fridge", "refrigerator", "冷蔵庫"],
+    ["tv", "television", "テレビ"],
+    ["max", "maximum", "最大"],
+    ["min", "minimum", "最小"],
+    ["temp", "temperature", "温度"],
+    ["approx", "approximately", "およそ"],
+    ["qty", "quantity", "数量"],
+    ["spec", "specification", "仕様"],
+    ["dia", "diameter", "直径"],
+    ["manual", "handbook", "取扱説明書", "取説"],
+    ["warranty", "guarantee", "保証"],
+    ["dept", "department", "部署"]
+  ]
+}

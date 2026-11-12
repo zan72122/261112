@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF横断検索</title>
+<link rel="stylesheet" href="app.css">
+<script src="../../gf-playlog.js" defer></script>
+</head>
+<body>
+
+<!-- The whole window is the result surface: pages on the left/center, opened page on the right. -->
+<main id="stage" aria-label="検索結果のページ"><div id="grid"></div></main>
+<section id="viewer" aria-label="ページ表示" hidden><div id="vscroll" tabindex="-1"></div></section>
+
+<!-- The only three fixed controls: search, add, fullscreen. -->
+<label id="search">
+  <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="6.8" cy="6.8" r="4.6"/><path d="M10.3 10.3 14 14"/></svg>
+  <input id="q" type="text" placeholder="PDFを横断検索" aria-label="PDFを横断検索" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+  <span id="count" aria-live="polite"></span>
+</label>
+<button id="add" type="button" title="PDF・フォルダを追加" aria-label="PDF・フォルダを追加" aria-haspopup="menu">
+  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>
+</button>
+<button id="fs" type="button" title="全画面 (F)" aria-label="全画面表示の切り替え">
+  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"/></svg>
+</button>
+
+<!-- Transient: the + menu (built when it opens) and a message that leaves by itself. -->
+<div id="menu" role="menu" hidden></div>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<div id="drop" hidden><span>PDF・フォルダをここにドロップ</span></div>
+<input id="pickFiles" type="file" accept=".pdf,application/pdf" multiple hidden>
+<input id="pickDir" type="file" webkitdirectory multiple hidden>
+
+<!-- Classic scripts only: ES modules and fetch() do not work from file://. -->
+<script src="vendor/pdfjs/build/pdf.min.js"></script>
+<script src="pdfs/manifest.js"></script>
+<script src="js/search.js"></script>
+<script src="js/indexer.js"></script>
+<script src="js/store.js"></script>
+<script src="js/core.js"></script>
+<script src="js/ocr.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/dictionary-default.js"></script>
+<script src="js/notes.js"></script>
+<script src="js/extras.js"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>いちごジャム</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #14110f; overflow: hidden; overscroll-behavior: none; }
+  body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; cursor: default; }
+  #stage { position: fixed; inset: 0; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; outline: none; touch-action: none; }
+  /* wordless loading indicator: a thin ring that fills */
+  #load { position: fixed; inset: 0; display: grid; place-items: center; background: #14110f; transition: opacity 1.2s ease; }
+  #load.done { opacity: 0; pointer-events: none; }
+  #ring { width: 84px; height: 84px; transform: rotate(-90deg); }
+  #ring circle { fill: none; stroke-width: 5; stroke-linecap: round; }
+  #ring .bg { stroke: #ffffff14; }
+  #ring .fg { stroke: #d8343c; stroke-dasharray: 226.2; stroke-dashoffset: 226.2; transition: stroke-dashoffset .35s ease; }
+  /* end-screen credits: the only text in the game, for the parent */
+  #credits { position: fixed; right: 0; top: 0; bottom: 0; width: min(38vw, 520px); box-sizing: border-box; padding: 5vh 28px 5vh 28px;
+    color: #fff; font: 13px/1.65 -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
+    background: linear-gradient(to right, #0000, #000a 22%, #000c); opacity: 0; pointer-events: none; transition: opacity 2s ease; overflow: hidden; }
+  #credits.on { opacity: 1; pointer-events: auto; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #credits h1 { font-size: 15px; font-weight: 600; margin: 0 0 .6em; letter-spacing: .08em; }
+  #credits h2 { font-size: 12px; font-weight: 600; margin: 1.5em 0 .3em; opacity: .75; letter-spacing: .06em; }
+  #credits p, #credits li { margin: .25em 0; opacity: .92; }
+  #credits ul { margin: 0; padding-left: 1.1em; }
+  #credits a { color: #ffd9d9; text-decoration: none; }
+  #credits small { opacity: .7; }
+  @media (max-aspect-ratio: 1/1) { #credits { width: 100vw; top: auto; height: 46vh; background: linear-gradient(to bottom, #0000, #000b 18%, #000d); } }
+</style>
+<script src="../../gf-playlog.js"></script>
+</head>
+<body>
+<div id="stage"></div>
+<div id="credits" aria-hidden="true"></div>
+<div id="load"><svg id="ring" viewBox="0 0 84 84"><circle class="bg" cx="42" cy="42" r="36"/><circle class="fg" cx="42" cy="42" r="36"/></svg></div>
+<script src="dist/packs.js"></script>
+<script>
+(function () {
+  // Load the base64 asset packs one after another (classic scripts: works on file://), then the game.
+  var packs = window.__PACKS || [], total = 0, done = 0, fg = document.querySelector('#ring .fg');
+  packs.forEach(function (p) { total += p.bytes; });
+  function progress(extra) { var k = total ? (done + (extra || 0)) / total : 1; fg.style.strokeDashoffset = (226.2 * (1 - 0.9 * k)).toFixed(1); }
+  window.__bootProgress = function (k) { fg.style.strokeDashoffset = (226.2 * (1 - (0.9 + 0.1 * k))).toFixed(1); };
+  function add(src, cb) { var s = document.createElement('script'); s.src = src; s.onload = cb; s.onerror = cb; document.body.appendChild(s); }
+  var i = 0;
+  (function next() {
+    if (i >= packs.length) return add('dist/game.js', function () {});
+    var p = packs[i++];
+    add('dist/' + p.file, function () { done += p.bytes; progress(); next(); });
+  })();
+})();
+</script>
+</body>
+</html>

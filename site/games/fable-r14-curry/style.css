@@ -1,0 +1,20 @@
+html, body { margin: 0; height: 100%; overflow: hidden; background: #2b2520; overscroll-behavior: none; }
+body { position: fixed; inset: 0; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+#c { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; }
+#vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 58%, rgba(20,10,0,0.20) 100%); }
+#fade { position: absolute; inset: 0; pointer-events: none; background: #fbf3e4; opacity: 1; transition: opacity 0.9s ease; }
+#fade.off { opacity: 0; }
+#fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+#ui { position: absolute; top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right)); display: flex; gap: 10px; }
+.ic { width: 46px; height: 46px; border-radius: 50%; border: 0; padding: 0; background: rgba(255,252,244,0.55) center/60% no-repeat; box-shadow: 0 1px 5px rgba(60,40,20,0.22); cursor: pointer; opacity: 0.6; touch-action: none; position: relative; outline: none; }
+.ic:active { transform: scale(0.94); }
+.ic .ring { position: absolute; inset: -3px; border-radius: 50%; pointer-events: none; }
+.halo { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; pointer-events: none; opacity: 0; transition: opacity 0.5s ease;
+  background: radial-gradient(circle, rgba(255,246,200,0) 44%, rgba(255,244,190,0.75) 60%, rgba(255,240,170,0) 74%); }
+.halo.on { opacity: 1; animation: halo 1.5s ease-in-out infinite; }
+@keyframes halo { 0%,100% { transform: scale(0.9); } 50% { transform: scale(1.08); } }
+.hand { position: absolute; width: 72px; height: 72px; margin: -8px 0 0 -22px; pointer-events: none; opacity: 0; transition: opacity 0.4s ease; background: center/contain no-repeat; filter: drop-shadow(0 3px 5px rgba(0,0,0,0.25)); }
+.hand.on { opacity: 0.85; }
+.spark { position: absolute; width: 60px; height: 60px; margin: -30px 0 0 -30px; pointer-events: none; background: center/contain no-repeat; }
+body.hidecursor { cursor: none; }
+@media (max-height: 520px) { .ic { width: 38px; height: 38px; } }

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f3eee6">
+<meta property="og:image" content="thumb.png">
+<meta property="og:title" content="いちごジャム">
+<title>いちごジャム</title>
+<style>
+  :root { --load: 0; }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden; background: #f3eee6;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: none;
+  }
+  #game { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; touch-action: none; outline: none; }
+  /* wordless loader: a strawberry that fills up with red */
+  #loader {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: #f3eee6; transition: opacity .6s ease; z-index: 5; pointer-events: none;
+  }
+  #loader.gone { opacity: 0; }
+  #loader svg { width: min(16vmin, 120px); height: auto; overflow: visible; }
+  #loader .fill { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(var(--load)); transition: transform .35s ease; }
+  #loader .berry { animation: breathe 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 60%; }
+  @keyframes breathe { 50% { transform: scale(1.04); } }
+  /* end-screen credits: the only text in the game (for the parent) */
+  #credits {
+    position: fixed; left: 2.2vmin; bottom: 2.2vmin; max-width: min(46vw, 420px); max-height: 46vh; overflow: auto;
+    padding: 12px 16px; border-radius: 10px; z-index: 4;
+    background: rgba(250, 247, 242, .72); color: #4a3f36; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    font: 11px/1.45 -apple-system, "Hiragino Sans", "Helvetica Neue", sans-serif; user-select: text; -webkit-user-select: text;
+    transition: opacity .8s ease; touch-action: pan-y;
+  }
+  #credits.hidden { opacity: 0; pointer-events: none; }
+  #credits h2 { font-size: 13px; margin: 0 0 6px; font-weight: 600; }
+  #credits p { margin: 0 0 6px; }
+  #credits .small { opacity: .7; font-size: 10px; }
+  #credits a { color: inherit; }
+</style>
+<script src="../../gf-playlog.js"></script>
+</head>
+<body>
+<canvas id="game" tabindex="-1"></canvas>
+<div id="loader" aria-hidden="true">
+  <svg viewBox="0 0 100 118">
+    <defs>
+      <clipPath id="berryClip">
+        <path d="M50 26 C74 22 94 34 92 56 C90 82 66 112 50 114 C34 112 10 82 8 56 C6 34 26 22 50 26 Z"/>
+      </clipPath>
+    </defs>
+    <g class="berry">
+      <path d="M50 26 C74 22 94 34 92 56 C90 82 66 112 50 114 C34 112 10 82 8 56 C6 34 26 22 50 26 Z" fill="#e7d9cf"/>
+      <g clip-path="url(#berryClip)">
+        <rect class="fill" x="0" y="20" width="100" height="98" fill="#c8202c"/>
+      </g>
+      <path d="M50 30 C42 18 30 16 22 22 C34 24 40 28 44 32 C36 32 30 36 28 42 C38 38 44 36 50 36 C56 36 62 38 72 42 C70 36 64 32 56 32 C60 28 66 24 78 22 C70 16 58 18 50 30 Z" fill="#4f7a2e"/>
+      <path d="M49 30 C49 22 50 14 53 8" stroke="#4f7a2e" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </g>
+  </svg>
+</div>
+<script src="game/game.js"></script>
+</body>
+</html>

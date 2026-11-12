@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>ねぐせパパのおひさま目玉焼き</title>
+<link rel="icon" href="icon.png">
+<style>
+  html, body { margin: 0; height: 100%; background: #2a211a; overflow: hidden; overscroll-behavior: none; }
+  body { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+  #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; }
+  #ui { position: fixed; top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right)); display: flex; gap: 10px; opacity: 0; transition: opacity .8s; z-index: 5; }
+  #ui.on { opacity: 1; }
+  #ui button { width: 46px; height: 46px; border-radius: 50%; border: 0; padding: 9px; background: rgba(255, 250, 240, .72); box-shadow: 0 1px 6px rgba(60, 40, 20, .25); cursor: pointer; touch-action: manipulation; }
+  #ui button:active { transform: scale(.92); }
+  #ui svg { width: 100%; height: 100%; display: block; fill: none; stroke: #6b4a2b; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+  #ui button.off svg .wave { display: none; }
+  #ui button .slash { display: none; } #ui button.off .slash { display: inline; }
+  #load { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #f6e9cf; transition: opacity .9s; z-index: 10; }
+  #load.gone { opacity: 0; pointer-events: none; }
+  .egg { width: 120px; height: 104px; background: #fff; border-radius: 52% 48% 55% 45% / 50% 55% 45% 50%; box-shadow: 0 6px 18px rgba(120, 80, 30, .25); position: relative; animation: wob 1.6s ease-in-out infinite; }
+  .egg::after { content: ""; position: absolute; left: 34px; top: 26px; width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe27a, #f6a400 70%); }
+  @keyframes wob { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.06, .95); } }
+  #fade { position: fixed; inset: 0; background: #1c1510; opacity: 0; pointer-events: none; z-index: 4; }
+</style>
+<script src="../../gf-playlog.js" defer></script>
+</head>
+<body>
+<canvas id="c" tabindex="0"></canvas>
+<div id="fade"></div>
+<div id="ui">
+  <button id="b-home" aria-label="home"><svg viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6.5 10v9h11v-9"/><path d="M10 19v-5h4v5"/></svg></button>
+  <button id="b-sound" aria-label="sound"><svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 6v12l-4.500-3.500H4z"/><path class="wave" d="M15.500 9.500a4 4 0 0 1 0 5"/><path class="wave" d="M18 7a7.500 7.500 0 0 1 0 10"/><path class="slash" d="M16 9.500l5 5M21 9.500l-5 5"/></svg></button>
+  <button id="b-full" aria-label="fullscreen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+</div>
+<div id="load"><div class="egg"></div></div>
+<script src="game.js"></script>
+</body>
+</html>

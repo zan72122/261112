@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>光学顕微鏡 3D ― 光の通り道をたどろう</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="../../gf-playlog.js" defer></script>
+</head>
+<body class="mode-real">
+<canvas id="gl" aria-label="正立型光学顕微鏡の3Dモデル"></canvas>
+
+<!-- fixed UI element 1 of 3: mode switch (+ fullscreen) -->
+<div id="pill" class="hud" role="group" aria-label="表示モード">
+  <button type="button" data-mode="real" class="on">リアル</button>
+  <button type="button" data-mode="beginner" class="spark">ビギナー</button>
+  <button type="button" id="fs" title="全画面 (F)" aria-label="全画面">
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</div>
+
+<!-- fixed UI element 2 of 3: objective + diaphragm controls (beginner mode) -->
+<div id="dock" class="hud" aria-label="操作">
+  <div class="objs" role="group" aria-label="対物レンズ">
+    <button type="button" data-obj="0" style="--c:#e0343a">4×</button>
+    <button type="button" data-obj="1" style="--c:#f0c820">10×</button>
+    <button type="button" data-obj="2" style="--c:#27b060">20×</button>
+    <button type="button" data-obj="3" style="--c:#4fb2f0">40×</button>
+  </div>
+  <label class="sl"><span>視野絞り</span><input id="fd" type="range" min="0" max="100" value="90" aria-label="視野絞り"></label>
+  <label class="sl"><span>開口絞り</span><input id="ad" type="range" min="0" max="100" value="60" aria-label="開口絞り"></label>
+</div>
+
+<!-- fixed UI element 3 of 3: view through the eyepiece (beginner mode) -->
+<div id="inset" class="hud" aria-label="接眼レンズから見たテストパターン">
+  <div class="view"><canvas class="pat"></canvas><canvas class="ovl"></canvas></div>
+  <div class="cap"></div>
+</div>
+
+<!-- transient elements (only while a part is selected / during the first seconds) -->
+<svg id="lead" aria-hidden="true"><line x1="0" y1="0" x2="0" y2="0"/><circle r="4"/></svg>
+<div id="tag" role="status" aria-live="polite"></div>
+<div id="hint"></div>
+<div id="fail" hidden>このページの表示には WebGL2 が必要です。<br>WebGL2 is required to display this page.</div>
+
+<script src="js/math.js"></script>
+<script src="js/geo.js"></script>
+<script src="js/shaders.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/pattern.js"></script>
+<script src="js/labels.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/model-lower.js"></script>
+<script src="js/model-upper.js"></script>
+<script src="js/optics.js"></script>
+<script src="js/inset.js"></script>
+<script src="js/controls.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

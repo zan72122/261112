@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PDF横断検索・最初の版（コマンドライン）</title>
+<style>body{margin:0;background:#f6f3ec;color:#222;font-family:-apple-system,"Hiragino Sans",sans-serif;line-height:1.6}
+main{max-width:860px;margin:auto;padding:24px}h1{font-size:24px}pre{background:#1e2127;color:#e8e8e8;padding:16px;border-radius:12px;overflow:auto;font-size:14px;white-space:pre-wrap}
+.note{background:#fff;border-radius:12px;padding:12px 16px;box-shadow:0 2px 0 rgba(0,0,0,.08)}a.b{display:inline-block;background:#3b6bd6;color:#fff;padding:10px 16px;border-radius:10px;text-decoration:none}
+details{margin-top:16px}</style>
+<script src="../../gf-playlog.js" defer></script></head>
+<body><main>
+<h1>PDF横断検索・最初の版（R1）</h1>
+<p class="note">R1でFable 5.2が最初に作った、Pythonのコマンドライン版のPDF横断検索です。ブラウザでは動かないので、実際の実行結果をそのまま載せています。のちのR2・R6のブラウザ版の出発点です。Macで試すには、zipを展開して <code>python3 search.py "質問"</code> を実行します（Python 3.10以上、追加インストール不要）。</p>
+<p><a class="b" href="pdf-cli-r1.zip" download>ソース一式（zip）</a></p>
+<h2>実行結果（見本のPDF 5つ）</h2>
+<pre>$ python3 search.py &quot;冷蔵庫と電子レンジの型番は何か。&quot;
+質問: 冷蔵庫と電子レンジの型番は何か。
+
+答え: 冷蔵庫は FR-228K、電子レンジは MW-20S。
+
+根拠:
+  [1] warranty-fridge.pdf: 「型番: FR-228K」
+  [2] household-notes.pdf: 「冷蔵庫 FR-228K の庫内灯が 2026年10月12日に切れた。保証対象外。」
+  [3] manual-microwave.pdf: 「型番: MW-20S」
+  [4] household-notes.pdf: 「電子レンジ MW-20S は、子どもが使うときは 600 W だけにする。」
+
+$ python3 search.py &quot;オーブントースター OT-12 の庫内幅は何 cm か。出典は何ファイルか。&quot;
+質問: オーブントースター OT-12 の庫内幅は何 cm か。出典は何ファイルか。
+
+答え: 28 cm（2 資料で一致）。
+      出典は 2 ファイル: household-notes.pdf、recipe-toast.pdf
+
+根拠:
+  [1] household-notes.pdf: 「オーブントースター OT-12 の庫内は幅 28 cm。」
+  [2] recipe-toast.pdf: 「対象機種: OT-12（庫内幅 28 cm。2枚まで）」
+
+$ python3 search.py &quot;柔軟剤はどこに入れる&quot;
+質問: 柔軟剤はどこに入れる
+
+答え: 柔軟剤は投入口の右側。漂白剤は左側。混ぜて置かない。
+
+根拠:
+  [1] manual-washer.pdf: 「柔軟剤は投入口の右側。漂白剤は左側。混ぜて置かない。」</pre>
+<details><summary>README（説明書）</summary><pre># 家庭ドキュメント横断検索（小型）
+
+`pdfs/` にある PDF（保証書・家電の取説・家庭メモ・レシピ）を、オフラインで横断検索する小さなコマンドラインツールです。
+質問を入れると **答え** と、根拠になった **ファイル名・引用文** を返します。複数ファイルにまたがる質問にも答えます。
+
+- 必要なもの: Python 3.10 以上のみ（標準ライブラリだけで動作。`pip install` 不要）
+- 外部通信なし。LLM・埋め込み API・追加コーパスは使いません
+- `pdftotext`（poppler）が PATH にあれば PDF の読み取りに使い、なければ内蔵の PDF パーサで読みます
+
+## 使い方
+
+```bash
+# 1 問だけ聞く
+python3 search.py &quot;冷蔵庫と電子レンジの型番は何か。&quot;
+
+# 対話モード（空行で終了）
+python3 search.py
+
+# JSON で受け取る / 検索上位の段落も見る
+python3 search.py --json &quot;冷蔵庫の購入日は？&quot;
+python3 search.py --top 5 &quot;柔軟剤はどこに入れる&quot;
+```
+
+出力例:
+
+```
+質問: オーブントースター OT-12 の庫内幅は何 cm か。出典は何ファイルか。
+
+答え: 28 cm（2 資料で一致）。
+      出典は 2 ファイル: household-notes.pdf、recipe-toast.pdf
+
+根拠:
+  [1] household-notes.pdf: 「オーブントースター OT-12 の庫内は幅 28 cm。」
+  [2] recipe-toast.pdf: 「対象機種: OT-12（庫内幅 28 cm。2枚まで）」
+```
+
+`補足:` の欄には、数値の突き合わせ結果や、資料どうしの食い違い（例: 日付の曜日と「平日」という条件が合わない）が出ます。
+
+### オプション
+
+| オプション | 意味 |
+|---|---|
+| `--pdf-dir DIR` | 検索する PDF フォルダ（既定: `./pdfs`）。PDF を足したらそのまま検索対象になる |
+| `--json` | JSON 出力（`answer` / `evidence[{file, quote}]` / `notes` / `found`） |
+| `--top N` | 検索スコア上位 N 段落も表示 |
+| `--extractor auto\|pdftotext\|builtin` | PDF テキスト抽出器の選択（既定 `auto`） |
+| `--dump` | PDF から抽出したテキストを表示して終了（読み取り確認用） |
+
+## テスト
+
+```bash
+python3 run_acceptance.py                  # 受け入れテスト T1〜T5 を実行し test-results.md を更新
+python3 -m unittest discover -s tests -v   # 単体テスト（22 件）
+```
+
+`run_acceptance.py` は質問と正解を `ACCEPTANCE.md` から読み、既定の抽出器と内蔵パーサの両方で 5 問を実行します。
+結果（合否・ツールの答え・正解）は [`test-results.md`](test-results.md) にあります。
+
+## しくみ
+
+```
+search.py            コマンドライン入口
+xsearch/pdftext.py   PDF → 段落（pdftotext または内蔵パーサ）
+xsearch/index.py     索引: 文字 2-gram + 英数字トークンの BM25、「キー: 値」行、型番と製品名の対応
+xsearch/answer.py    質問を小問に分け、型ごとの規則で資料の文言から答えを組み立てる
+run_acceptance.py    受け入れテスト実行・test-results.md 生成
+tests/               単体テスト
+```
+
+1. **抽出** — 各 PDF を段落に分ける。1 行目をその資料のタイトルとして扱う。
+2. **索引** — 形態素解析の辞書を使わず、和文は文字 2-gram、英数字（`FR-228K`、`600` など）は語のまま BM25 で検索。
+   `型番: FR-228K` のような「キー: 値」行と、`冷蔵庫 FR-228K` のような「製品名 + 型番」を拾い、
+   「冷蔵庫 = FR-228K = warranty-fridge.pdf の製品」という対応を作る。これが資料をまたぐ手がかりになる。
+3. **回答** — 質問を小問に分け（「A と、B」「いつ、どの〜」）、小問ごとに型を判定する。
+
+| 型 | 例 | やること |
+|---|---|---|
+| 保証の可否 | 〜は保証の対象か | 除外リスト（保証対象外: …）に品目があるか／本文の「対象外」記述／購入日 + 保証期間と質問の日付の比較 |
+| いつ | 洗濯はいつ | 日付を抽出し、「前日」「3日後」などを基準日から計算 |
+| どの〇〇 | どのコース | 「△△コース」という語を探し、別資料にある定義（`お急ぎコース: …`）と結合 |
+| 数量 | 何 cm、何枚 | 単位つき数値を抽出（mm→cm などは換算）。同じ値の資料をまとめ、違う値があれば補足に出す |
+| 項目 | 型番、購入日、販売店 | その製品の資料の「キー: 値」を引く |
+| その他 | 柔軟剤はどこに入れる | 最上位の段落を引用。「〜は保証書に書いてある」のような案内は参照先までたどる |
+
+答えに使う語句と数値はすべて PDF から取り出したもので、引用文は PDF の段落そのままです。
+質問と十分に一致する記述がなければ「該当する記述が見つかりませんでした。」と返します。
+
+## 制限
+
+- 規則ベースの抽出型です。上の型に当てはまらない込み入った質問は、関連段落の引用にとどまります。
+- 日本語の短い文書向けです。「〜は対象外ではない」のような否定の読み分けは簡易的です。保証の最終判断は販売店に確認してください。
+- 祝日は考慮しません（曜日の確認は土日のみ）。年が書かれていない日付は、同じ資料に出てくる年で補います（補足に明記）。
+- 内蔵 PDF パーサが読めるのは、暗号化なし・Flate/ASCII85 圧縮・WinAnsi または UCS2 系 CMap フォントの単純な PDF です
+  （同梱 5 ファイルは読めます）。それ以外の PDF を足す場合は `pdftotext` を入れてください。スキャン画像の PDF（OCR が必要なもの）は非対応です。
+- 呼び名のゆれは、資料中の名前との 3 文字以上の一致と、`xsearch/answer.py` の `SYNONYMS`（例: 洗濯機 → 洗濯乾燥機）で吸収します。
+
+## English summary
+
+Offline cross-document search over the PDFs in `./pdfs`. Pure Python standard library, no network, no LLM.
+Run `python3 search.py &quot;&lt;question in Japanese&gt;&quot;` (or with no argument for an interactive prompt); it prints an answer
+plus the supporting file names and verbatim quotes. `python3 run_acceptance.py` runs acceptance tests T1–T5 and
+rewrites `test-results.md`; `python3 -m unittest discover -s tests` runs the unit tests.
+</pre></details>
+</main></body></html>

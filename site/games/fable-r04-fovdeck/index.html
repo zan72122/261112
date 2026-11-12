@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>接眼レンズで見える範囲とカメラに写る範囲（スライド）</title>
+<style>
+html,body{margin:0;height:100%;background:#1d1f23;color:#eee;font-family:-apple-system,"Hiragino Sans",sans-serif}
+#wrap{position:fixed;inset:0 0 64px 0;display:flex;align-items:center;justify-content:center}
+#wrap img{max-width:96vw;max-height:calc(100vh - 84px);box-shadow:0 6px 30px rgba(0,0,0,.5);background:#fff}
+nav{position:fixed;left:0;right:0;bottom:0;height:64px;display:flex;align-items:center;justify-content:center;gap:14px}
+button,a.b{background:#3a3e46;color:#fff;border:0;border-radius:10px;padding:10px 16px;font-size:16px;cursor:pointer;text-decoration:none}
+#n{min-width:70px;text-align:center}
+.side{position:fixed;top:0;bottom:64px;width:30%;cursor:pointer}#prevz{left:0}#nextz{right:0}
+</style>
+<script src="../../gf-playlog.js" defer></script>
+</head>
+<body>
+<div id="wrap"><img id="img" alt="スライド"></div>
+<div class="side" id="prevz"></div><div class="side" id="nextz"></div>
+<nav><button id="prev" aria-label="前へ">◀</button><span id="n"></span><button id="next" aria-label="次へ">▶</button>
+<a class="b" href="fov-scale.pptx" download>PowerPoint（.pptx）</a><a class="b" href="fov-scale.pdf" download>PDF</a></nav>
+<script>
+(function(){
+var N=12,i=0,img=document.getElementById('img'),n=document.getElementById('n');
+function p(k){return 'slides/s-'+(k<9?'0':'')+(k+1)+'.jpg';}
+function show(){img.src=p(i);n.textContent=(i+1)+' / '+N;var a=new Image();if(i+1<N)a.src=p(i+1);}
+function go(d){i=Math.max(0,Math.min(N-1,i+d));show();}
+document.getElementById('prev').onclick=document.getElementById('prevz').onclick=function(){go(-1)};
+document.getElementById('next').onclick=document.getElementById('nextz').onclick=function(){go(1)};
+addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown')go(1);if(e.key==='ArrowLeft'||e.key==='PageUp')go(-1);});
+var sx=null;addEventListener('touchstart',function(e){sx=e.touches[0].clientX},{passive:true});
+addEventListener('touchend',function(e){if(sx===null)return;var dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>40)go(dx<0?1:-1);sx=null});
+show();
+})();
+</script>
+</body>
+</html>
