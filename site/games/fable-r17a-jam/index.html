@@ -6,6 +6,63 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>いちごジャム</title>
+<script>
+  // ?debug=1 — screenshot-friendly diagnostics overlay (installed before anything else so it sees every error).
+  // Shows: build, device/tier, WebGL state (lost/restored, getError, programs, textures), NaN/Inf pixels in the HDR
+  // scene target, shader compile errors, fade value, scene, story clock and loop tick counters, asset failures,
+  // JS errors and unhandled rejections. Updated from a timer, so it keeps running even if the render loop dies.
+  (function () {
+    if (!/[?&]debug(=|&|$)/.test(location.search)) return;
+    var t0 = performance.now(), sec = function () { return ((performance.now() - t0) / 1000).toFixed(1); };
+    var D = window.__dbg = { errors: [], counts: {}, ticks: 0, frames: 0, frameErr: 0, gapMax: 0, last: 0, nan: null, nanAt: 0, marks: [] };
+    D.add = function (kind, msg) {
+      msg = String(msg).replace(/\s+/g, ' ').slice(0, 260);
+      D.counts[kind] = (D.counts[kind] || 0) + 1;
+      var l = D.errors[D.errors.length - 1];
+      if (l && l.kind === kind && l.msg === msg) { l.n++; l.t = sec(); return; }
+      D.errors.push({ t: sec(), kind: kind, msg: msg, n: 1 }); if (D.errors.length > 30) D.errors.shift();
+    };
+    D.tick = function (now) { D.ticks++; if (D.last) D.gapMax = Math.max(D.gapMax, now - D.last); D.last = now; };
+    var str = function (a) { try { return a && a.stack ? a.stack : typeof a === 'object' ? JSON.stringify(a) : String(a); } catch (e) { return String(a); } };
+    addEventListener('error', function (e) {
+      var tg = e.target; if (tg && tg !== window && (tg.src || tg.href)) { D.add('load', tg.src || tg.href); return; }
+      D.add('error', (e.message || '') + ' @' + String(e.filename || '').split('/').pop() + ':' + e.lineno + ':' + e.colno + (e.error && e.error.stack ? ' | ' + e.error.stack : ''));
+    }, true);
+    addEventListener('unhandledrejection', function (e) { var r = e.reason; if (r && r.cancelled) return; D.add('reject', str(r)); });
+    ['error', 'warn'].forEach(function (k) { var o = console[k]; console[k] = function () { try { D.add('console.' + k, Array.prototype.map.call(arguments, str).join(' ')); } catch (e) {} return o.apply(console, arguments); }; });
+    if (window.fetch) { var of = window.fetch; window.fetch = function (u) { var url = String(u && u.url || u); return of.apply(this, arguments).then(function (r) { if (!r.ok) D.add('http', r.status + ' ' + url); return r; }, function (e) { D.add('fetch', url + ' ' + str(e)); throw e; }); }; }
+    var el;
+    function line(s, c) { return '<div' + (c ? ' style="color:' + c + '"' : '') + '>' + String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</div>'; }
+    function render() {
+      if (!el) { if (!document.body) return; el = document.createElement('div'); el.id = 'dbg';
+        el.style.cssText = 'position:fixed;left:6px;top:6px;z-index:99;max-width:min(96vw,760px);padding:6px 8px;background:rgba(0,0,0,.72);color:#e8e8e8;font:11px/1.35 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-all;pointer-events:none;border-radius:4px';
+        document.body.appendChild(el); }
+      var h = '', T = window.__T, g = T && T.g, I = D.info || {};
+      h += line('R17A debug · build ' + (window.__BUILD || '?') + ' · up ' + sec() + 's · ' + new Date().toLocaleTimeString());
+      h += line(navigator.userAgent.replace(/Mozilla\/5.0 /, '').slice(0, 150));
+      h += line('screen ' + innerWidth + 'x' + innerHeight + '@' + devicePixelRatio + ' touch ' + (navigator.maxTouchPoints || 0) + ' · tier ' + (I.tier || '?') + ' · ' + (I.gl || ''));
+      if (I.ext) h += line('ext ' + I.ext);
+      var marks = []; try { performance.getEntriesByType('mark').forEach(function (m) { marks.push(m.name + ' ' + (m.startTime / 1000).toFixed(1)); }); } catch (e) {}
+      h += line('boot: ' + (marks.slice(-3).join(' | ') || '…') + (window.__bootError ? ' · BOOT ERROR' : ''), window.__bootError ? '#ff6b6b' : '');
+      var now = performance.now();
+      h += line('loop: ticks ' + D.ticks + ' · frames ' + D.frames + ' · last ' + (D.last ? ((now - D.last) / 1000).toFixed(1) + 's ago' : '-') + ' · max gap ' + Math.round(D.gapMax) + 'ms · frame errors ' + D.frameErr, D.frameErr || (D.last && now - D.last > 2000) ? '#ff6b6b' : '');
+      if (g) {
+        var R = g.R, st = R.state, gl = g.renderer.getContext(), lost = gl.isContextLost(), ge = lost ? '-' : gl.getError(), mi = g.renderer.info;
+        h += line('scene ' + g.sceneName + ' · fade ' + (+st.fade).toFixed(3) + ' · clock ' + g.clock.t.toFixed(2) + ' · flow ' + (g.flowScope ? (g.flowScope.dead ? 'DEAD' : 'ok') : '-') + ' · ring ' + (document.getElementById('load').classList.contains('done') ? 'off' : 'ON') + ' · res ' + st.w + 'x' + st.h,
+          isNaN(st.fade) ? '#ff6b6b' : '');
+        h += line('GL: lost ' + (window.__ctxLost || 0) + ' restored ' + (window.__ctxRestored || 0) + ' · now ' + (lost ? 'LOST' : 'ok') + ' · getError ' + ge + ' · programs ' + (mi.programs ? mi.programs.length : '?') + ' · tex ' + mi.memory.textures + ' · geo ' + mi.memory.geometries + ' · calls ' + mi.render.calls + ' · tris ' + mi.render.triangles,
+          lost || (ge && ge !== '-') ? '#ff6b6b' : '');
+        h += line('HDR NaN/Inf px: ' + (D.nan === null ? '…' : D.nan + ' (' + ((now - D.nanAt) / 1000).toFixed(0) + 's ago)') + ' · shader errors ' + (D.counts.shader || 0) + ' · audio ' + (g.audio && g.audio.ctx ? g.audio.ctx.state : '-'),
+          D.nan || D.counts.shader ? '#ff6b6b' : '');
+      }
+      var c = []; for (var k in D.counts) c.push(k + ' ' + D.counts[k]);
+      h += line('events: ' + (c.join(' · ') || 'none'), c.length ? '#ffb86b' : '#8f8');
+      for (var i = Math.max(0, D.errors.length - 9); i < D.errors.length; i++) { var e = D.errors[i]; h += line(e.t + 's ' + e.kind + (e.n > 1 ? ' ×' + e.n : '') + ': ' + e.msg, /warn/.test(e.kind) ? '#ffd27a' : '#ff8b8b'); }
+      el.innerHTML = h;
+    }
+    setInterval(function () { try { render(); } catch (e) {} }, 500);
+  })();
+</script>
 <link rel="icon" href="data:,">
 <style>
   html, body { margin: 0; height: 100%; background: #14110f; overflow: hidden; overscroll-behavior: none; }
