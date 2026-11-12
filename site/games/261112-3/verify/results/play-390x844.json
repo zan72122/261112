@@ -1,0 +1,438 @@
+{
+ "size": "390x844",
+ "mode": "core",
+ "url": "file:// (index.html?low=1&rs=0.25&fixed=1 で操作 / ?fixed=1 で撮影)",
+ "wallSec": 391,
+ "gameSec": 251.54,
+ "sounds": 207,
+ "pass": 37,
+ "fail": 0,
+ "checks": [
+  {
+   "name": "最初の一画面: 納品箱の牛乳・棚の空き・隣の牛乳が画面内",
+   "pass": true,
+   "detail": {
+    "milk1": [
+     48,
+     579
+    ],
+    "slot0": [
+     87,
+     251
+    ],
+    "milk2": [
+     125,
+     252
+    ]
+   }
+  },
+  {
+   "name": "当たり判定は 64 CSS px 以上 (最小でも直径68px)",
+   "pass": true,
+   "detail": {
+    "apple": 68,
+    "milk": 68
+   }
+  },
+  {
+   "name": "最初のタッチ前は音が始まっていない",
+   "pass": true,
+   "detail": "none"
+  },
+  {
+   "name": "牛乳は指を動かした次の描画フレームで本体が動く (60fps なら約17ms、30fps でも約33ms = 100ms以内)",
+   "pass": true,
+   "detail": {
+    "frames": 1,
+    "ms": 94.3,
+    "inputMs": 2.7,
+    "fps": 5.2,
+    "note": "frames=入力から反映までの描画フレーム数。ms はこのヘッドレス環境(低fps)での実測で、実機の値ではない"
+   }
+  },
+  {
+   "name": "牛乳が棚の空きへ「ことん」と収まる",
+   "pass": true,
+   "detail": {
+    "loc": "shelf",
+    "slot": 0,
+    "sounds": 5
+   }
+  },
+  {
+   "name": "発見1: 手前のりんごを取ると奥のりんごが前へ転がる",
+   "pass": true,
+   "detail": {
+    "before": 0.088,
+    "after": 0
+   }
+  },
+  {
+   "name": "発見1: 同じ列へ戻すと奥に入り、次に出る品が変わる",
+   "pass": true,
+   "detail": [
+    [
+     "apple2",
+     "apple1"
+    ],
+    [],
+    []
+   ]
+  },
+  {
+   "name": "撮影 scene1",
+   "pass": true,
+   "detail": {
+    "ms": 40101,
+    "station": 0,
+    "pixelRatio": 1,
+    "errors": []
+   }
+  },
+  {
+   "name": "好きな品をかごへ集められる",
+   "pass": true,
+   "detail": {
+    "milk1": "basket",
+    "apple1": "basket",
+    "berry": "basket",
+    "bread": "basket"
+   }
+  },
+  {
+   "name": "かごをレジ側へ運ぶと同じ品のままレジ場面へ",
+   "pass": true,
+   "detail": {
+    "basket": "reg"
+   }
+  },
+  {
+   "name": "未読が残るうちの丸ボタンは会計にならない (未読品が寄るだけ)",
+   "pass": true,
+   "detail": {
+    "presses": 1,
+    "pays": 0
+   }
+  },
+  {
+   "name": "スキャナーをかざすと最も近い一品ずつ読み、読取ごとに光と「ピッ」が一度",
+   "pass": true,
+   "detail": {
+    "reads": 2,
+    "strongFlashes": 2,
+    "scannedItems": 2
+   }
+  },
+  {
+   "name": "撮影 scene2",
+   "pass": true,
+   "detail": {
+    "ms": 36756,
+    "station": 1,
+    "pixelRatio": 1,
+    "errors": []
+   }
+  },
+  {
+   "name": "読んだ品は補助店員の手が右の受け台へ移す (全品)",
+   "pass": true,
+   "detail": {
+    "reads": 4,
+    "locs": [
+     "tray",
+     "tray",
+     "tray",
+     "tray"
+    ]
+   }
+  },
+  {
+   "name": "再読取は短い確認光だけで登録は増えない",
+   "pass": true,
+   "detail": {
+    "reads": 4,
+    "flash": {
+     "id": "milk1",
+     "strong": false,
+     "t": 96.9445999999977
+    },
+    "weak": 1
+   }
+  },
+  {
+   "name": "丸ボタン連打でも会計確定は一度だけ",
+   "pass": true,
+   "detail": {
+    "presses": 3,
+    "pays": 1
+   }
+  },
+  {
+   "name": "会計後は同じ受け台が袋の隣へ滑る (品もそのまま)",
+   "pass": true
+  },
+  {
+   "name": "会計済みの品が袋に入っている",
+   "pass": true,
+   "detail": {
+    "inBag": [
+     "milk1",
+     "apple1",
+     "berry",
+     "bread"
+    ],
+    "sim": [
+     [
+      "milk1",
+      -0.047,
+      0.11,
+      true
+     ],
+     [
+      "apple1",
+      0.022,
+      0.04,
+      true
+     ],
+     [
+      "berry",
+      0.102,
+      0.089,
+      true
+     ],
+     [
+      "bread",
+      0.077,
+      0.301,
+      true
+     ]
+    ]
+   }
+  },
+  {
+   "name": "撮影 scene3",
+   "pass": true,
+   "detail": {
+    "ms": 31934,
+    "station": 2,
+    "pixelRatio": 1,
+    "errors": []
+   }
+  },
+  {
+   "name": "持った袋を近づけると客が手を伸ばして受け取りの構えをとる",
+   "pass": true,
+   "detail": {
+    "x": 0.251,
+    "y": 0.68,
+    "z": 0.04,
+    "bow": 0.42,
+    "lean": 0.119,
+    "support": false,
+    "arm1": true
+   }
+  },
+  {
+   "name": "重い袋 (1.25kg超) では客がもう一方の手を底へ添える",
+   "pass": true,
+   "detail": {
+    "mass": 1.96,
+    "support": true,
+    "arm1": true
+   }
+  },
+  {
+   "name": "離すと客が受け取り、同じ袋・同じ品が客の手に",
+   "pass": true,
+   "detail": {
+    "bodies": [
+     "milk1",
+     "apple1",
+     "berry",
+     "bread"
+    ],
+    "support": true
+   }
+  },
+  {
+   "name": "手渡しとおじぎのあと店じまいへ (渡した袋の中身だけが売れ、ほかは残る・複製なし)",
+   "pass": true,
+   "detail": {
+    "handed": [
+     "apple1",
+     "berry",
+     "bread",
+     "milk1"
+    ],
+    "sold": [
+     "apple1",
+     "berry",
+     "bread",
+     "milk1"
+    ],
+    "leftOnTray": [],
+    "milk2": "shelf",
+    "apple2": "lane"
+   }
+  },
+  {
+   "name": "売れた棚で残品が奥に引っ込んでいる",
+   "pass": true
+  },
+  {
+   "name": "残品に触れると前へ寄る",
+   "pass": true
+  },
+  {
+   "name": "空かごを重ねられる",
+   "pass": true
+  },
+  {
+   "name": "シャッターは引いたぶん下がり、離すとその位置で止まる",
+   "pass": true,
+   "detail": {
+    "shutter": 0.5095700167645033
+   }
+  },
+  {
+   "name": "撮影 scene4-shutter",
+   "pass": true,
+   "detail": {
+    "ms": 26008,
+    "station": 3,
+    "pixelRatio": 1,
+    "errors": []
+   }
+  },
+  {
+   "name": "閉じ切るとカメラが日中の店先へ移る",
+   "pass": true
+  },
+  {
+   "name": "はなまるを受け取るまではシャッターは開かない",
+   "pass": true
+  },
+  {
+   "name": "店長が白いカードにはなまるを押して渡す",
+   "pass": true,
+   "detail": {
+    "x": 113,
+    "y": 633,
+    "visible": true
+   }
+  },
+  {
+   "name": "撮影 scene4-storefront",
+   "pass": true,
+   "detail": {
+    "ms": 32813,
+    "station": 4,
+    "pixelRatio": 1,
+    "errors": []
+   }
+  },
+  {
+   "name": "上へ引くと再開店: 新しい取引として補充される",
+   "pass": true,
+   "detail": {
+    "milk1": "crate",
+    "apple1": "crate",
+    "berry": "crate",
+    "bread": "bin"
+   }
+  },
+  {
+   "name": "前回整えた棚の並びは残る",
+   "pass": true,
+   "detail": {
+    "milk2": {
+     "loc": "shelf",
+     "slot": 1,
+     "ord": 0,
+     "sc": 0,
+     "paid": 0,
+     "bx": 0,
+     "by": 0.2,
+     "ba": 0,
+     "tidy": 1
+    },
+    "apple2": {
+     "loc": "lane",
+     "slot": 0,
+     "ord": 0,
+     "sc": 0,
+     "paid": 0,
+     "bx": 0,
+     "by": 0.2,
+     "ba": 0,
+     "tidy": 1
+    }
+   }
+  },
+  {
+   "name": "再開店後も納品箱の牛乳から始められる",
+   "pass": true,
+   "detail": [
+    48,
+    580
+   ]
+  },
+  {
+   "name": "コンソールエラー 0",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "name": "外部リクエスト 0 (自分自身の HTML のみ)",
+   "pass": true,
+   "detail": [
+    "file:///home/user/261112/games/261112-3/index.html?low=1&rs=0.25&fixed=1"
+   ]
+  }
+ ],
+ "notes": {
+  "pxPer10cm_shelf": 34,
+  "hitDiameterPx": {
+   "apple": 68,
+   "milk": 68
+  },
+  "milkResponse": {
+   "frames": 1,
+   "ms": 94.3,
+   "inputMs": 2.7,
+   "fps": 5.2
+  },
+  "milkToShelfGameSec": 4.23,
+  "handover": {
+   "custHand": {
+    "x": 0.251,
+    "y": 0.68,
+    "z": 0.04,
+    "bow": 0.42,
+    "lean": 0.119,
+    "support": false,
+    "arm1": true
+   },
+   "com": [
+    0.271,
+    0.43,
+    1.96
+   ],
+   "pins": [
+    0.255,
+    0.86,
+    0.281,
+    0.86
+   ]
+  },
+  "holding": {
+   "x": 0.508,
+   "y": 0.604,
+   "z": -0.427,
+   "bow": 0.411,
+   "lean": 0.12,
+   "support": true,
+   "arm1": true
+  }
+ }
+}

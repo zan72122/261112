@@ -1,0 +1,79 @@
+{
+ "pass": 7,
+ "fail": 0,
+ "checks": [
+  {
+   "name": "index.html は 1 ファイル完結 (script src / link href / @import / 外部画像の参照なし)",
+   "pass": true,
+   "detail": {
+    "bytes": 702505,
+    "sizeMB": 0.67,
+    "externalRefs": {
+     "scriptSrc": false,
+     "linkHref": false,
+     "cssImport": false,
+     "imgSrc": false,
+     "cssUrl": false
+    },
+    "urlLikeStrings": [
+     "http://www.w3.org/1999/xhtml"
+    ]
+   }
+  },
+  {
+   "name": "容量 8MB 以内",
+   "pass": true,
+   "detail": {
+    "MB": 0.67
+   }
+  },
+  {
+   "name": "file://: 起動して遊べる / リクエストは自身のHTMLのみ / コンソールエラー0",
+   "pass": true,
+   "detail": {
+    "requests": [
+     "file:///home/user/261112/games/261112-3/index.html?low=1&rs=0.25&fixed=1"
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "file:// (既定の画質): 起動して遊べる / リクエストは自身のHTMLのみ / コンソールエラー0",
+   "pass": true,
+   "detail": {
+    "requests": [
+     "file:///home/user/261112/games/261112-3/index.html"
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "http サブフォルダ: 起動して遊べる / リクエストは自身のHTMLのみ / コンソールエラー0",
+   "pass": true,
+   "detail": {
+    "requests": [
+     "http://127.0.0.1:37523/261112/games/261112-3/?low=1&rs=0.25&fixed=1"
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "http サブフォルダ index.html (既定の画質): 起動して遊べる / リクエストは自身のHTMLのみ / コンソールエラー0",
+   "pass": true,
+   "detail": {
+    "requests": [
+     "http://127.0.0.1:37523/261112/games/261112-3/index.html"
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "サーバーが受けたリクエストはゲームの HTML だけ",
+   "pass": true,
+   "detail": [
+    "/261112/games/261112-3/?low=1&rs=0.25&fixed=1",
+    "/261112/games/261112-3/index.html"
+   ]
+  }
+ ]
+}

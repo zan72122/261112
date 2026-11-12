@@ -1,0 +1,160 @@
+{
+ "pass": 20,
+ "fail": 0,
+ "checks": [
+  {
+   "name": "マルチタッチ: 2本目の指を無視し、1本目のドラッグが最後まで成立",
+   "pass": true,
+   "detail": {
+    "drag": "item",
+    "loc": "shelf"
+   }
+  },
+  {
+   "name": "pointercancel: つかみが解除され、品は支持面に戻る",
+   "pass": true,
+   "detail": {
+    "loc": "lane",
+    "mode": "lane"
+   }
+  },
+  {
+   "name": "画面回転(縦→横): つかみが解除され支持面へ、横画面でも主要物が画面内",
+   "pass": true,
+   "detail": {
+    "apple2": "lane",
+    "milk2": [
+     380,
+     92
+    ],
+    "basket": [
+     489,
+     297
+    ]
+   }
+  },
+  {
+   "name": "横画面でも同じ操作が成立 (りんごをかごへ)",
+   "pass": true
+  },
+  {
+   "name": "画面回転(横→縦): 状態はそのまま",
+   "pass": true
+  },
+  {
+   "name": "逆戻り: 棚へ戻ってもかごと品はレジに残り、巻き戻らない",
+   "pass": true
+  },
+  {
+   "name": "逆戻り: かごを棚側へ持ち帰れる (会計前)",
+   "pass": true
+  },
+  {
+   "name": "非表示: つかみを解除し、描画と進行が止まる",
+   "pass": true,
+   "detail": {
+    "frames": [
+     614,
+     614
+    ],
+    "time": [
+     29.4,
+     29.4
+    ],
+    "audio": "suspended"
+   }
+  },
+  {
+   "name": "復帰: 非表示だった時間 (2.5 秒超) は進行に加算されない (復帰後の進みは見えていた実時間以内)",
+   "pass": true,
+   "detail": {
+    "advancedGameSec": 0.48,
+    "visibleWallSec": 0.46,
+    "hiddenSec": 2.8
+   }
+  },
+  {
+   "name": "放置 20 秒: 状態は変わらず、お手本は一度だけ",
+   "pass": true,
+   "detail": {
+    "hints": [
+     1,
+     0
+    ]
+   }
+  },
+  {
+   "name": "連打 40 回: 壊れず、未読のまま会計は成立しない",
+   "pass": true,
+   "detail": {
+    "presses": 8,
+    "pays": 0,
+    "station": 1
+   }
+  },
+  {
+   "name": "一品だけで会計まで進める (連打でも一度)",
+   "pass": true
+  },
+  {
+   "name": "袋の手前で離しても近い支え(袋)へ収まる",
+   "pass": true,
+   "detail": [
+    {
+     "id": "apple1",
+     "x": -0.01,
+     "y": 0.044,
+     "a": 0.113,
+     "in": true,
+     "all": true,
+     "held": false,
+     "reach": true
+    }
+   ]
+  },
+  {
+   "name": "袋を持ち上げたまま非表示→復帰: 袋は袋掛けへ戻り中身も無事",
+   "pass": true,
+   "detail": {
+    "bagWhere": "rack"
+   }
+  },
+  {
+   "name": "一品での完了: りんご1個の袋を渡して店じまいへ",
+   "pass": true
+  },
+  {
+   "name": "シャッターを上下に往復しても壊れない",
+   "pass": true,
+   "detail": {
+    "shutter": 0
+   }
+  },
+  {
+   "name": "店先で画面回転してもカードは画面内",
+   "pass": true,
+   "detail": {
+    "x": 245,
+    "y": 293,
+    "visible": true
+   }
+  },
+  {
+   "name": "再開店: 売れた一品だけ納品箱へ補充、ほかは前日の場所のまま",
+   "pass": true
+  },
+  {
+   "name": "コンソールエラー 0",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "name": "外部リクエスト 0",
+   "pass": true,
+   "detail": [
+    "file:///home/user/261112/games/261112-3/index.html?low=1&rs=0.3&fixed=1"
+   ]
+  }
+ ],
+ "notes": {}
+}

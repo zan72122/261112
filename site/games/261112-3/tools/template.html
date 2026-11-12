@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<title>ピッ！ピッ！ちいさなスーパーの一日</title>
+<link rel="icon" href="data:,">
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#d8d2c6;overscroll-behavior:none;touch-action:none;
+-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;position:fixed;inset:0}
+#c{position:fixed;left:0;top:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+#fade{position:fixed;inset:0;background:#f4efe4;opacity:0;pointer-events:none}
+#fb{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;display:none;background:#d8d2c6}
+#sa{position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;
+padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+</style>
+</head>
+<body>
+<canvas id="c" aria-hidden="true"></canvas>
+<div id="fade"></div>
+<img id="fb" alt="" src="__FALLBACK__">
+<div id="sa"></div>
+<script>
+__BUNDLE__
+</script>
+</body>
+</html>

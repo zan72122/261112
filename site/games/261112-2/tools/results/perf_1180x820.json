@@ -1,0 +1,125 @@
+{
+ "env": "headless Chromium (Playwright) / ANGLE SwiftShader software rendering / 4 vCPU",
+ "rows": [
+  {
+   "size": "1180x820",
+   "quality": "high",
+   "scene": 1,
+   "fps": 0.1,
+   "frames": 1,
+   "seconds": 10,
+   "drawCalls": 152,
+   "triangles": 641044,
+   "jsSimMsPerFrame": 0.7,
+   "jsRenderSubmitMs": 6.9
+  },
+  {
+   "size": "1180x820",
+   "quality": "high",
+   "scene": 2,
+   "fps": 0.3,
+   "frames": 3,
+   "seconds": 10,
+   "drawCalls": 156,
+   "triangles": 643372,
+   "jsSimMsPerFrame": 0.7,
+   "jsRenderSubmitMs": 3.2
+  },
+  {
+   "size": "1180x820",
+   "quality": "high",
+   "scene": 3,
+   "fps": 0.1,
+   "frames": 1,
+   "seconds": 10,
+   "drawCalls": 187,
+   "triangles": 647266,
+   "jsSimMsPerFrame": 0.8,
+   "jsRenderSubmitMs": 9.3
+  },
+  {
+   "size": "1180x820",
+   "quality": "high",
+   "scene": 4,
+   "fps": 0.2,
+   "frames": 2,
+   "seconds": 10,
+   "drawCalls": 187,
+   "triangles": 647266,
+   "jsSimMsPerFrame": 0.6,
+   "jsRenderSubmitMs": 3.3
+  },
+  {
+   "size": "1180x820",
+   "quality": "high",
+   "scene": 5,
+   "fps": 0.8,
+   "frames": 8,
+   "seconds": 10,
+   "drawCalls": 116,
+   "triangles": 595740,
+   "jsSimMsPerFrame": 0.6,
+   "jsRenderSubmitMs": 2.3
+  },
+  {
+   "size": "1180x820",
+   "quality": "low",
+   "scene": 1,
+   "fps": 0.6,
+   "frames": 6,
+   "seconds": 10,
+   "drawCalls": 72,
+   "triangles": 201988,
+   "jsSimMsPerFrame": 3.2,
+   "jsRenderSubmitMs": 2
+  },
+  {
+   "size": "1180x820",
+   "quality": "low",
+   "scene": 2,
+   "fps": 0.5,
+   "frames": 5,
+   "seconds": 10,
+   "drawCalls": 74,
+   "triangles": 203152,
+   "jsSimMsPerFrame": 3.7,
+   "jsRenderSubmitMs": 2.1
+  },
+  {
+   "size": "1180x820",
+   "quality": "low",
+   "scene": 3,
+   "fps": 0.9,
+   "frames": 9,
+   "seconds": 10,
+   "drawCalls": 90,
+   "triangles": 205100,
+   "jsSimMsPerFrame": 0.7,
+   "jsRenderSubmitMs": 4.4
+  },
+  {
+   "size": "1180x820",
+   "quality": "low",
+   "scene": 4,
+   "fps": 0.7,
+   "frames": 7,
+   "seconds": 10,
+   "drawCalls": 90,
+   "triangles": 205100,
+   "jsSimMsPerFrame": 0.5,
+   "jsRenderSubmitMs": 1.8
+  },
+  {
+   "size": "1180x820",
+   "quality": "low",
+   "scene": 5,
+   "fps": 1.7,
+   "frames": 17,
+   "seconds": 10,
+   "drawCalls": 54,
+   "triangles": 179336,
+   "jsSimMsPerFrame": 1.9,
+   "jsRenderSubmitMs": 1.3
+  }
+ ]
+}

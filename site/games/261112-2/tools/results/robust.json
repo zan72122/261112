@@ -1,0 +1,264 @@
+{
+ "checks": {
+  "multitouch_first_finger_only": {
+   "pass": true,
+   "info": {
+    "mid": {
+     "drag": "handle",
+     "open": 0.5122,
+     "kid": "tub"
+    },
+    "openAfter": 0.5122,
+    "endDrag": null,
+    "errors": []
+   }
+  },
+  "rapid_taps_no_break": {
+   "pass": true,
+   "info": {
+    "level": -0.0149,
+    "open": 0.42,
+    "stage": 2,
+    "ducks": [
+     [
+      "tub",
+      -0.13,
+      0.0455
+     ],
+     [
+      "tub",
+      -0.2977,
+      0.1769
+     ]
+    ],
+    "errors": []
+   }
+  },
+  "rotate_releases_grab_and_reframes": {
+   "pass": true,
+   "info": {
+    "heldBefore": "held",
+    "after": "tub",
+    "handle": [
+     739.228,
+     92.6422
+    ]
+   }
+  },
+  "rotate_back_and_play_on": {
+   "pass": true,
+   "info": {
+    "openAfterLandscapeDrag": 0.5955,
+    "openAfterTap": 0.0255,
+    "errors": []
+   }
+  },
+  "hidden_stops_progress": {
+   "pass": true,
+   "info": {
+    "frames": [
+     29,
+     29
+    ],
+    "simT": [
+     0.75,
+     0.75
+    ],
+    "audio": "suspended"
+   }
+  },
+  "resume_releases_grab_no_time_jump": {
+   "pass": true,
+   "info": {
+    "heldBefore": "held",
+    "kidAfter": "tub",
+    "simJump": 0.6333,
+    "levelJump": 0.0017,
+    "audio": "running"
+   }
+  },
+  "resume_play_on": {
+   "pass": true,
+   "info": {
+    "open": 0,
+    "errors": []
+   }
+  },
+  "storage_denied_still_plays": {
+   "pass": true,
+   "info": {
+    "flow": 0.2678,
+    "errors": []
+   }
+  },
+  "storage_quota_still_plays": {
+   "pass": true,
+   "info": {
+    "flow": 0.3245,
+    "saveReturned": false,
+    "errors": []
+   }
+  },
+  "storage_corrupt_starts_playable": {
+   "pass": true,
+   "info": {
+    "broken_json": {
+     "stage": 1,
+     "flow": 0.3045,
+     "loaded": false,
+     "level": -0.0806,
+     "errors": 0
+    },
+    "wrong_version": {
+     "stage": 1,
+     "flow": 0.3851,
+     "loaded": false,
+     "level": -0.0802,
+     "errors": 0
+    },
+    "out_of_range": {
+     "stage": 1,
+     "flow": 0.281,
+     "loaded": false,
+     "level": -0.0807,
+     "errors": 0
+    },
+    "wrong_types": {
+     "stage": 1,
+     "flow": 0.4078,
+     "loaded": false,
+     "level": -0.0797,
+     "errors": 0
+    },
+    "nan_values": {
+     "stage": 1,
+     "flow": 0.3981,
+     "loaded": false,
+     "level": -0.08,
+     "errors": 0
+    },
+    "huge": {
+     "stage": 1,
+     "flow": 0.4193,
+     "loaded": false,
+     "level": -0.0781,
+     "errors": 0
+    },
+    "bad_strings": {
+     "stage": 3,
+     "flow": 0.2678,
+     "loaded": true,
+     "level": -0.0488,
+     "errors": 0
+    }
+   }
+  },
+  "webgl_fail_shows_embedded_still": {
+   "pass": true,
+   "info": {
+    "fallback": true,
+    "display": "block",
+    "src": "data:image/jpeg;base64",
+    "natural": [
+     960,
+     720
+    ],
+    "rect": [
+     820,
+     1180
+    ],
+    "canvas": "none",
+    "veil": "0",
+    "errors": []
+   }
+  },
+  "audio_refused_game_continues": {
+   "pass": true,
+   "info": {
+    "audio": "failed",
+    "open": 0.5815,
+    "errors": []
+   }
+  },
+  "audio_resume_rejected_game_continues": {
+   "pass": true,
+   "info": {
+    "audio": "suspended",
+    "open": 0.5815,
+    "errors": []
+   }
+  },
+  "audio_starts_only_after_first_touch": {
+   "pass": true,
+   "info": {
+    "before": "none",
+    "after": "running"
+   }
+  },
+  "idle_50s_stable": {
+   "pass": true,
+   "info": {
+    "hintsShown": 5,
+    "level": [
+     -0.0809,
+     -0.081
+    ],
+    "simT": 48.05,
+    "errors": []
+   }
+  },
+  "auto_lowers_resolution_then_low_mode": {
+   "pass": true,
+   "info": {
+    "before": {
+     "low": false,
+     "scale": 1
+    },
+    "after": {
+     "low": true,
+     "scale": 0.55
+    },
+    "log": [
+     {
+      "t": 33.2,
+      "scale": 0.88
+     },
+     {
+      "t": 46.4,
+      "scale": 0.76
+     },
+     {
+      "t": 60.7,
+      "scale": 0.64
+     },
+     {
+      "t": 74.8,
+      "scale": 0.55
+     },
+     {
+      "t": 79.3,
+      "low": true
+     }
+    ]
+   }
+  },
+  "low_mode_keeps_core_play": {
+   "pass": true,
+   "info": {
+    "level": -0.0652,
+    "low": true,
+    "errors": []
+   }
+  },
+  "pages_subfolder_boots_single_file": {
+   "pass": true,
+   "info": {
+    "url": "/261112/games/261112-2/index.html",
+    "otherRequests": [],
+    "errors": []
+   }
+  }
+ },
+ "passed": 18,
+ "total": 18
+}
