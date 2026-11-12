@@ -13,10 +13,10 @@
 
 | パス | 内容 |
 |---|---|
-| `index.html` | 完成品。CSS・JS（three.js r160・Canvas代替描画を含む）・予備画像をすべて埋め込んだ1ファイル |
+| `index.html` | 完成品。CSS・JS（three.js r160 を含む）・代替静止画をすべて埋め込んだ1ファイル |
 | `thumb.png` | 実画面から作ったサムネイル |
 | `src/` | 開発用ソース（ES modules）。`index.html` はここから生成 |
-| `tools/build.mjs` | `src/` と three.js を1ファイルに束ねる開発時ビルド。`tools/fallback.jpg`（実画面）を予備画像として埋め込む |
+| `tools/build.mjs` | `src/` と three.js を1ファイルに束ねる開発時ビルド。`tools/fallback.jpg`（実画面）を代替静止画として埋め込む |
 | `verify/` | ヘッドレス検証スクリプト・結果JSON・スクリーンショット・検証記録 `VERIFY.md` |
 
 ### `src/` の役割
@@ -55,7 +55,3 @@ node verify/shots.js     # 4サイズ×5場面のスクリーンショットとf
 
 URLの補助パラメータ（遊びには不要）: `?low=1` 低負荷モードを強制、`?fresh=1` 保存を読まずに開始、
 `?steps=N&dtmax=S` 低fps環境でも実時間に近い速さで物理を進める（ヘッドレス検証用）。
-
-WebGL が使えない環境では `src/software-renderer.js` が同じシーンを Canvas 2D で描画します。洗濯・布の物理・一本指操作・最後のご褒美は元の処理を共有します。中央の空白へのタッチにも、長押し中と離した後に変化する光の輪を表示します。
-
-依存パッケージなしの代替描画・4サイズ・中央タッチ／長押し／解放の構造検証: `node verify/software.cjs`。実ブラウザでの画像差分確認は別途必要です。
