@@ -1,0 +1,224 @@
+{
+ "rows": [
+  {
+   "size": "375x667",
+   "scene": "s1_load",
+   "view": "wash-load",
+   "fps": 5.9,
+   "resScale": 1,
+   "low": false,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "375x667",
+   "scene": "s2_wash",
+   "view": "wash-run",
+   "fps": 8.5,
+   "resScale": 0.55,
+   "low": true,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "375x667",
+   "scene": "s3_spin",
+   "view": "wash-spin",
+   "fps": 7.4,
+   "resScale": 0.55,
+   "low": true,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "375x667",
+   "scene": "s4_dry",
+   "view": "bal",
+   "fps": 5.7,
+   "resScale": 0.88,
+   "low": false,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "375x667",
+   "scene": "s5_fold",
+   "view": "fold",
+   "fps": 6.8,
+   "resScale": 0.88,
+   "low": false,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "390x844",
+   "scene": "s1_load",
+   "view": "wash-load",
+   "fps": 5.5,
+   "resScale": 1,
+   "low": false,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "390x844",
+   "scene": "s2_wash",
+   "view": "wash-run",
+   "fps": 7.6,
+   "resScale": 0.55,
+   "low": true,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "390x844",
+   "scene": "s3_spin",
+   "view": "wash-spin",
+   "fps": 6.5,
+   "resScale": 0.55,
+   "low": true,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "390x844",
+   "scene": "s4_dry",
+   "view": "bal",
+   "fps": 5.3,
+   "resScale": 0.88,
+   "low": false,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "390x844",
+   "scene": "s5_fold",
+   "view": "fold",
+   "fps": 6.3,
+   "resScale": 0.88,
+   "low": false,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "820x1180",
+   "scene": "s1_load",
+   "view": "wash-load",
+   "fps": 4.5,
+   "resScale": 1,
+   "low": false,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "820x1180",
+   "scene": "s2_wash",
+   "view": "wash-run",
+   "fps": 3.5,
+   "resScale": 0.55,
+   "low": true,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "820x1180",
+   "scene": "s3_spin",
+   "view": "wash-spin",
+   "fps": 2.6,
+   "resScale": 0.55,
+   "low": true,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "820x1180",
+   "scene": "s4_dry",
+   "view": "bal",
+   "fps": 4,
+   "resScale": 1,
+   "low": false,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "820x1180",
+   "scene": "s5_fold",
+   "view": "fold",
+   "fps": 4.3,
+   "resScale": 1,
+   "low": false,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "1180x820",
+   "scene": "s1_load",
+   "view": "wash-load",
+   "fps": 4.6,
+   "resScale": 1,
+   "low": false,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "1180x820",
+   "scene": "s2_wash",
+   "view": "wash-run",
+   "fps": 3.4,
+   "resScale": 0.55,
+   "low": true,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "1180x820",
+   "scene": "s3_spin",
+   "view": "wash-spin",
+   "fps": 3,
+   "resScale": 0.55,
+   "low": true,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "1180x820",
+   "scene": "s4_dry",
+   "view": "bal",
+   "fps": 4.5,
+   "resScale": 1,
+   "low": false,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  },
+  {
+   "size": "1180x820",
+   "scene": "s5_fold",
+   "view": "fold",
+   "fps": 4.1,
+   "resScale": 1,
+   "low": false,
+   "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+   "errors": 0,
+   "external": 0
+  }
+ ]
+}

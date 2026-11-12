@@ -1,0 +1,831 @@
+{
+ "size": [
+  640,
+  440
+ ],
+ "checks": [
+  {
+   "name": "starts in the laundry view with no menu",
+   "ok": true,
+   "detail": {
+    "view": "wash-load"
+   }
+  },
+  {
+   "name": "sleeve, open port and basket are on screen together",
+   "ok": true,
+   "detail": {
+    "sleeve": [
+     223.072,
+     372.493
+    ],
+    "port": [
+     374.56,
+     173.227
+    ]
+   }
+  },
+  {
+   "name": "idle ~4s shows one finger demonstration for the first step",
+   "ok": true,
+   "detail": {
+    "key": "load"
+   }
+  },
+  {
+   "name": "knob only wiggles while the door is open",
+   "ok": true
+  },
+  {
+   "name": "balcony door only rattles before the laundry is washed",
+   "ok": true
+  },
+  {
+   "name": "touching the sleeve grabs it and lifts that point (frames until visibly lifted)",
+   "ok": true,
+   "detail": {
+    "ms": 341,
+    "frames": 1,
+    "liftedBy": 0.03
+   }
+  },
+  {
+   "name": "short pull drops the shirt over the lip into the drum",
+   "ok": true,
+   "detail": {
+    "seconds": 1.027
+   }
+  },
+  {
+   "name": "sock put in on its own is not wrapped",
+   "ok": true
+  },
+  {
+   "name": "sock laid onto the towel in the drum gets wrapped in its fold",
+   "ok": true,
+   "detail": {
+    "sockA": true,
+    "sockB": false
+   }
+  },
+  {
+   "name": "door handle tap closes and latches the door, view moves to the washer",
+   "ok": true,
+   "detail": {
+    "view": "wash-run"
+   }
+  },
+  {
+   "name": "turning the plain knob (arc drag) starts the wash",
+   "ok": true,
+   "detail": {
+    "knob": 0.254
+   }
+  },
+  {
+   "name": "water fills, slow drum lifts the cloth and drops it into the water",
+   "ok": true,
+   "detail": {
+    "omega": 4.6,
+    "towelCentreYRange": 0.081
+   }
+  },
+  {
+   "name": "cloth gets soaked, suds build up",
+   "ok": true,
+   "detail": {
+    "wet": 1,
+    "suds": 1
+   }
+  },
+  {
+   "name": "dirt marks thin out while washing",
+   "ok": true,
+   "detail": {
+    "before": 0.07,
+    "after": 0
+   }
+  },
+  {
+   "name": "turning further gives a short rinse and the water drains",
+   "ok": true,
+   "detail": {
+    "water": 0,
+    "suds": 0
+   }
+  },
+  {
+   "name": "spin: the view closes in on the round window",
+   "ok": true,
+   "detail": {
+    "view": "wash-spin"
+   }
+  },
+  {
+   "name": "fast spin presses the laundry onto the drum wall, drops run on the window",
+   "ok": true,
+   "detail": {
+    "onWall": {
+     "shirt": true,
+     "towel": true,
+     "sockA": true,
+     "sockB": true
+    },
+    "windowDrops": 4
+   }
+  },
+  {
+   "name": "D1 slowing down: clothes peel off the wall one after another",
+   "ok": true,
+   "detail": {
+    "peelSeconds": {
+     "sockA": {
+      "s": 9.802,
+      "knob": 0.825,
+      "omega": 10.539
+     },
+     "shirt": {
+      "s": 55.553,
+      "knob": 0.638,
+      "omega": 6.845
+     },
+     "towel": {
+      "s": 75.712,
+      "knob": 0.618,
+      "omega": 6.453
+     },
+     "sockB": {
+      "s": 99.434,
+      "knob": 0.59,
+      "omega": 5.883
+     }
+    },
+    "omega": 5.34
+   }
+  },
+  {
+   "name": "D1 speeding up again: they stick to the wall again (both states reachable around mid speed)",
+   "ok": true,
+   "detail": {
+    "omega": 11.034,
+    "onWall": {
+     "shirt": true,
+     "towel": true,
+     "sockA": true,
+     "sockB": true
+    }
+   }
+  },
+  {
+   "name": "spinning lowers the remaining water",
+   "ok": true,
+   "detail": {
+    "towelWet": 0.3
+   }
+  },
+  {
+   "name": "turning the knob back does not put water back",
+   "ok": true,
+   "detail": {
+    "zone": "rinse",
+    "water": 0,
+    "towelWet": 0.3
+   }
+  },
+  {
+   "name": "door does not pop open mid-spin",
+   "ok": true,
+   "detail": {
+    "omega": 11.393
+   }
+  },
+  {
+   "name": "it slows, the knob returns, then the door opens",
+   "ok": true
+  },
+  {
+   "name": "after the spin the pieces cling to the drum wall",
+   "ok": true,
+   "detail": {
+    "shirt": 1,
+    "towel": 1,
+    "sockA": 1,
+    "sockB": 1
+   }
+  },
+  {
+   "name": "D2 pulling the towel out makes the wrapped sock tumble out inside-out",
+   "ok": true,
+   "detail": {
+    "koron": 1,
+    "sockA": "basket",
+    "inverted": true
+   }
+  },
+  {
+   "name": "D2 the separately loaded sock is still stuck in the drum, not inverted",
+   "ok": true
+  },
+  {
+   "name": "everything is back in the basket, damp",
+   "ok": true,
+   "detail": {
+    "shirt": 0.3,
+    "towel": 0.3,
+    "sockA": 0.3,
+    "sockB": 0.3
+   }
+  },
+  {
+   "name": "carrying the basket to the doorway takes the view (and the laundry) to the balcony",
+   "ok": true,
+   "detail": {
+    "view": "bal"
+   }
+  },
+  {
+   "name": "towel hangs over the rod where it was dropped",
+   "ok": true,
+   "detail": {
+    "id": 0,
+    "s": 3,
+    "zr": 0.28974719765396006,
+    "row": 3,
+    "holds": []
+   }
+  },
+  {
+   "name": "pulling one side down feeds the towel over the rod until it hangs spread by its edge",
+   "ok": true,
+   "detail": {
+    "from": 3,
+    "to": 0
+   }
+  },
+  {
+   "name": "sliding it along the rod puts it across the eaves line",
+   "ok": true,
+   "detail": {
+    "outside": 0.05,
+    "nOut": 75,
+    "under": 0.05,
+    "nUnder": 69
+   }
+  },
+  {
+   "name": "a clothespin carried from the saucer pins the corner",
+   "ok": true,
+   "detail": {
+    "id": 0,
+    "s": -1,
+    "zr": 0.5509971829941678,
+    "row": 0,
+    "holds": [
+     {
+      "k": 0,
+      "pinned": true
+     }
+    ]
+   }
+  },
+  {
+   "name": "D3 one corner pinned: free corner swings widely; both corners pinned: overall swing drops, cloth between ripples",
+   "ok": true,
+   "detail": {
+    "onePin": {
+     "freeCorner": 0.23,
+     "hem": 0.261,
+     "overall": 0.263
+    },
+    "twoPins": {
+     "corner": 0,
+     "hem": 0.292,
+     "middle": 0.114,
+     "overall": 0.15
+    }
+   }
+  },
+  {
+   "name": "shirt hangs on the front rod",
+   "ok": true,
+   "detail": {
+    "id": 1,
+    "s": 4,
+    "zr": -0.06550646973653995,
+    "row": 4,
+    "holds": []
+   }
+  },
+  {
+   "name": "(towel still evenly damp/dry before the shower)",
+   "ok": true,
+   "detail": {
+    "outside": 0,
+    "nOut": 80,
+    "under": 0,
+    "nUnder": 64
+   }
+  },
+  {
+   "name": "D6 a light shower comes once: only the part outside the eaves gets wet (same towel, two halves)",
+   "ok": true,
+   "detail": {
+    "before": {
+     "outside": 0,
+     "nOut": 80,
+     "under": 0,
+     "nUnder": 64
+    },
+    "during": {
+     "outside": 0.98,
+     "nOut": 85,
+     "under": 0.02,
+     "nUnder": 59
+    },
+    "sun": "dimmed only, no thunder"
+   }
+  },
+  {
+   "name": "D6 sliding the stand under the eaves by its grip: no new wet marks while it still rains",
+   "ok": true,
+   "detail": {
+    "standZ": -1.25,
+    "rainK": 0.876,
+    "newWet": [
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "name": "the shower passes and does not come back",
+   "ok": true
+  },
+  {
+   "name": "a tap on the grip rolls the stand back out",
+   "ok": true,
+   "detail": {
+    "standZ": -2.5,
+    "hit": {
+     "x": 406.38775634765625,
+     "y": 88.7514419555664,
+     "hit": "stand"
+    }
+   }
+  },
+  {
+   "name": "socks hang on the front rod too",
+   "ok": true,
+   "detail": {
+    "shirt": "rod",
+    "towel": "rod",
+    "sockA": "rod",
+    "sockB": "rod"
+   }
+  },
+  {
+   "name": "pulling a clothespin takes it off; it returns to the saucer; the towel rests on the rod",
+   "ok": true,
+   "detail": {
+    "rod": {
+     "id": 0,
+     "s": 0,
+     "zr": 0.5509971829941678,
+     "row": 0,
+     "holds": []
+    }
+   }
+  },
+  {
+   "name": "towel re-hung folded in half over the rod",
+   "ok": true,
+   "detail": {
+    "front": 0.182,
+    "back": 0.189,
+    "covF": 26,
+    "covB": 128,
+    "s": 8,
+    "loc": "rod"
+   }
+  },
+  {
+   "name": "D5 folded towel: outer face dries, the inner face keeps a darker wet patch (seen by flipping it up)",
+   "ok": true,
+   "detail": {
+    "atHang": {
+     "front": 0.182,
+     "back": 0.189,
+     "covF": 26,
+     "covB": 128,
+     "s": 8,
+     "loc": "rod"
+    },
+    "later": {
+     "front": 0.113,
+     "back": 0.172,
+     "covF": 46,
+     "covB": 126,
+     "s": 8,
+     "loc": "rod"
+    }
+   }
+  },
+  {
+   "name": "D5 spread out and pinned again: the patch is uncovered and dries, the towel catches the wind",
+   "ok": true,
+   "detail": {
+    "spread": {
+     "front": 0.016,
+     "back": 0.084,
+     "covF": 5,
+     "covB": 0,
+     "s": 0,
+     "loc": "rod"
+    },
+    "later": {
+     "front": 0,
+     "back": 0,
+     "covF": 0,
+     "covB": 0,
+     "s": -1,
+     "loc": "rod"
+    },
+    "swing": 0.189
+   }
+  },
+  {
+   "name": "D4 towel slid upwind of the shirt: the shirt sways less; slid aside: wind reaches it and it sways again",
+   "ok": true,
+   "detail": {
+    "windShare": {
+     "open": 0.541,
+     "behind": 0.144,
+     "aside": 0.539
+    },
+    "shirt": {
+     "open": {
+      "lean": 0.027,
+      "speed": 0.016
+     },
+     "behindTowel": {
+      "lean": 0.025,
+      "speed": 0.009
+     },
+     "towelAside": {
+      "lean": 0.026,
+      "speed": 0.015
+     }
+    },
+    "towelZ": [
+     -2.122,
+     -2.887
+    ]
+   }
+  },
+  {
+   "name": "laundry dries within seconds-to-a-minute depending on exposure",
+   "ok": true,
+   "detail": {
+    "shirt": 0.07,
+    "towel": 0,
+    "sockA": 0.023,
+    "sockB": 0.047
+   }
+  },
+  {
+   "name": "taking in: pulling pops the pins back to the saucer, laundry returns to the basket",
+   "ok": true,
+   "detail": {
+    "pins": [
+     "tray",
+     "tray",
+     "tray",
+     "tray",
+     "tray",
+     "tray"
+    ]
+   }
+  },
+  {
+   "name": "basket carried back through the door returns to the washer",
+   "ok": true
+  },
+  {
+   "name": "returning the knob to the wash position refills the water",
+   "ok": true,
+   "detail": {
+    "water": 1
+   }
+  },
+  {
+   "name": "weak spin leaves the same towel much wetter",
+   "ok": true,
+   "detail": {
+    "strongSpin": 0.3,
+    "weakSpin": 0.763
+   }
+  },
+  {
+   "name": "same towel, same two pins, wetter: it drips, hangs heavier and swings less than after the strong spin",
+   "ok": true,
+   "detail": {
+    "first": {
+     "wet": 0,
+     "swingSlow": 0.18,
+     "hem": 0.292,
+     "drips": 0
+    },
+    "second": {
+     "wet": 0.177,
+     "hem": 0.07,
+     "drips": 19
+    }
+   }
+  },
+  {
+   "name": "basket carried on to the counter",
+   "ok": true,
+   "detail": {
+    "view": "fold"
+   }
+  },
+  {
+   "name": "pieces laid on the counter spread flat; a family member comes over",
+   "ok": true,
+   "detail": {
+    "person": "wait"
+   }
+  },
+  {
+   "name": "folding follows the finger; pulling the folded edge back opens it again",
+   "ok": true,
+   "detail": {
+    "folded": {
+     "w": 0.9,
+     "d": 0.24,
+     "where": "top",
+     "folds": 1,
+     "x": -2.25,
+     "z": -0.175
+    },
+    "opened": {
+     "w": 0.9,
+     "d": 0.48,
+     "where": "top",
+     "folds": 0,
+     "x": -2.25,
+     "z": -0.05
+    }
+   }
+  },
+  {
+   "name": "pulling the handle opens the drawer",
+   "ok": true
+  },
+  {
+   "name": "the stored towel can be taken out and opened again",
+   "ok": true,
+   "detail": {
+    "w": 0.9,
+    "d": 0.48,
+    "where": "top",
+    "folds": 0,
+    "x": -1.86,
+    "z": 0.015
+   }
+  },
+  {
+   "name": "D7 folding the towel from different edges gives a long thin package and a square one; they leave different gaps in the drawer and the socks go in differently",
+   "ok": true,
+   "detail": {
+    "thin": [
+     0.42,
+     0.12
+    ],
+    "square": [
+     0.18,
+     0.24
+    ],
+    "thinInDrawer": [
+     -2.337,
+     0.442
+    ],
+    "squareInDrawer": [
+     -2.512,
+     0.479
+    ],
+    "sockWithThin": [
+     -2.337,
+     0.571
+    ],
+    "sockWithSquare": [
+     -2.2,
+     0.442
+    ],
+    "sockB": [
+     -2.2,
+     0.56,
+     "drawer"
+    ]
+   }
+  },
+  {
+   "name": "shirt folds (sleeves, hem) and goes into the drawer",
+   "ok": true,
+   "detail": {
+    "folded": {
+     "w": 0.32,
+     "d": 0.2,
+     "where": "top",
+     "folds": 3,
+     "x": -1.55,
+     "z": -0.15
+    },
+    "stored": {
+     "w": 0.32,
+     "d": 0.2,
+     "where": "drawer",
+     "folds": 3,
+     "x": -2.213,
+     "z": 0.516
+    }
+   }
+  },
+  {
+   "name": "empty basket slides onto the shelf; pins are in their saucer",
+   "ok": true
+  },
+  {
+   "name": "the last towel is handed to the waiting hands",
+   "ok": true,
+   "detail": {
+    "person": "receive"
+   }
+  },
+  {
+   "name": "towel is pressed to the cheek, then a wordless hanamaru card comes back",
+   "ok": true
+  },
+  {
+   "name": "the towel can be taken back from the hands (same piece, folds kept)",
+   "ok": true,
+   "detail": {
+    "folds": 3,
+    "was": 3
+   }
+  },
+  {
+   "name": "stored pieces go back into the basket for another wash (no copies; the socks stay where they were put, one still inside-out)",
+   "ok": true,
+   "detail": {
+    "towel": "basket",
+    "shirt": "basket",
+    "sockA": "drawer",
+    "inv": true
+   }
+  },
+  {
+   "name": "the basket carries the view back to the washer",
+   "ok": true
+  },
+  {
+   "name": "door tap now goes out to the balcony (visited): only the viewpoint moves, the basket stays",
+   "ok": true
+  },
+  {
+   "name": "and the door seen from the balcony leads back in",
+   "ok": true,
+   "detail": {
+    "doorOnScreen": true
+   }
+  },
+  {
+   "name": "same towel goes into the drum again",
+   "ok": true
+  },
+  {
+   "name": "no console errors",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "no external requests",
+   "ok": true,
+   "detail": []
+  }
+ ],
+ "notes": {
+  "sleeveLift": {
+   "ms": 341,
+   "frames": 1,
+   "liftedBy": 0.03
+  },
+  "retouch": [
+   {
+    "id": "towel",
+    "hit": "basket",
+    "zone": null
+   },
+   {
+    "id": "sockA",
+    "hit": "basket",
+    "zone": null
+   },
+   {
+    "id": "sockA",
+    "hit": "basket",
+    "zone": null
+   },
+   {
+    "id": "sockA",
+    "hit": "basket",
+    "zone": null
+   },
+   {
+    "id": "sockA",
+    "hit": "basket",
+    "zone": null
+   },
+   {
+    "id": "sockA",
+    "hit": "basket",
+    "zone": null
+   },
+   {
+    "id": "sockA",
+    "hit": "basket",
+    "zone": null
+   },
+   {
+    "id": "towel",
+    "hit": "pin",
+    "zone": null
+   },
+   {
+    "id": "towel",
+    "hit": "basket",
+    "zone": null
+   }
+  ],
+  "firstHang": {
+   "wet": 0,
+   "swingSlow": 0.18,
+   "hem": 0.292,
+   "drips": 0
+  },
+  "d4": {
+   "wOpen": {
+    "lean": 0.027,
+    "speed": 0.016
+   },
+   "wBehind": {
+    "lean": 0.025,
+    "speed": 0.009
+   },
+   "wAside": {
+    "lean": 0.026,
+    "speed": 0.015
+   },
+   "shade0": 0.5412952567988295,
+   "shade1": 0.1444760817822402,
+   "shade2": 0.5386251087595777
+  },
+  "secondHang": {
+   "wet": 0.177,
+   "hem": 0.07,
+   "drips": 19
+  }
+ },
+ "started": "2026-11-11T22:23:22.646Z",
+ "final": {
+  "fps": 7.509,
+  "low": true,
+  "res": 0.55,
+  "gameSeconds": 1237.113,
+  "audio": "running"
+ },
+ "consoleErrors": [],
+ "externalRequests": [],
+ "hints": [
+  "load",
+  "load1",
+  "close",
+  "knob2",
+  "open",
+  "takeout",
+  "hang",
+  "hang2",
+  "stand",
+  "takein",
+  "pin",
+  "carryfold",
+  "tocounter",
+  "fold",
+  "give"
+ ],
+ "pass": 69,
+ "fail": 0,
+ "finished": "2026-11-11T22:45:27.238Z"
+}
