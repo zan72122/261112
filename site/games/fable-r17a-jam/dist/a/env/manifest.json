@@ -1,0 +1,1256 @@
+{
+ "units": "metres, three.js axes (+X right, +Y up, +Z toward viewer)",
+ "room": {
+  "x": [
+   -2.6,
+   2.6
+  ],
+  "y": [
+   0,
+   2.4
+  ],
+  "z": [
+   -2.2,
+   2.2
+  ]
+ },
+ "counter": {
+  "top_y": 0.85,
+  "x": [
+   -1.95,
+   1.0
+  ],
+  "z": [
+   -2.2,
+   -1.53
+  ],
+  "front_face_z": -1.55
+ },
+ "prep_zone": {
+  "x": [
+   -0.85,
+   0.15
+  ],
+  "z": [
+   -2.0,
+   -1.53
+  ],
+  "y": 0.85,
+  "decor_strip_z_max": -2.0
+ },
+ "sink": {
+  "x": [
+   -1.6,
+   -0.9
+  ],
+  "z": [
+   -2.05,
+   -1.67
+  ],
+  "rim_y": 0.85,
+  "bottom_y": 0.6599999999999999,
+  "depth": 0.19,
+  "drain": [
+   -1.25,
+   0.6599999999999999,
+   -1.8599999999999999
+  ],
+  "drain_radius": 0.058,
+  "corner_radius": 0.05
+ },
+ "faucet": {
+  "base": [
+   -1.25,
+   0.85,
+   -2.1
+  ],
+  "spout_outlet": [
+   -1.25,
+   1.1,
+   -1.86
+  ],
+  "spout_dir": [
+   0,
+   -1,
+   0
+  ],
+  "spout_top_y": 1.3370000000000002,
+  "lever": {
+   "node": "dyn_faucet_lever",
+   "pivot": [
+    -1.226,
+    0.9199999999999999,
+    -2.1
+   ],
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "angle_off": 0.0,
+   "angle_on": 0.55,
+   "note": "rotation.x of the node; 0 = closed (handle upright), +0.55 rad = fully open (handle tip swings toward +Z / the viewer)",
+   "handle_tip_off": [
+    -1.19,
+    1.045,
+    -2.1
+   ]
+  }
+ },
+ "hob": {
+  "plate_x": [
+   0.25,
+   0.85
+  ],
+  "plate_z": [
+   -2.12,
+   -1.6
+  ],
+  "plate_top_y": 0.856,
+  "pan_support_top_y": 0.895,
+  "burner_main": {
+   "center": [
+    0.47,
+    -1.84
+   ],
+   "flame_ring_radius": 0.0435,
+   "flame_ring_y": 0.871,
+   "flame_ports": 36,
+   "cap_top_y": 0.8815,
+   "sensor_top_y": 0.892,
+   "pan_support_top_y": 0.895,
+   "support_outer_radius": 0.121,
+   "support_inner_radius": 0.045
+  },
+  "burner_small": {
+   "center": [
+    0.72,
+    -1.95
+   ],
+   "flame_ring_radius": 0.0348,
+   "flame_ring_y": 0.871,
+   "flame_ports": 36,
+   "cap_top_y": 0.8815,
+   "sensor_top_y": 0.892,
+   "pan_support_top_y": 0.895,
+   "support_outer_radius": 0.0994,
+   "support_inner_radius": 0.0368
+  },
+  "knobs": {
+   "dyn_knob_main": {
+    "node": "dyn_knob_main",
+    "pivot": [
+     0.47,
+     0.856,
+     -1.655
+    ],
+    "axis": [
+     0,
+     1,
+     0
+    ],
+    "diameter": 0.045,
+    "top_y": 0.8812,
+    "angle_off": 0.0,
+    "angle_high": 1.5707963267948966,
+    "angle_low": 2.6179938779914944,
+    "note": "rotation.y; pointer notch faces -Z at 0 (OFF); positive rotation = counter-clockwise seen from above"
+   },
+   "dyn_knob_small": {
+    "node": "dyn_knob_small",
+    "pivot": [
+     0.72,
+     0.856,
+     -1.655
+    ],
+    "axis": [
+     0,
+     1,
+     0
+    ],
+    "diameter": 0.045,
+    "top_y": 0.8812,
+    "angle_off": 0.0,
+    "angle_high": 1.5707963267948966,
+    "angle_low": 2.6179938779914944,
+    "note": "rotation.y; pointer notch faces -Z at 0 (OFF); positive rotation = counter-clockwise seen from above"
+   }
+  }
+ },
+ "kettle": {
+  "on": "burner_small",
+  "center": [
+   0.72,
+   0.895,
+   -1.95
+  ],
+  "radius": 0.086,
+  "top_y": 1.08
+ },
+ "grill_rail": {
+  "x": [
+   0.32000000000000006,
+   0.78
+  ],
+  "y": 0.772,
+  "z": -1.514
+ },
+ "backsplash": {
+  "x": [
+   -1.95,
+   1.0
+  ],
+  "y": [
+   0.85,
+   1.55
+  ],
+  "face_z": -2.1940000000000004
+ },
+ "wall_cabinet": {
+  "x": [
+   -0.6,
+   0.15
+  ],
+  "y": [
+   1.45,
+   2.15
+  ],
+  "z": [
+   -2.2,
+   -1.87
+  ]
+ },
+ "under_cabinet_light": {
+  "x": [
+   -0.5599999999999999,
+   0.10999999999999999
+  ],
+  "y": 1.4395,
+  "z": -1.935,
+  "color_srgb": [
+   1.0,
+   0.86,
+   0.7
+  ],
+  "display_rgb": [
+   7.0,
+   5.9,
+   4.6
+  ]
+ },
+ "hood": {
+  "x": [
+   0.25,
+   0.85
+  ],
+  "bottom_y": 1.546,
+  "z": [
+   -2.2,
+   -1.63
+  ]
+ },
+ "fridge": {
+  "x": [
+   -2.6,
+   -1.95
+  ],
+  "z": [
+   -2.2,
+   -1.525
+  ],
+  "top_y": 1.8
+ },
+ "cabinets": {
+  "front_z": -1.55,
+  "plinth_h": 0.1,
+  "columns_x": [
+   [
+    -1.95,
+    -1.4
+   ],
+   [
+    -1.4,
+    -0.85
+   ],
+   [
+    -0.85,
+    -0.325
+   ],
+   [
+    -0.325,
+    0.2
+   ],
+   [
+    0.2,
+    0.982
+   ]
+  ]
+ },
+ "table": {
+  "top_y": 0.72,
+  "x": [
+   0.575,
+   1.925
+  ],
+  "z": [
+   0.35,
+   1.15
+  ],
+  "center": [
+   1.25,
+   0.72,
+   0.75
+  ]
+ },
+ "chairs": {
+  "A": {
+   "who": "papa",
+   "seat": [
+    1.25,
+    0.44,
+    0.12
+   ],
+   "facing": [
+    0,
+    0,
+    1
+   ],
+   "seat_y": 0.44,
+   "seat_size": [
+    0.42,
+    0.405
+   ]
+  },
+  "B": {
+   "who": "girl",
+   "seat": [
+    0.35,
+    0.56,
+    0.75
+   ],
+   "facing": [
+    1,
+    0,
+    0
+   ],
+   "seat_y": 0.56,
+   "footrest_y": 0.3,
+   "footrest_center": [
+    0.475,
+    0.3,
+    0.75
+   ],
+   "type": "high_chair",
+   "seat_size": [
+    0.28,
+    0.4
+   ]
+  },
+  "D": {
+   "who": "mama",
+   "seat": [
+    2.15,
+    0.44,
+    0.75
+   ],
+   "facing": [
+    -1,
+    0,
+    0
+   ],
+   "seat_y": 0.44,
+   "seat_size": [
+    0.42,
+    0.405
+   ]
+  }
+ },
+ "pendant": {
+  "shade_bottom": [
+   1.25,
+   1.42,
+   0.75
+  ],
+  "shade_radius": 0.2
+ },
+ "sideboard": {
+  "x": [
+   1.4,
+   2.5
+  ],
+  "z": [
+   -2.2,
+   -1.758
+  ],
+  "top_y": 0.74
+ },
+ "sofa": {
+  "x": [
+   -2.2,
+   -0.5
+  ],
+  "z": [
+   1.34,
+   2.2
+  ],
+  "seat_y": 0.455
+ },
+ "shelf": {
+  "x": [
+   -0.35,
+   0.45
+  ],
+  "z": [
+   1.9,
+   2.2
+  ],
+  "top_y": 0.86
+ },
+ "hooks": [
+  {
+   "pos": [
+    -2.58,
+    1.25,
+    -0.9
+   ],
+   "peg_axis": [
+    1,
+    0,
+    0
+   ],
+   "peg_length": 0.05,
+   "wall_x": -2.6
+  },
+  {
+   "pos": [
+    -2.58,
+    1.0,
+    -0.7
+   ],
+   "peg_axis": [
+    1,
+    0,
+    0
+   ],
+   "peg_length": 0.05,
+   "wall_x": -2.6
+  }
+ ],
+ "left_door": {
+  "x": -2.6,
+  "z": [
+   0.6,
+   1.4
+  ],
+  "y": [
+   0.0,
+   2.0
+  ],
+  "handle": [
+   -2.553,
+   0.95,
+   1.2399999999999998
+  ]
+ },
+ "windows": {
+  "kitchen": {
+   "wall": "back",
+   "z": -2.2,
+   "x": [
+    -1.85,
+    -0.65
+   ],
+   "y": [
+    1.05,
+    1.85
+   ],
+   "sill_top_y": 1.068
+  },
+  "garden_door": {
+   "wall": "right",
+   "x": 2.6,
+   "z": [
+    -0.6,
+    1.8
+   ],
+   "y": [
+    0.0,
+    2.0
+   ]
+  }
+ },
+ "curtains": {
+  "sheer_drawn_z": [
+   0.12,
+   1.94
+  ],
+  "open_glass_z": [
+   -0.52,
+   0.12
+  ]
+ },
+ "decor": {
+  "crock": [
+   0.045,
+   0.85,
+   -2.118
+  ],
+  "canisters": [
+   [
+    -0.72,
+    0.85,
+    -2.118
+   ],
+   [
+    -0.605,
+    0.85,
+    -2.118
+   ]
+  ],
+  "soap": [
+   -0.985,
+   0.85,
+   -2.122
+  ],
+  "tea_towel_x": [
+   0.63,
+   0.78
+  ]
+ },
+ "dynamic_nodes": [
+  "dyn_knob_main",
+  "dyn_knob_small",
+  "dyn_faucet_lever"
+ ],
+ "static_nodes": [
+  "static_hero",
+  "static_room",
+  "static_props",
+  "static_unlit"
+ ],
+ "probes": {
+  "prep": {
+   "file": "probe_prep.hdr",
+   "pos": [
+    -0.35,
+    1.15,
+    -1.45
+   ],
+   "size": [
+    512,
+    256
+   ],
+   "mean_radiance": 1.2382316589355469,
+   "irradiance_up": [
+    4.382472038269043,
+    4.177642345428467,
+    4.10823917388916
+   ],
+   "irradiance_plusZ": [
+    2.1618621349334717,
+    2.118211269378662,
+    2.1605968475341797
+   ],
+   "irradiance_plusX": [
+    4.440080642700195,
+    4.247176647186279,
+    4.197082042694092
+   ]
+  },
+  "hob": {
+   "file": "probe_hob.hdr",
+   "pos": [
+    0.47,
+    1.15,
+    -1.5
+   ],
+   "size": [
+    512,
+    256
+   ],
+   "mean_radiance": 0.9326170682907104,
+   "irradiance_up": [
+    2.651047706604004,
+    2.480983257293701,
+    2.3354177474975586
+   ],
+   "irradiance_plusZ": [
+    3.1412618160247803,
+    3.2080702781677246,
+    3.4701762199401855
+   ],
+   "irradiance_plusX": [
+    3.4679269790649414,
+    3.6210546493530273,
+    4.016357421875
+   ]
+  },
+  "sink": {
+   "file": "probe_sink.hdr",
+   "pos": [
+    -1.25,
+    1.2,
+    -1.55
+   ],
+   "size": [
+    512,
+    256
+   ],
+   "mean_radiance": 0.8169539570808411,
+   "irradiance_up": [
+    2.047175645828247,
+    2.486738681793213,
+    3.0236103534698486
+   ],
+   "irradiance_plusZ": [
+    1.668605089187622,
+    1.6001389026641846,
+    1.5663609504699707
+   ],
+   "irradiance_plusX": [
+    3.8010365962982178,
+    3.8527331352233887,
+    3.914365530014038
+   ]
+  },
+  "table": {
+   "file": "probe_table.hdr",
+   "pos": [
+    1.25,
+    1.05,
+    0.75
+   ],
+   "size": [
+    512,
+    256
+   ],
+   "mean_radiance": 1.1727728843688965,
+   "irradiance_up": [
+    2.97813081741333,
+    3.179375171661377,
+    3.744849920272827
+   ],
+   "irradiance_plusZ": [
+    3.127134084701538,
+    3.1792678833007812,
+    3.465397357940674
+   ],
+   "irradiance_plusX": [
+    6.604655742645264,
+    8.184059143066406,
+    10.912399291992188
+   ]
+  },
+  "room": {
+   "file": "probe_room.hdr",
+   "pos": [
+    0.2,
+    1.35,
+    0.4
+   ],
+   "size": [
+    512,
+    256
+   ],
+   "mean_radiance": 0.7144341468811035,
+   "irradiance_up": [
+    2.177354335784912,
+    2.067671298980713,
+    1.9955421686172485
+   ],
+   "irradiance_plusZ": [
+    1.9540047645568848,
+    1.873132348060608,
+    1.8528660535812378
+   ],
+   "irradiance_plusX": [
+    4.141025543212891,
+    4.466663837432861,
+    5.0286664962768555
+   ]
+  }
+ },
+ "reflection_box": {
+  "min": [
+   -2.6,
+   0,
+   -2.2
+  ],
+  "max": [
+   2.6,
+   2.4,
+   2.2
+  ]
+ },
+ "sun": {
+  "dir_to_sun": [
+   0.5825634002685547,
+   0.7660444378852844,
+   0.27165377140045166
+  ],
+  "color": [
+   1.0,
+   0.97,
+   0.92
+  ],
+  "elev_deg": 50.0,
+  "az_deg": 25.0
+ },
+ "key_lights": {
+  "note": "Derived from the HDR probes: direction TOWARD the dominant light (window), linear RGB colour (max = 1), \"irradiance\" = net directional irradiance of everything brighter than 1.5x the median radiance, in the same units as THREE.DirectionalLight.intensity. suggested_directional_intensity keeps the IBL fill and adds ~60 % as a shadow-casting key; lower envMapIntensity on dynamic objects by ~0.7 if you use it.",
+  "prep": {
+   "dir": [
+    0.12432054430246353,
+    0.4974081218242645,
+    -0.8585625290870667
+   ],
+   "intensity": 2.69,
+   "dir_to_light": [
+    0.12432054430246353,
+    0.4974081218242645,
+    -0.8585625290870667
+   ],
+   "color": [
+    1.0,
+    0.8624781966209412,
+    0.7617636919021606
+   ],
+   "irradiance": 4.482618808746338,
+   "suggested_directional_intensity": 2.69,
+   "ambient_mean_radiance": 1.2382316589355469
+  },
+  "hob": {
+   "dir": [
+    -0.6778764724731445,
+    0.5606289505958557,
+    -0.47558245062828064
+   ],
+   "intensity": 0.729,
+   "dir_to_light": [
+    -0.6778764724731445,
+    0.5606289505958557,
+    -0.47558245062828064
+   ],
+   "color": [
+    1.0,
+    0.8665760159492493,
+    0.7359689474105835
+   ],
+   "irradiance": 1.2154591083526611,
+   "suggested_directional_intensity": 0.729,
+   "ambient_mean_radiance": 0.9326170682907104
+  },
+  "sink": {
+   "dir": [
+    0.5011059641838074,
+    0.3514995872974396,
+    -0.790785014629364
+   ],
+   "intensity": 0.941,
+   "dir_to_light": [
+    0.5011059641838074,
+    0.3514995872974396,
+    -0.790785014629364
+   ],
+   "color": [
+    1.0,
+    0.8684346079826355,
+    0.8581520915031433
+   ],
+   "irradiance": 1.5676885843276978,
+   "suggested_directional_intensity": 0.941,
+   "ambient_mean_radiance": 0.8169539570808411
+  },
+  "table": {
+   "dir": [
+    0.981021523475647,
+    0.1855388879776001,
+    -0.056321222335100174
+   ],
+   "intensity": 1.774,
+   "dir_to_light": [
+    0.981021523475647,
+    0.1855388879776001,
+    -0.056321222335100174
+   ],
+   "color": [
+    0.4069489538669586,
+    0.6315113306045532,
+    1.0
+   ],
+   "irradiance": 2.9568045139312744,
+   "suggested_directional_intensity": 1.774,
+   "ambient_mean_radiance": 1.1727728843688965
+  },
+  "room": {
+   "dir": [
+    0.9935492277145386,
+    0.03697574511170387,
+    -0.10720404982566833
+   ],
+   "intensity": 0.487,
+   "dir_to_light": [
+    0.9935492277145386,
+    0.03697574511170387,
+    -0.10720404982566833
+   ],
+   "color": [
+    0.3829518258571625,
+    0.6270042657852173,
+    1.0
+   ],
+   "irradiance": 0.8123453855514526,
+   "suggested_directional_intensity": 0.487,
+   "ambient_mean_radiance": 0.7144341468811035
+  }
+ },
+ "keys": {
+  "prep": {
+   "dir": [
+    0.12432054430246353,
+    0.4974081218242645,
+    -0.8585625290870667
+   ],
+   "color": [
+    1.0,
+    0.8624781966209412,
+    0.7617636919021606
+   ],
+   "intensity": 2.69
+  },
+  "hob": {
+   "dir": [
+    -0.6778764724731445,
+    0.5606289505958557,
+    -0.47558245062828064
+   ],
+   "color": [
+    1.0,
+    0.8665760159492493,
+    0.7359689474105835
+   ],
+   "intensity": 0.729
+  },
+  "sink": {
+   "dir": [
+    0.5011059641838074,
+    0.3514995872974396,
+    -0.790785014629364
+   ],
+   "color": [
+    1.0,
+    0.8684346079826355,
+    0.8581520915031433
+   ],
+   "intensity": 0.941
+  },
+  "table": {
+   "dir": [
+    0.981021523475647,
+    0.1855388879776001,
+    -0.056321222335100174
+   ],
+   "color": [
+    0.4069489538669586,
+    0.6315113306045532,
+    1.0
+   ],
+   "intensity": 1.774
+  },
+  "room": {
+   "dir": [
+    0.9935492277145386,
+    0.03697574511170387,
+    -0.10720404982566833
+   ],
+   "color": [
+    0.3829518258571625,
+    0.6270042657852173,
+    1.0
+   ],
+   "intensity": 0.487
+  }
+ },
+ "key": {
+  "dir": [
+   0.9935492277145386,
+   0.03697574511170387,
+   -0.10720404982566833
+  ],
+  "color": [
+   0.3829518258571625,
+   0.6270042657852173,
+   1.0
+  ],
+  "intensity": 0.487
+ },
+ "lightmaps": {
+  "uv_channel": 1,
+  "encoding": "sRGB-encoded 8-bit RGB of (white-surface radiance / range); load as an sRGB texture (GPU decodes to linear). The hero atlas has a soft shoulder above 0.75 (max 1.5) so the strip-lit counter does not clip. three.js: lightMapIntensity = PI * range (irradiance = texel * intensity), flipY = false, no mipmaps.",
+  "atlases": {
+   "hero": {
+    "file": "lm_hero.webp",
+    "size": 1024,
+    "range": 1.75,
+    "intensity": 5.497787143782138,
+    "coverage": 0.6121072769165039,
+    "median_radiance": 0.843817412853241,
+    "p99_9_radiance": 1.4870543479919434
+   },
+   "room": {
+    "file": "lm_room.webp",
+    "size": 1024,
+    "range": 6.0,
+    "intensity": 18.84955592153876,
+    "coverage": 0.6008996963500977,
+    "median_radiance": 0.5189244747161865,
+    "p99_9_radiance": 23.49272346496582
+   },
+   "props": {
+    "file": "lm_props.webp",
+    "size": 1024,
+    "range": 5.0,
+    "intensity": 15.707963267948966,
+    "coverage": 0.5279941558837891,
+    "median_radiance": 0.4004037082195282,
+    "p99_9_radiance": 23.464357376098633
+   }
+  },
+  "spec_occlusion_ref_irradiance": 0.6911503837897545,
+  "spec_occlusion_min": 0.04
+ },
+ "exposure": {
+  "bake_exposure": 16.0,
+  "post_gain": 2.6,
+  "white_balance": [
+   0.7783699035644531,
+   1.0,
+   1.3487434387207031
+  ],
+  "backdrop_cheat": 0.28,
+  "note": "All baked data is pre-exposed for renderer.toneMappingExposure = 1.0 with ACES Filmic or AgX."
+ },
+ "backdrop": {
+  "file": "backdrop.jpg",
+  "mapping": "equirect, u = atan2(z, x) / 2pi + 0.5 (three.js convention), same world as the bake",
+  "intensity_rgb": [
+   3.48709716796875,
+   4.47999983567458,
+   6.042370194655199
+  ],
+  "dome_radius": 30
+ },
+ "materials_runtime": {
+  "sheer_opacity": 0.86
+ },
+ "charts": {
+  "floor": {
+   "atlas": "room",
+   "x": 8,
+   "y": 8,
+   "ppm": 186,
+   "origin": [
+    -2.6,
+    0,
+    2.2
+   ],
+   "u": [
+    1,
+    0,
+    0
+   ],
+   "v": [
+    0,
+    0,
+    -1
+   ],
+   "n": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "w": 5.2,
+   "h": 4.4
+  },
+  "wall_back": {
+   "atlas": "room",
+   "x": 8,
+   "y": 842,
+   "ppm": 186,
+   "origin": [
+    -2.6,
+    0,
+    -2.2
+   ],
+   "u": [
+    1,
+    0,
+    0
+   ],
+   "v": [
+    0,
+    1,
+    0
+   ],
+   "n": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "w": 5.2,
+   "h": 2.4
+  },
+  "wall_right": {
+   "atlas": "room",
+   "x": 8,
+   "y": 1304,
+   "ppm": 186,
+   "origin": [
+    2.6,
+    0,
+    -2.2
+   ],
+   "u": [
+    0,
+    0,
+    1
+   ],
+   "v": [
+    0,
+    1,
+    0
+   ],
+   "n": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "w": 4.4,
+   "h": 2.4
+  },
+  "wall_left": {
+   "atlas": "room",
+   "x": 991,
+   "y": 8,
+   "ppm": 186,
+   "origin": [
+    -2.6,
+    0,
+    2.2
+   ],
+   "u": [
+    0,
+    0,
+    -1
+   ],
+   "v": [
+    0,
+    1,
+    0
+   ],
+   "n": [
+    1.0,
+    -0.0,
+    0.0
+   ],
+   "w": 4.4,
+   "h": 2.4
+  },
+  "wall_front": {
+   "atlas": "room",
+   "x": 991,
+   "y": 470,
+   "ppm": 150,
+   "origin": [
+    2.6,
+    0,
+    2.2
+   ],
+   "u": [
+    -1,
+    0,
+    0
+   ],
+   "v": [
+    0,
+    1,
+    0
+   ],
+   "n": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "w": 5.2,
+   "h": 2.4
+  },
+  "ceiling": {
+   "atlas": "room",
+   "x": 991,
+   "y": 846,
+   "ppm": 150,
+   "origin": [
+    -2.6,
+    2.4,
+    -2.2
+   ],
+   "u": [
+    1,
+    0,
+    0
+   ],
+   "v": [
+    0,
+    0,
+    1
+   ],
+   "n": [
+    0.0,
+    -1.0,
+    0.0
+   ],
+   "w": 5.2,
+   "h": 4.4
+  },
+  "deck": {
+   "atlas": "room",
+   "x": 1800,
+   "y": 470,
+   "ppm": 60,
+   "origin": [
+    2.78,
+    -0.02,
+    2.6
+   ],
+   "u": [
+    1,
+    0,
+    0
+   ],
+   "v": [
+    0,
+    0,
+    -1
+   ],
+   "n": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "w": 1.7,
+   "h": 4.0
+  },
+  "counter": {
+   "atlas": "hero",
+   "x": 8,
+   "y": 656,
+   "ppm": 640,
+   "origin": [
+    -1.95,
+    0.85,
+    -1.53
+   ],
+   "u": [
+    1,
+    0,
+    0
+   ],
+   "v": [
+    0,
+    0,
+    -1
+   ],
+   "n": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "w": 2.95,
+   "h": 0.6700000000000002
+  },
+  "splash": {
+   "atlas": "hero",
+   "x": 8,
+   "y": 1101,
+   "ppm": 640,
+   "origin": [
+    -1.95,
+    0.85,
+    -2.2
+   ],
+   "u": [
+    1,
+    0,
+    0
+   ],
+   "v": [
+    0,
+    1,
+    0
+   ],
+   "n": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "w": 2.95,
+   "h": 0.7000000000000001
+  },
+  "hob": {
+   "atlas": "hero",
+   "x": 830,
+   "y": 1568,
+   "ppm": 900,
+   "origin": [
+    0.25,
+    0.856,
+    -1.6
+   ],
+   "u": [
+    1,
+    0,
+    0
+   ],
+   "v": [
+    0,
+    0,
+    -1
+   ],
+   "n": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "w": 0.6,
+   "h": 0.52
+  },
+  "table": {
+   "atlas": "hero",
+   "x": 8,
+   "y": 1568,
+   "ppm": 590,
+   "origin": [
+    0.575,
+    0.72,
+    1.15
+   ],
+   "u": [
+    1,
+    0,
+    0
+   ],
+   "v": [
+    0,
+    0,
+    -1
+   ],
+   "n": [
+    -0.0,
+    1.0,
+    0.0
+   ],
+   "w": 1.35,
+   "h": 0.8
+  }
+ }
+}

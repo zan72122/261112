@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>いちごジャム</title>
+<link rel="icon" href="data:,">
 <style>
   html, body { margin: 0; height: 100%; background: #14110f; overflow: hidden; overscroll-behavior: none; }
   body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; cursor: default; }
@@ -39,22 +40,12 @@
 <div id="stage"></div>
 <div id="credits" aria-hidden="true"></div>
 <div id="load"><svg id="ring" viewBox="0 0 84 84"><circle class="bg" cx="42" cy="42" r="36"/><circle class="fg" cx="42" cy="42" r="36"/></svg></div>
-<script src="dist/packs.js"></script>
 <script>
-(function () {
-  // Load the base64 asset packs one after another (classic scripts: works on file://), then the game.
-  var packs = window.__PACKS || [], total = 0, done = 0, fg = document.querySelector('#ring .fg');
-  packs.forEach(function (p) { total += p.bytes; });
-  function progress(extra) { var k = total ? (done + (extra || 0)) / total : 1; fg.style.strokeDashoffset = (226.2 * (1 - 0.9 * k)).toFixed(1); }
-  window.__bootProgress = function (k) { fg.style.strokeDashoffset = (226.2 * (1 - (0.9 + 0.1 * k))).toFixed(1); };
-  function add(src, cb) { var s = document.createElement('script'); s.src = src; s.onload = cb; s.onerror = cb; document.body.appendChild(s); }
-  var i = 0;
-  (function next() {
-    if (i >= packs.length) return add('dist/game.js', function () {});
-    var p = packs[i++];
-    add('dist/' + p.file, function () { done += p.bytes; progress(); next(); });
-  })();
-})();
+  // wordless loading ring: the game reports progress 0..1 (window.__bootProgress); shown from the very first paint
+  (function () { var fg = document.querySelector('#ring .fg'), cur = 0;
+    window.__bootProgress = function (k) { k = Math.max(cur, Math.min(1, k)); cur = k; fg.style.strokeDashoffset = (226.2 * (1 - 0.06 - 0.94 * k)).toFixed(1); };
+    window.__bootProgress(0); })();
 </script>
+<script src="dist/game.js" defer></script>
 </body>
 </html>
