@@ -1,0 +1,7 @@
+{
+  "name": "sentaku-biyori-261112-1",
+  "private": true,
+  "description": "dev-time only: bundles src/ + three.js into the single self-contained index.html",
+  "scripts": { "build": "node tools/build.mjs" },
+  "devDependencies": { "esbuild": "^0.25.0", "three": "0.160.0" }
+}

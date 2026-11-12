@@ -1,0 +1,234 @@
+{
+ "checks": [
+  {
+   "name": "first touch not yet made: audio not started",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "name": "first touch starts Web Audio",
+   "ok": true,
+   "detail": "running"
+  },
+  {
+   "name": "a second finger is ignored: the sleeve stays held, the door handle did nothing",
+   "ok": true,
+   "detail": {
+    "grab": 17,
+    "door": 1
+   }
+  },
+  {
+   "name": "the first finger finishes its drag normally",
+   "ok": true
+  },
+  {
+   "name": "pointercancel mid-drag: the towel is let go and settles back in the basket",
+   "ok": true,
+   "detail": "basket"
+  },
+  {
+   "name": "60 rapid taps/flicks on handle, port, knob, cloth, empty space: no error, one owner per piece",
+   "ok": true,
+   "detail": {
+    "door": 0,
+    "latched": true,
+    "locs": {
+     "shirt": "drum",
+     "towel": "basket",
+     "sockA": "basket",
+     "sockB": "basket"
+    }
+   }
+  },
+  {
+   "name": "rotating to portrait while holding a piece: it is released, layout re-fits",
+   "ok": true,
+   "detail": {
+    "view": "wash-load"
+   }
+  },
+  {
+   "name": "after rotation the port and the basket are both inside the portrait screen",
+   "ok": true,
+   "detail": {
+    "port": [
+     248,
+     266
+    ],
+    "basket": [
+     121,
+     429
+    ]
+   }
+  },
+  {
+   "name": "hidden: game time stops; visible again: it continues without adding the time away",
+   "ok": true,
+   "detail": {
+    "how": "synthetic visibilitychange (headless tab stayed visible)",
+    "hiddenAdvance": 0,
+    "afterReturn": 0.65
+   }
+  },
+  {
+   "name": "left alone for 16 s: nothing breaks, at most one new finger demo for the current step",
+   "ok": true,
+   "detail": {
+    "demos": 0
+   }
+  },
+  {
+   "name": "no console errors / external requests in this session",
+   "ok": true,
+   "detail": {
+    "errors": [],
+    "requests": []
+   }
+  },
+  {
+   "name": "reload restores save_s4.json: station, where each piece is, folds, pins, inside-out sock",
+   "ok": true,
+   "detail": {
+    "station": "bal",
+    "got": {
+     "shirt": "rod",
+     "towel": "rod",
+     "sockA": "rod",
+     "sockB": "rod"
+    },
+    "pins": 2
+   }
+  },
+  {
+   "name": "reload restores save_s5.json: station, where each piece is, folds, pins, inside-out sock",
+   "ok": true,
+   "detail": {
+    "station": "fold",
+    "got": {
+     "shirt": "flat",
+     "towel": "flat",
+     "sockA": "flat",
+     "sockB": "flat"
+    },
+    "pins": 0
+   }
+  },
+  {
+   "name": "saving refused (setItem throws): play continues in memory, no error",
+   "ok": true,
+   "detail": {
+    "saveOK": false,
+    "errors": []
+   }
+  },
+  {
+   "name": "storage blocked entirely (localStorage getter throws): starts and plays",
+   "ok": true,
+   "detail": {
+    "errors": []
+   }
+  },
+  {
+   "name": "corrupted save (broken JSON): rejected, starts from the beginning and is playable",
+   "ok": true,
+   "detail": {
+    "errors": []
+   }
+  },
+  {
+   "name": "corrupted save (wrong version): rejected, starts from the beginning and is playable",
+   "ok": true,
+   "detail": {
+    "errors": []
+   }
+  },
+  {
+   "name": "corrupted save (out-of-range values): rejected, starts from the beginning and is playable",
+   "ok": true,
+   "detail": {
+    "errors": []
+   }
+  },
+  {
+   "name": "WebGL unavailable (getContext returns null): embedded still picture is shown instead, no error",
+   "ok": true,
+   "detail": {
+    "shown": "block",
+    "img": "url(\"data:image/jpeg;b",
+    "bytes": 92414,
+    "canvas": "none",
+    "hasT": false,
+    "errors": []
+   }
+  },
+  {
+   "name": "WebGL unavailable (browser started with --disable-3d-apis): embedded still picture is shown instead, no error",
+   "ok": true,
+   "detail": {
+    "shown": "block",
+    "img": "url(\"data:image/jpeg;b",
+    "bytes": 92414,
+    "canvas": "none",
+    "hasT": false,
+    "errors": []
+   }
+  },
+  {
+   "name": "audio refused (AudioContext throws): silent, game still plays",
+   "ok": true,
+   "detail": {
+    "audio": "failed",
+    "errors": []
+   }
+  },
+  {
+   "name": "forced low-load mode (?low=1): same interaction works",
+   "ok": true,
+   "detail": {
+    "fps": 5
+   }
+  },
+  {
+   "name": "dynamic resolution reacts to slow frames (software GL at 1180x820, first 20 s): the render scale drops (or low-load mode engages)",
+   "ok": true,
+   "detail": {
+    "fps": 1.9,
+    "resScale": 0.88,
+    "low": false
+   }
+  },
+  {
+   "name": "and the game is still playable in that state",
+   "ok": true,
+   "detail": {
+    "shirt": "drum",
+    "fps": 2.4,
+    "low": false
+   }
+  },
+  {
+   "name": "served over http from /261112/games/261112-1/: starts and plays, only index.html is requested",
+   "ok": true,
+   "detail": {
+    "requestsToServer": [
+     "/261112/games/261112-1/index.html?steps=20&dtmax=0.15"
+    ],
+    "external": []
+   }
+  }
+ ],
+ "notes": {
+  "hiddenMethod": "synthetic visibilitychange (headless tab stayed visible)",
+  "lowFps640": 5,
+  "auto": {
+   "fps": 1.9,
+   "resScale": 0.88,
+   "low": false
+  }
+ },
+ "started": "2026-11-11T23:30:10.368Z",
+ "pass": 25,
+ "fail": 0,
+ "finished": "2026-11-11T23:37:25.966Z"
+}
