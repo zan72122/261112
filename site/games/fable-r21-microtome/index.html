@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>ロータリーミクロトーム 3D ― しくみ学習モデル</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="../../gf-playlog.js" defer></script>
+
+<script src="/gf-nav.js" defer></script>
+</head>
+<body>
+<canvas id="gl" aria-label="ロータリーミクロトームの3Dモデル"></canvas>
+<div id="vig"></div>
+
+<!-- transient labels anchored to parts (not fixed UI) -->
+<svg id="lead" aria-hidden="true"><line id="leadLine" x1="0" y1="0" x2="0" y2="0"/><circle id="leadDot" r="3.2"/></svg>
+<div id="label" class="lbl" role="status"><b></b><span></span><i></i></div>
+<div id="toast" class="lbl warn" role="alert"></div>
+
+<!-- fixed UI 1/2: magnified cross-section inset -->
+<div id="insetBox"><canvas id="inset" width="300" height="220"></canvas></div>
+
+<!-- fixed UI 2/2: three tiny monochrome buttons -->
+<div id="pill">
+  <button id="bMode" title="実機ビュー / ビギナーモード" aria-label="表示モード切替">
+    <svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg>
+  </button>
+  <button id="bSound" title="サウンド" aria-label="サウンド切替">
+    <svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path class="on" d="M15.5 9a4.2 4.2 0 010 6M18 6.5a7.6 7.6 0 010 11"/><path class="off" d="M15.5 9.5l5 5M20.5 9.5l-5 5"/></svg>
+  </button>
+  <button id="bFull" title="全画面" aria-label="全画面切替">
+    <svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
+  </button>
+</div>
+
+<div id="boot"><div></div></div>
+
+<script src="vendor/three.classic.js"></script>
+<script src="vendor/three-addons.classic.js"></script>
+<script src="js/tex.js"></script>
+<script src="js/machine.js"></script>
+<script src="js/sim.js"></script>
+<script src="js/ribbon.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/inset.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
