@@ -15,7 +15,7 @@ const res = await esbuild.build({
   entryPoints: [path.join(root, 'src/main.js')], bundle: true, format: 'iife', minify: true, write: false,
   nodePaths: [mods], target: ['es2020', 'safari15'], legalComments: 'none', logLevel: 'warning',
 });
-let js = readFileSync(path.join(root, 'src/software.js'), 'utf8') + '\n' + res.outputFiles[0].text.replace(/<\/script/gi, '<\\/script');
+let js = res.outputFiles[0].text.replace(/<\/script/gi, '<\\/script');
 const fbPath = path.join(root, 'tools/fallback.jpg');
 const fb = existsSync(fbPath) ? 'data:image/jpeg;base64,' + readFileSync(fbPath).toString('base64') : 'data:image/gif;base64,R0lGODlhAQABAIAAANjSxgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
 const html = readFileSync(path.join(root, 'tools/template.html'), 'utf8').replace('__FALLBACK__', () => fb).replace('__BUNDLE__', () => js);
