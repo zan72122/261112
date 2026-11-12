@@ -12,6 +12,6 @@ const out = await esbuild.build({ entryPoints: [path.join(root, 'src/main.js')],
 let js = out.outputFiles[0].text.replace(/<\/script/gi, '<\\/script');
 const fb = path.join(here, 'fallback.jpg');
 const fbUri = fs.existsSync(fb) ? 'data:image/jpeg;base64,' + fs.readFileSync(fb).toString('base64') : 'data:image/gif;base64,R0lGODlhAQABAIAAAOnk2gAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
-const html = fs.readFileSync(path.join(root, 'src/index.template.html'), 'utf8').replace('__FALLBACK__', () => fbUri).replace('/*__JS__*/', () => js);
+const html = fs.readFileSync(path.join(root, 'src/index.template.html'), 'utf8').replace('/*__SOFTWARE__*/', () => fs.readFileSync(path.join(root, 'src/software-renderer.js'), 'utf8')).replace('__FALLBACK__', () => fbUri).replace('/*__JS__*/', () => js);
 fs.writeFileSync(path.join(root, 'index.html'), html);
 console.log('index.html', (html.length / 1024 | 0) + ' KB');

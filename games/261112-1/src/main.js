@@ -20,8 +20,8 @@ window.__G = G;
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const canvas = document.getElementById('c');
 
-// ---------- renderer (with still-image fallback) ----------
-function fallback() { document.getElementById('fb').style.display = 'block'; canvas.style.display = 'none'; G.dead = true; }
+// ---------- renderer (same-scene Canvas fallback when WebGL is unavailable) ----------
+function fallback() { renderer = new window.LaundrySoftwareRenderer(canvas); G.low = true; }
 let renderer;
 try {
   // probe first so that a missing WebGL shows the still picture quietly
@@ -42,7 +42,7 @@ function boot() {
   G.renderer = renderer; G.audio = new Sound();
 
   // image-based light from two tiny procedural environments
-  const pm = new THREE.PMREMGenerator(renderer);
+  const pm = renderer.software ? { fromScene: () => ({ texture: null }) } : new THREE.PMREMGenerator(renderer);
   const envRoom = (() => {
     const s = new THREE.Scene(), bm = (c, i) => new THREE.MeshBasicMaterial({ color: new THREE.Color(c).multiplyScalar(i), side: THREE.BackSide });
     s.add(new THREE.Mesh(new THREE.BoxGeometry(8, 3, 7), [bm(0xf3ede2, 0.42), bm(0xf3ede2, 0.36), bm(0xffffff, 0.7), bm(0xc59a6a, 0.22), bm(0xf3ede2, 0.42), bm(0xf3ede2, 0.3)]));
