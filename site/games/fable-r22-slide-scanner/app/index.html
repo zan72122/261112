@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>スライドスキャナのしくみ</title>
+<style>
+:root{--ink:#1c2632;--mute:#5c6b7b;--card:rgba(255,255,255,.92);--line:rgba(28,38,50,.12);--acc:#0f9d8c;--acc2:#e9694b;--bezel:#1b2129}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#dfe6ec;color:var(--ink);
+  font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",system-ui,sans-serif;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none;overscroll-behavior:none}
+canvas{display:block}
+#gl{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:6}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;margin:0;cursor:pointer;touch-action:manipulation}
+.bar{position:fixed;z-index:8;display:flex;gap:8px;padding:6px;background:var(--card);border-radius:999px;
+  box-shadow:0 6px 22px rgba(20,30,45,.16),0 0 0 1px var(--line)}
+#steps{left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%);width:max-content;max-width:calc(100vw - 16px)}
+#steps button{position:relative;white-space:nowrap;min-width:92px;height:52px;padding:0 16px 0 12px;border-radius:999px;font-weight:700;font-size:17px;
+  display:flex;align-items:center;gap:8px;color:var(--mute);transition:background .2s,color .2s}
+#steps button i{font-style:normal;width:26px;height:26px;border-radius:50%;background:rgba(28,38,50,.09);
+  display:grid;place-items:center;font-size:14px;font-weight:800}
+#steps button.on{background:var(--acc);color:#fff}
+#steps button.on i{background:rgba(255,255,255,.25)}
+#steps button.next::after{content:"";position:absolute;inset:-3px;border-radius:999px;border:3px solid var(--acc2);animation:pulse 1.3s ease-out infinite}
+#steps button.no{animation:shake .35s}
+@keyframes pulse{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.14,1.3)}}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+#views{left:calc(12px + env(safe-area-inset-left));top:calc(12px + env(safe-area-inset-top))}
+#views button{white-space:nowrap;height:42px;padding:0 13px 0 9px;border-radius:999px;font-weight:700;font-size:14px;display:flex;align-items:center;gap:5px;color:var(--mute)}
+#views button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#views button.on{background:var(--ink);color:#fff}
+#tools{left:calc(12px + env(safe-area-inset-left));top:calc(70px + env(safe-area-inset-top));padding:4px}
+#tools button{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--mute)}
+#tools svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#tools button.off{opacity:.45}
+#light{position:fixed;z-index:8;left:calc(12px + env(safe-area-inset-left));top:50%;transform:translateY(-40%);width:52px;height:210px;
+  background:var(--card);border-radius:26px;box-shadow:0 6px 22px rgba(20,30,45,.16),0 0 0 1px var(--line);touch-action:none}
+#light svg{position:absolute;left:14px;top:10px;width:24px;height:24px;stroke:#e0a100;fill:none;stroke-width:2;stroke-linecap:round}
+#light .track{position:absolute;left:23px;top:46px;bottom:18px;width:6px;border-radius:3px;background:linear-gradient(#ffd45c,#5b6470)}
+#light .knob{position:absolute;left:11px;width:30px;height:30px;margin-top:-15px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.3),0 0 0 1px var(--line)}
+#panel{position:fixed;z-index:7;background:var(--bezel);border-radius:18px;padding:10px;box-shadow:0 14px 40px rgba(15,22,32,.35);
+  transition:opacity .25s;touch-action:none}
+#panel.hide{opacity:0;pointer-events:none}
+#panel canvas{position:absolute;border-radius:8px;background:#0b0e12}
+#screen{touch-action:none}
+#panel #dial{border-radius:50%;background:none;touch-action:none;cursor:grab}
+#auto{position:absolute;border-radius:999px;background:#f0b429;color:#2a2000;font-weight:800;letter-spacing:.04em;font-size:15px;height:40px;min-width:76px;
+  box-shadow:0 2px 0 #a67708}
+#auto.run{background:#fff3cf;animation:blink .6s steps(2) infinite}
+#lens{position:absolute;height:40px;border-radius:999px;background:#2a323d;color:#dfe7ee;font-weight:800;font-size:14px;min-width:60px;padding:0 10px}
+@keyframes blink{50%{opacity:.55}}
+#tip{position:fixed;z-index:9;max-width:260px;padding:10px 14px 11px;background:var(--card);border-radius:14px;pointer-events:none;
+  box-shadow:0 8px 26px rgba(20,30,45,.22),0 0 0 1px var(--line);opacity:0;transform:translateY(6px);transition:opacity .18s,transform .18s}
+#tip.show{opacity:1;transform:none}
+#tip b{display:block;font-size:17px;line-height:1.25}
+#tip span{display:block;margin-top:2px;font-size:13.5px;line-height:1.45;color:var(--mute)}
+#hand{position:fixed;z-index:9;width:44px;height:44px;margin:-6px 0 0 -12px;pointer-events:none;opacity:0;transition:opacity .4s}
+#hand svg{width:100%;height:100%;filter:drop-shadow(0 3px 5px rgba(0,0,0,.35))}
+#splash{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#dfe6ec;transition:opacity .35s}
+#splash div{width:46px;height:46px;border-radius:50%;border:5px solid rgba(15,157,140,.25);border-top-color:var(--acc);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (max-width:560px){#steps{gap:2px}#steps button{min-width:0;padding:0 10px 0 6px;font-size:14px;height:46px;gap:5px}#steps button i{width:22px;height:22px;font-size:12px}#views{gap:2px}#views button{padding:0 8px 0 6px;font-size:13px}#views button svg{width:18px;height:18px}}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<canvas id="fx"></canvas>
+
+<nav id="views" class="bar">
+  <button data-view="real" class="on"><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg>写実</button>
+  <button data-view="explode"><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="4" rx="1"/><rect x="7" y="10" width="10" height="4" rx="1"/><rect x="7" y="17" width="10" height="4" rx="1"/></svg>分解</button>
+  <button data-view="path"><svg viewBox="0 0 24 24"><circle cx="12" cy="19" r="2"/><path d="M12 17V3M8 14l4-5 4 5M9 3h6"/></svg>光路</button>
+  <button data-view="scan"><svg viewBox="0 0 24 24"><path d="M4 6h16v4H4v4h16v4H4"/></svg>走査</button>
+</nav>
+<div id="tools" class="bar">
+  <button id="snd" aria-label="音"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg></button>
+</div>
+<div id="light" aria-label="光量">
+  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+  <div class="track"></div><div class="knob"></div>
+</div>
+
+<div id="panel" class="hide">
+  <canvas id="screen"></canvas>
+  <canvas id="live"></canvas>
+  <canvas id="graph"></canvas>
+  <canvas id="dial"></canvas>
+  <button id="auto">AUTO</button>
+  <button id="lens">10×</button>
+</div>
+
+<nav id="steps" class="bar">
+  <button data-step="load" class="on"><i>1</i>いれる</button>
+  <button data-step="focus"><i>2</i>ピント</button>
+  <button data-step="scan"><i>3</i>よみとる</button>
+  <button data-step="view"><i>4</i>みる</button>
+</nav>
+
+<div id="tip"><b></b><span></span></div>
+<div id="hand"><svg viewBox="0 0 44 44"><path d="M15 22V9a3 3 0 016 0v9l9.5 2.2a4 4 0 013 4.6L32 34a6 6 0 01-5.9 5H21a7 7 0 01-5.6-2.8L8.6 27a2.7 2.7 0 014.2-3.3z" fill="#fff" stroke="#1c2632" stroke-width="2" stroke-linejoin="round"/></svg></div>
+<div id="splash"><div></div></div>
+
+<script defer src="vendor/three.min.js"></script>
+<script defer src="js/core.js"></script>
+<script defer src="js/pattern.js"></script>
+<script defer src="js/build.js"></script>
+<script defer src="js/mech.js"></script>
+<script defer src="js/app.js"></script>
+</body>
+</html>

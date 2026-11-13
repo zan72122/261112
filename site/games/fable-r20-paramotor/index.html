@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>たんぼの そら</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#b9cfe0;overscroll-behavior:none;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+canvas#view{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;outline:none}
+#veil{position:fixed;inset:0;background:linear-gradient(#c3d8ea,#e3ecf1 58%,#efe9d8);pointer-events:none;opacity:1;transition:opacity 1.6s ease}
+</style>
+<script>
+// errors from the very start (the ?debug=1 overlay shows them), then the quality tier and the files it needs.
+// iPadOS Safari reports a Macintosh UA: a touch Apple device (maxTouchPoints > 1) is a tablet and gets the mobile tier.
+window.__early = [];
+addEventListener('error', function (e) { var t = e.target; if (t && t !== window && (t.src || t.href)) __early.push({ k: 'asset', m: 'load failed: ' + (t.src || t.href).split('/').slice(-2).join('/') }); else __early.push({ k: 'js', m: e.message }); }, true);
+addEventListener('unhandledrejection', function (e) { __early.push({ k: 'rej', m: String(e.reason && e.reason.message || e.reason) }); });
+(function () {
+  var q = (location.search.match(/[?&]q=(low|high)/) || [])[1], ua = navigator.userAgent;
+  var mobile = /iPhone|iPad|iPod|Android/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  window.__tier = q || (mobile ? 'low' : 'high');
+  var dir = window.__tier === 'low' ? 'vendor/people-m/' : 'vendor/people/';
+  var files = ['vendor/people/people-meta.js', dir + 'girl.js', dir + 'papa.js', dir + 'mama.js', dir + 'brother.js', 'dist/game.js'];
+  for (var i = 0; i < files.length; i++) { var s = document.createElement('script'); s.src = files[i]; s.async = false; document.head.appendChild(s); }
+})();
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="veil"></div>
+</body>
+</html>

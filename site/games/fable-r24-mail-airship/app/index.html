@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#7cc4fb">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
+<title>空飛ぶ郵便飛行船</title>
+<style>
+  html, body {
+    margin: 0; width: 100%; height: 100%; overflow: hidden; position: fixed; top: 0; left: 0;
+    background: linear-gradient(#2f8fe8, #7cc4fb 55%, #d4eeff);
+    touch-action: none; overscroll-behavior: none;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #c { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: block; touch-action: none; opacity: 0; transition: opacity .5s; }
+  .run #c { opacity: 1; }
+  /* white-out while flying inside a cloud */
+  #veil { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; opacity: 0; pointer-events: none; }
+  /* wordless hint: a fingertip that taps or drags */
+  #hint { position: fixed; left: 0; top: 0; width: 0; height: 0; pointer-events: none; opacity: 0; transition: opacity .5s; }
+  #hint.on { opacity: 1; }
+  #hint i, #hint b { position: absolute; border-radius: 50%; box-sizing: border-box; }
+  #hint i {
+    left: -4.5vmin; top: -4.5vmin; width: 9vmin; height: 9vmin;
+    background: rgba(255, 255, 255, .5); border: .7vmin solid #fff;
+    box-shadow: 0 .5vmin 2.4vmin rgba(0, 60, 130, .3);
+  }
+  #hint b { left: -4.5vmin; top: -4.5vmin; width: 9vmin; height: 9vmin; border: .6vmin solid #fff; opacity: 0; }
+  #hint.tap i { animation: press 1.3s ease-in-out infinite; }
+  #hint.tap b { animation: ring 1.3s ease-out infinite; }
+  #hint.drag i { animation: drag 5.2s ease-in-out infinite; }
+  @keyframes press { 0%, 100% { transform: scale(1.15); } 45% { transform: scale(.78); } }
+  @keyframes ring { 0%, 40% { transform: scale(.8); opacity: 0; } 50% { opacity: .9; } 100% { transform: scale(2.3); opacity: 0; } }
+  @keyframes drag {
+    0%, 50%, 100% { transform: translate(0, 0); }
+    12% { transform: translate(-17vmin, 0); }
+    37% { transform: translate(17vmin, 0); }
+    62% { transform: translate(0, -13vmin); }
+    87% { transform: translate(0, 13vmin); }
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="veil"></div>
+<div id="hint"><b></b><i></i></div>
+<script src="vendor/three.custom.min.js"></script>
+<script src="js/core.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/input.js"></script>
+<script src="js/sky.js"></script>
+<script src="js/airship.js"></script>
+<script src="js/port.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
