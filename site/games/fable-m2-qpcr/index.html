@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0b0d">
+<meta http-equiv="Content-Security-Policy" content="connect-src 'none'">
+<title>サーマルサイクラー 3D 教材モデル</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="../../gf-playlog.js" defer></script>
+<script src="/gf-nav.js" defer></script>
+</head>
+<body>
+<canvas id="gl" aria-label="蛍光光学系つきサーマルサイクラーの3Dモデル"></canvas>
+
+<!-- 固定コントロールは 3 つだけ: 表示モード / 音 / 全画面 -->
+<div id="ui">
+  <button id="b-mode" type="button" aria-label="体験モード切り替え" aria-pressed="false">
+    <svg viewBox="0 0 24 24" class="i-real"><path d="M12 2.8 20 7.2v9.6l-8 4.4-8-4.4V7.2z"/><path d="M4 7.2l8 4.4 8-4.4M12 11.6v9.6"/></svg>
+    <svg viewBox="0 0 24 24" class="i-play"><path d="M12 2.8 20 7.2v9.6l-8 4.4-8-4.4V7.2z" stroke-dasharray="2.2 2.6"/><path d="M10 8.6v6.8l5.6-3.4z" class="fill"/></svg>
+  </button>
+  <button id="b-sound" type="button" aria-label="音" aria-pressed="true">
+    <svg viewBox="0 0 24 24" class="i-on"><path d="M4 9.5h3.2L12 5.6v12.8l-4.8-3.9H4z"/><path d="M15.4 9.2a4 4 0 0 1 0 5.6M17.9 6.7a7.5 7.5 0 0 1 0 10.6"/></svg>
+    <svg viewBox="0 0 24 24" class="i-off"><path d="M4 9.5h3.2L12 5.6v12.8l-4.8-3.9H4z"/><path d="M15.6 9.6l4.8 4.8M20.4 9.6l-4.8 4.8"/></svg>
+  </button>
+  <button id="b-full" type="button" aria-label="全画面">
+    <svg viewBox="0 0 24 24"><path d="M4.5 9.5v-5h5M19.5 9.5v-5h-5M4.5 14.5v5h5M19.5 14.5v5h-5"/></svg>
+  </button>
+</div>
+
+<!-- 光路の小窓（描画は WebGL 側。ここは枠と注記だけ） -->
+<div id="inset" aria-hidden="true"><span>誇張表示</span></div>
+
+<!-- クリックしたパーツの名前 -->
+<div id="label" aria-live="polite"><i></i><b></b></div>
+
+<div id="boot" aria-hidden="true"><i></i></div>
+<div id="nogl">WebGL を利用できません</div>
+
+<script src="vendor/three.min.js"></script>
+<script src="vendor/three-addons.js"></script>
+<script src="js/core.js"></script>
+<script src="js/materials.js"></script>
+<script src="js/build.js"></script>
+<script src="js/model-housing.js"></script>
+<script src="js/model-thermal.js"></script>
+<script src="js/model-lid.js"></script>
+<script src="js/model-optics.js"></script>
+<script src="js/model-plate.js"></script>
+<script src="js/machine.js"></script>
+<script src="js/screen.js"></script>
+<script src="js/view.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/post.js"></script>
+<script src="js/inset.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/interact.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

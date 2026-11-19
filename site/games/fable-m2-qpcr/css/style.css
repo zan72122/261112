@@ -1,0 +1,169 @@
+/* 全画面優先・モノクロの最小 UI。固定コントロールは右上の 3 つだけ。 */
+:root {
+  --fg: rgba(255, 255, 255, 0.92);
+  --line: rgba(255, 255, 255, 0.28);
+  --glass: rgba(18, 19, 22, 0.42);
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0a0b0d;
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Noto Sans JP", "Noto Sans CJK JP", Meiryo, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+#gl {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  outline: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+body.ready #gl { opacity: 1; }
+
+/* ---- 固定コントロール ---- */
+#ui {
+  position: fixed;
+  top: calc(10px + var(--sat));
+  right: calc(10px + var(--sar));
+  display: flex;
+  gap: 8px;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.6s ease 0.2s;
+}
+body.ready #ui { opacity: 1; }
+
+#ui button {
+  width: 38px;
+  height: 38px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--glass);
+  color: var(--fg);
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: background 0.2s, border-color 0.2s, transform 0.12s;
+}
+#ui button:active { transform: scale(0.92); }
+#ui button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+#ui svg { width: 100%; height: 100%; display: block; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+#ui svg .fill { fill: currentColor; stroke: none; }
+
+#b-mode .i-real { display: none; }
+#b-mode[aria-pressed="true"] .i-real { display: block; }
+#b-mode[aria-pressed="true"] .i-play { display: none; }
+#b-mode[aria-pressed="true"] { background: rgba(255, 255, 255, 0.9); color: #0a0b0d; border-color: #fff; }
+/* 実機表示のときは、体験モードへの入口をそっと脈打たせる */
+#b-mode[aria-pressed="false"] { animation: invite 2.6s ease-in-out infinite; }
+@keyframes invite { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } 50% { box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.16); } }
+
+#b-sound .i-off { display: none; }
+#b-sound[aria-pressed="false"] .i-on { display: none; }
+#b-sound[aria-pressed="false"] .i-off { display: block; }
+#b-full[hidden] { display: none; }
+
+/* ---- 光路の小窓（体験モードのみ） ---- */
+#inset {
+  position: fixed;
+  left: calc(10px + var(--sal));
+  bottom: calc(10px + var(--sab));
+  width: clamp(124px, 27vmin, 232px);
+  height: clamp(150px, 33vmin, 284px);
+  border: 1px solid var(--line);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 4;
+}
+body.beginner.ready #inset { opacity: 1; }
+#inset span {
+  position: absolute;
+  left: 6px;
+  bottom: 5px;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* ---- パーツ名ラベル ---- */
+#label {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  will-change: transform;
+}
+#label.show { opacity: 1; }
+#label b {
+  position: absolute;
+  left: 26px;
+  bottom: 26px;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 6px 10px 6px;
+  color: #0a0b0d;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 3px;
+}
+#label.left b { left: auto; right: 26px; }
+#label i {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 36px;
+  height: 1px;
+  background: #fff;
+  transform-origin: 0 100%;
+  transform: rotate(-45deg);
+}
+#label.left i { transform: rotate(-135deg); }
+#label::before {
+  content: "";
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* ---- 起動中 ---- */
+#boot { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; transition: opacity 0.4s; }
+#boot i { width: 26px; height: 26px; border: 1px solid rgba(255, 255, 255, 0.25); border-top-color: #fff; border-radius: 50%; animation: spin 0.9s linear infinite; }
+body.ready #boot { opacity: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#nogl { display: none; position: fixed; inset: 0; place-items: center; font-size: 14px; }
+body.nogl #nogl { display: grid; }
+body.nogl #boot, body.nogl #ui { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  #b-mode[aria-pressed="false"] { animation: none; }
+}

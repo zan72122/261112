@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#15171a">
+<title>ワックス注型ステーション 3D</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/style.css">
+<script src="../../gf-playlog.js" defer></script>
+<script src="/gf-nav.js" defer></script>
+</head>
+<body>
+<canvas id="c" aria-label="ワックス注型ステーションの3Dモデル"></canvas>
+<div id="vignette"></div>
+<div id="hud">
+  <div id="leader"></div>
+  <div id="label"></div>
+  <div id="hintline"></div>
+  <div id="hint"></div>
+  <div id="mark"></div>
+  <div id="inset"><canvas id="insetc" width="300" height="300"></canvas></div>
+</div>
+<div id="bar">
+  <button id="bMode" type="button" aria-label="操作モード" title="操作モード"></button>
+  <button id="bSound" type="button" aria-label="音" title="音"></button>
+  <button id="bFull" type="button" aria-label="全画面" title="全画面"></button>
+</div>
+<div id="veil"></div>
+<script src="vendor/three.classic.min.js"></script>
+<script src="js/00-core.js"></script>
+<script src="js/10-textures.js"></script>
+<script src="js/11-materials.js"></script>
+<script src="js/12-geom.js"></script>
+<script src="js/20-env.js"></script>
+<script src="js/30-machine.js"></script>
+<script src="js/31-coldplate.js"></script>
+<script src="js/32-props.js"></script>
+<script src="js/40-thermal.js"></script>
+<script src="js/41-wax.js"></script>
+<script src="js/42-crystal.js"></script>
+<script src="js/50-audio.js"></script>
+<script src="js/60-controls.js"></script>
+<script src="js/61-interact.js"></script>
+<script src="js/62-explode.js"></script>
+<script src="js/70-ui.js"></script>
+<script src="js/90-main.js"></script>
+</body>
+</html>
